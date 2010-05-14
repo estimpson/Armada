@@ -1,0 +1,743 @@
+$PBExportHeader$m_blanket_order.srm
+forward
+global type m_blanket_order from menu
+end type
+type m_file from menu within m_blanket_order
+end type
+type m_insert from menu within m_file
+end type
+type m_delete from menu within m_file
+end type
+type m_update from menu within m_file
+end type
+type m_relhistory from menu within m_file
+end type
+type m_edi from menu within m_file
+end type
+type m_editcum from menu within m_file
+end type
+type m_shiphistory from menu within m_file
+end type
+type m_fastcopy from menu within m_file
+end type
+type m_note from menu within m_file
+end type
+type m_promisedate from menu within m_file
+end type
+type m_editkanban from menu within m_file
+end type
+type m_invkanban from menu within m_file
+end type
+type m_print from menu within m_file
+end type
+type m_additional from menu within m_file
+end type
+type m_custom1 from menu within m_file
+end type
+type m_custom2 from menu within m_file
+end type
+type m_custom3 from menu within m_file
+end type
+type m__1 from menu within m_file
+end type
+type m_exit from menu within m_file
+end type
+type m_file from menu within m_blanket_order
+m_insert m_insert
+m_delete m_delete
+m_update m_update
+m_relhistory m_relhistory
+m_edi m_edi
+m_editcum m_editcum
+m_shiphistory m_shiphistory
+m_fastcopy m_fastcopy
+m_note m_note
+m_promisedate m_promisedate
+m_editkanban m_editkanban
+m_invkanban m_invkanban
+m_print m_print
+m_additional m_additional
+m_custom1 m_custom1
+m_custom2 m_custom2
+m_custom3 m_custom3
+m__1 m__1
+m_exit m_exit
+end type
+type m_edit from menu within m_blanket_order
+end type
+type m_edit from menu within m_blanket_order
+end type
+type m_window from menu within m_blanket_order
+end type
+type m_tile from menu within m_window
+end type
+type m_layer from menu within m_window
+end type
+type m_cascade from menu within m_window
+end type
+type m__ from menu within m_window
+end type
+type m_arrangeicons from menu within m_window
+end type
+type m_window from menu within m_blanket_order
+m_tile m_tile
+m_layer m_layer
+m_cascade m_cascade
+m__ m__
+m_arrangeicons m_arrangeicons
+end type
+type m_help from menu within m_blanket_order
+end type
+type m_contents from menu within m_help
+end type
+type m_aboutthemonitor from menu within m_help
+end type
+type m_help from menu within m_blanket_order
+m_contents m_contents
+m_aboutthemonitor m_aboutthemonitor
+end type
+end forward
+
+global type m_blanket_order from menu
+m_file m_file
+m_edit m_edit
+m_window m_window
+m_help m_help
+end type
+global m_blanket_order m_blanket_order
+
+forward prototypes
+public subroutine wf_reset_screen ()
+end prototypes
+
+public subroutine wf_reset_screen ();If w_blanket_order.dw_3.Visible = True Then
+   m_blanket_order.m_file.m_shiphistory.ToolbarItemText = "Release"
+	m_blanket_order.m_file.m_insert.Enabled = False
+   m_blanket_order.m_file.m_insert.Microhelp = "You must go back to release screen first"
+   m_blanket_order.m_file.m_delete.Enabled = False
+   m_blanket_order.m_file.m_delete.Microhelp = "You must go back to release screen first"
+	m_blanket_order.m_file.m_update.Enabled = False
+   m_blanket_order.m_file.m_update.Microhelp = "You must go back to release screen first"
+Else
+   m_blanket_order.m_file.m_shiphistory.ToolbarItemText = "Shp Hist"
+	m_blanket_order.m_file.m_insert.Enabled = True
+   m_blanket_order.m_file.m_insert.Microhelp = "Add Release"   
+	m_blanket_order.m_file.m_delete.Enabled = True
+   m_blanket_order.m_file.m_delete.Microhelp = "Delete Release" 
+	m_blanket_order.m_file.m_update.Enabled = True
+   m_blanket_order.m_file.m_update.Microhelp = "Update Release" 
+End If
+
+
+
+
+end subroutine
+
+on m_blanket_order.create
+m_blanket_order=this
+this.m_file=create m_file
+this.m_edit=create m_edit
+this.m_window=create m_window
+this.m_help=create m_help
+this.Item[]={this.m_file, &
+this.m_edit, &
+this.m_window, &
+this.m_help}
+end on
+
+on m_blanket_order.destroy
+destroy(this.m_file)
+destroy(this.m_edit)
+destroy(this.m_window)
+destroy(this.m_help)
+end on
+
+
+type m_file from menu within m_blanket_order
+m_insert m_insert
+m_delete m_delete
+m_update m_update
+m_relhistory m_relhistory
+m_edi m_edi
+m_editcum m_editcum
+m_shiphistory m_shiphistory
+m_fastcopy m_fastcopy
+m_note m_note
+m_promisedate m_promisedate
+m_editkanban m_editkanban
+m_invkanban m_invkanban
+m_print m_print
+m_additional m_additional
+m_custom1 m_custom1
+m_custom2 m_custom2
+m_custom3 m_custom3
+m__1 m__1
+m_exit m_exit
+end type
+
+on m_file.create
+this.Text="&File"
+this.m_insert=create m_insert
+this.m_delete=create m_delete
+this.m_update=create m_update
+this.m_relhistory=create m_relhistory
+this.m_edi=create m_edi
+this.m_editcum=create m_editcum
+this.m_shiphistory=create m_shiphistory
+this.m_fastcopy=create m_fastcopy
+this.m_note=create m_note
+this.m_promisedate=create m_promisedate
+this.m_editkanban=create m_editkanban
+this.m_invkanban=create m_invkanban
+this.m_print=create m_print
+this.m_additional=create m_additional
+this.m_custom1=create m_custom1
+this.m_custom2=create m_custom2
+this.m_custom3=create m_custom3
+this.m__1=create m__1
+this.m_exit=create m_exit
+this.Item[]={this.m_insert, &
+this.m_delete, &
+this.m_update, &
+this.m_relhistory, &
+this.m_edi, &
+this.m_editcum, &
+this.m_shiphistory, &
+this.m_fastcopy, &
+this.m_note, &
+this.m_promisedate, &
+this.m_editkanban, &
+this.m_invkanban, &
+this.m_print, &
+this.m_additional, &
+this.m_custom1, &
+this.m_custom2, &
+this.m_custom3, &
+this.m__1, &
+this.m_exit}
+end on
+
+on m_file.destroy
+destroy(this.m_insert)
+destroy(this.m_delete)
+destroy(this.m_update)
+destroy(this.m_relhistory)
+destroy(this.m_edi)
+destroy(this.m_editcum)
+destroy(this.m_shiphistory)
+destroy(this.m_fastcopy)
+destroy(this.m_note)
+destroy(this.m_promisedate)
+destroy(this.m_editkanban)
+destroy(this.m_invkanban)
+destroy(this.m_print)
+destroy(this.m_additional)
+destroy(this.m_custom1)
+destroy(this.m_custom2)
+destroy(this.m_custom3)
+destroy(this.m__1)
+destroy(this.m_exit)
+end on
+
+
+type m_insert from menu within m_file
+end type
+
+event clicked;w_blanket_order.TriggerEvent("Insert_Release")
+
+end event
+
+on m_insert.create
+this.Text="&Add~tAlt+A"
+this.Microhelp="Add release"
+this.ToolBarItemName="Insert!"
+this.ToolBarItemText="Insert"
+this.ToolBarItemOrder=2
+this.Shortcut=577
+end on
+
+
+type m_delete from menu within m_file
+end type
+
+event clicked;w_Blanket_order.TriggerEvent("delete_release")
+end event
+
+on m_delete.create
+this.Text="&Delete~tAlt+D"
+this.Microhelp="Delete release"
+this.ToolBarItemName="Clear!"
+this.ToolBarItemText="Delete"
+this.ToolBarItemOrder=3
+this.Shortcut=580
+end on
+
+
+type m_update from menu within m_file
+end type
+
+event clicked;w_blanket_order.TriggerEvent ( "ue_save" )
+end event
+
+on m_update.create
+this.Text="&Save~tAlt+S"
+this.Microhelp="Update Release"
+this.ToolBarItemName="Update!"
+this.ToolBarItemText="Save"
+this.ToolBarItemOrder=4
+this.Shortcut=595
+end on
+
+
+type m_relhistory from menu within m_file
+end type
+
+event clicked;If w_blanket_order.iOrder <> -1 Then 
+	OpenWithParm ( w_oe_release_history, w_blanket_order.iOrder )
+Else
+	MessageBox("Warning", "You must enter and save header information before you view release history!", StopSign!)
+End If
+
+end event
+
+on m_relhistory.create
+this.Text="Rel&Graph~tAlt+G"
+this.Microhelp="View Release History"
+this.ToolBarItemName="Graph!"
+this.ToolBarItemText="Rel Graph"
+this.ToolBarItemOrder=5
+this.Shortcut=583
+end on
+
+
+type m_edi from menu within m_file
+end type
+
+event clicked;If w_blanket_order.iOrder <> -1 Then 
+	w_blanket_order.TriggerEvent("ue_edi_setup")
+Else
+	MessageBox("Warning", "You must enter and save header information before you setup EDI!", StopSign!)
+End If
+
+//OpenWithParm(w_edi_setup, w_blanket_order.iOrder)
+
+
+end event
+
+on m_edi.create
+this.Text="&EDI ~tAlt+E"
+this.Microhelp="EDI Related Information Setup"
+this.ToolBarItemName="Custom079!"
+this.ToolBarItemText="EDI"
+this.ToolBarItemOrder=6
+this.Shortcut=581
+end on
+
+
+type m_editcum from menu within m_file
+end type
+
+event clicked;If w_blanket_order.iOrder <> -1 Then 
+	w_blanket_order.TriggerEvent("edit_cum")
+END IF
+end event
+
+on m_editcum.create
+this.Text="Edit &Cum~tAlt+C"
+this.Microhelp="Edit Cum..."
+this.ToolBarItemName="EditStops!"
+this.ToolBarItemText="Edit Cum"
+this.ToolBarItemOrder=7
+this.Shortcut=579
+end on
+
+
+type m_shiphistory from menu within m_file
+end type
+
+event clicked;If w_blanket_order.iOrder <> -1 Then 
+	If m_shiphistory.ToolbarItemText <> "Release" then //If showing "SHIPPING HISTORY" now
+		m_shiphistory.ToolbarItemText = "Release"
+	Else
+		m_shiphistory.ToolbarItemText = "Shp Hist"
+	End If
+
+	If m_shiphistory.ToolbarItemText = "Release" Then
+		m_insert.Enabled = False
+	   m_insert.Microhelp = "You must go back to release screen first"
+	   m_delete.Enabled = False
+	   m_delete.Microhelp = "You must go back to release screen first"
+		m_file.m_update.Enabled = False
+	   m_update.Microhelp = "You must go back to release screen first"
+	Else
+		m_insert.Enabled = True
+	   m_insert.Microhelp = "Add Release"   
+		m_delete.Enabled = True
+  		m_delete.Microhelp = "Delete Release" 
+		m_update.Enabled = True
+	   m_update.Microhelp = "Update Release" 
+	End If
+
+	w_blanket_order.TriggerEvent("show_history")
+Else
+	MessageBox("Warning", "You must enter and save header information before you viewing ship history!", StopSign!)
+End If
+end event
+
+on m_shiphistory.create
+this.Text="ShipHistory~tAlt+S"
+this.Microhelp="Show Shipping History"
+this.ToolBarItemDownName="Custom027!"
+this.ToolBarItemName="Export!"
+this.ToolBarItemText="Shp Hist"
+this.ToolBarItemOrder=8
+this.Shortcut=595
+end on
+
+
+type m_fastcopy from menu within m_file
+end type
+
+event clicked;If w_blanket_order.iOrder <> -1 Then 
+	w_blanket_order.TriggerEvent("fastcopy")
+Else
+	MessageBox("Warning", "You must enter and save header information before you copy to other destination!", StopSign!)
+End If
+
+
+end event
+
+on m_fastcopy.create
+this.Text="&FastCopy~tAlt+F"
+this.Microhelp="Fast copy blanket order"
+this.ToolBarItemName="Copy!"
+this.ToolBarItemText="FastCopy"
+this.Visible=false
+this.ToolBarItemVisible=false
+this.ToolBarItemOrder=9
+this.Shortcut=582
+end on
+
+
+type m_note from menu within m_file
+end type
+
+event clicked;If w_blanket_order.iOrder <> -1 Then 
+	w_blanket_order.TriggerEvent("edit_note")
+Else
+	MessageBox("Warning", "You must enter and save header information before you attach notes!", StopSign!)
+End If
+end event
+
+on m_note.create
+this.Text="&Note~tAlt+N"
+this.Microhelp="Edit Note"
+this.ToolBarItemName="Noteno.bmp"
+this.ToolBarItemText="Note"
+this.ToolBarItemOrder=10
+this.Shortcut=590
+end on
+
+
+type m_promisedate from menu within m_file
+end type
+
+on clicked;w_blanket_order.TriggerEvent("ue_promise_date")
+end on
+
+on m_promisedate.create
+this.Text="&Promise Date~tAlt+P"
+this.Microhelp="Show the order promise date"
+this.ToolBarItemName="Custom023!"
+this.ToolBarItemText="Promise"
+this.Visible=false
+this.ToolBarItemVisible=false
+this.ToolBarItemOrder=11
+this.Shortcut=592
+end on
+
+
+type m_editkanban from menu within m_file
+end type
+
+on clicked;OpenSheet ( w_edit_kanban, wMainScreen, 3, Layered! ) 
+wMainScreen.SetMicroHelp ( "KANBAN Processing" )
+
+end on
+
+on m_editkanban.create
+this.Text="Edit &KANBAN~tAlt+K"
+this.Microhelp="View KANBAN data for this order."
+this.ToolBarItemName="blanket.bmp"
+this.ToolBarItemText="Edit &Kanban"
+this.ToolBarItemOrder=11
+this.Shortcut=587
+end on
+
+
+type m_invkanban from menu within m_file
+end type
+
+event clicked;w_blanket_order.TriggerEvent("ue_kanban_inv_detail")
+end event
+
+on m_invkanban.create
+this.Text="&Inv Kanban~tAlt+I"
+this.Microhelp="Kanban Inventory information for the blanket order"
+this.ToolBarItemName="CreateTable5!"
+this.ToolBarItemText="Inv Kanban"
+this.ToolBarItemOrder=12
+this.Shortcut=585
+end on
+
+
+type m_print from menu within m_file
+end type
+
+event clicked;w_blanket_order.TriggerEvent("ue_print")
+end event
+
+on m_print.create
+this.Text="P&rint"
+this.Microhelp="Print Blanket Order"
+this.ToolBarItemName="Print!"
+this.ToolBarItemText="Print"
+this.ToolBarItemOrder=13
+end on
+
+
+type m_additional from menu within m_file
+end type
+
+event clicked;
+OpenSheet (w_order_header_additional, wMainScreen, 3, Layered!)
+wMainScreen.SetMicroHelp ("Additional Fields")
+
+end event
+on m_additional.create
+this.Text="Additional~tCtrl+A"
+this.ToolBarItemName="Custom018!"
+this.ToolBarItemText="Additional"
+this.ToolBarItemOrder=14
+this.Shortcut=321
+end on
+
+
+type m_custom1 from menu within m_file
+end type
+
+on clicked;f_execute_custom_menu ( "monitor.oeblanket1" )
+end on
+
+on m_custom1.create
+this.Text="Custom&1"
+this.Microhelp="Chain to custom application"
+this.ToolBarItemName="Custom042!"
+this.ToolBarItemText="Custom"
+this.Visible=false
+this.ToolBarItemVisible=false
+this.ToolBarItemOrder=13
+end on
+
+
+type m_custom2 from menu within m_file
+end type
+
+on clicked;f_execute_custom_menu ( "monitor.oeblanket2" )
+end on
+
+on m_custom2.create
+this.Text="Custom&2"
+this.Microhelp="Chain to custom application"
+this.ToolBarItemName="Custom042!"
+this.ToolBarItemText="Custom"
+this.Visible=false
+this.ToolBarItemVisible=false
+this.ToolBarItemOrder=14
+end on
+
+
+type m_custom3 from menu within m_file
+end type
+
+on clicked;f_execute_custom_menu ( "monitor.oeblanket3" )
+end on
+
+on m_custom3.create
+this.Text="Custom&3"
+this.Microhelp="Chain to custom application"
+this.ToolBarItemName="Custom042!"
+this.ToolBarItemText="Custom"
+this.Visible=false
+this.ToolBarItemVisible=false
+this.ToolBarItemOrder=15
+end on
+
+
+type m__1 from menu within m_file
+end type
+
+on m__1.create
+this.Text="-"
+end on
+
+
+type m_exit from menu within m_file
+end type
+
+on clicked;close ( w_blanket_order )
+
+
+end on
+
+on m_exit.create
+this.Text="E&xit~tAlt+X"
+this.Microhelp="Exit"
+this.ToolBarItemName="Exit!"
+this.ToolBarItemText="Exit"
+this.ToolBarItemOrder=1
+this.Shortcut=600
+end on
+
+
+type m_edit from menu within m_blanket_order
+end type
+
+on m_edit.create
+this.Text="&Edit"
+end on
+
+on m_edit.destroy
+end on
+
+
+type m_window from menu within m_blanket_order
+m_tile m_tile
+m_layer m_layer
+m_cascade m_cascade
+m__ m__
+m_arrangeicons m_arrangeicons
+end type
+
+on m_window.create
+this.Text="&Window"
+this.m_tile=create m_tile
+this.m_layer=create m_layer
+this.m_cascade=create m_cascade
+this.m__=create m__
+this.m_arrangeicons=create m_arrangeicons
+this.Item[]={this.m_tile, &
+this.m_layer, &
+this.m_cascade, &
+this.m__, &
+this.m_arrangeicons}
+end on
+
+on m_window.destroy
+destroy(this.m_tile)
+destroy(this.m_layer)
+destroy(this.m_cascade)
+destroy(this.m__)
+destroy(this.m_arrangeicons)
+end on
+
+
+type m_tile from menu within m_window
+end type
+
+on clicked;w_main_screen.ArrangeSheets ( Tile! )
+end on
+
+on m_tile.create
+this.Text="&Tile"
+this.Microhelp="Tile Open Windows..."
+end on
+
+
+type m_layer from menu within m_window
+end type
+
+on clicked;w_main_screen.ArrangeSheets ( Layer! )
+end on
+
+on m_layer.create
+this.Text="&Layer"
+this.Microhelp="Layer Open Windows..."
+end on
+
+
+type m_cascade from menu within m_window
+end type
+
+on clicked;w_main_screen.ArrangeSheets ( Cascade! )
+end on
+
+on m_cascade.create
+this.Text="&Cascade"
+this.Microhelp="Cascade Open Windows..."
+end on
+
+
+type m__ from menu within m_window
+end type
+
+on m__.create
+this.Text="-"
+end on
+
+
+type m_arrangeicons from menu within m_window
+end type
+
+on clicked;w_main_screen.ArrangeSheets ( Icons! )
+end on
+
+on m_arrangeicons.create
+this.Text="Arrange &Icons"
+this.Microhelp="Arrange Windows In Workspace..."
+end on
+
+
+type m_help from menu within m_blanket_order
+m_contents m_contents
+m_aboutthemonitor m_aboutthemonitor
+end type
+
+on m_help.create
+this.Text="&Help"
+this.m_contents=create m_contents
+this.m_aboutthemonitor=create m_aboutthemonitor
+this.Item[]={this.m_contents, &
+this.m_aboutthemonitor}
+end on
+
+on m_help.destroy
+destroy(this.m_contents)
+destroy(this.m_aboutthemonitor)
+end on
+
+
+type m_contents from menu within m_help
+end type
+
+event clicked;ShowHelp ( "monapphelp.hlp", Topic!, 4501 )
+end event
+
+on m_contents.create
+this.Text="&Contents~tF1"
+this.Microhelp="Displays help contents"
+this.Shortcut=112
+end on
+
+
+type m_aboutthemonitor from menu within m_help
+end type
+
+event clicked;Open ( w_about )
+end event
+
+on m_aboutthemonitor.create
+this.Text="&About The Monitor..."
+this.Microhelp="Displays the program information and copyright"
+end on
+
