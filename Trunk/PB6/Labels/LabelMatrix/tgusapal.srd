@@ -1,0 +1,79 @@
+$PBExportHeader$tgusapal.srd
+release 6;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=16 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=2176 color="536870912" )
+table(column=(type=long updatewhereclause=yes name=object_serial dbname="object.serial" )
+ column=(type=datetime updatewhereclause=yes name=object_last_date dbname="object.last_date" initial="today" )
+ column=(type=char(35) updatewhereclause=yes name=custpart dbname="order_header.custpart" )
+ column=(type=char(25) updatewhereclause=yes name=po dbname="shipper_detail.po" )
+ column=(type=char(20) updatewhereclause=yes name=destination dbname="order_header.destination" )
+ column=(type=char(30) updatewhereclause=yes name=zone_code dbname="order_header.zone_code" )
+ column=(type=char(10) updatewhereclause=yes name=dock_code dbname="order_header.dock_code" )
+ column=(type=char(30) updatewhereclause=yes name=line_feed_code dbname="order_header.line_feed_code" )
+ column=(type=char(25) updatewhereclause=yes name=engineering_level dbname="order_header.engineering_level" )
+ column=(type=char(30) updatewhereclause=yes name=release_no dbname="shipper_detail.release_no" )
+ column=(type=char(20) updatewhereclause=yes name=edi_setups_supplier_code dbname="edi_setups.supplier_code" )
+ column=(type=decimal(0) updatewhereclause=yes name=order_header_order_no dbname="order_header.order_no" )
+ column=(type=char(25) updatewhereclause=yes name=part dbname="part" )
+ column=(type=char(10) updatewhereclause=yes name=quan dbname="quan" )
+ retrieve="
+SELECT   object.serial,
+         object.last_date,
+        ~"order_header~".~"customer_part~" CUSTPART,   
+        ~"shipper_detail~".~"customer_po~" PO,   
+         ~"order_header~".~"destination~",   
+         ~"order_header~".~"zone_code~",   
+         ~"order_header~".~"dock_code~",   
+         ~"order_header~".~"line_feed_code~",   
+         ~"order_header~".~"engineering_level~",   
+         ~"shipper_detail~".~"release_no~" ,
+         edi_setups.supplier_code,
+         order_header.order_no,
+( select distinct object_b.part
+   FROM  object object_b, object object_a 
+   WHERE (object_a.part  = 'PALLET' ) AND
+         shipper_detail.part_original = ( select max(object_b.part) from object object_b where object_b.parent_serial = :lSerial )AND
+			(object_a.serial = object_b.parent_serial ) AND
+			(object_a.serial =:lSerial)) part,
+          
+( SELECT convert(varchar(10),convert(integer,sum(object_b.quantity)))
+   FROM  object object_b, object object_a 
+   WHERE (object_a.part  = 'PALLET' ) AND
+         (object_a.serial = object_b.parent_serial ) AND
+			(object_a.serial =:lSerial)) quan 
+  FROM   order_header, shipper_detail, shipper, object,edi_setups
+  WHERE  order_header.order_no = shipper_detail.order_no AND
+         shipper_detail.part_original = ( select max(object_b.part) from object object_b where object_b.parent_serial = :lSerial )AND 
+			shipper.destination = edi_setups.destination and
+			 shipper.id = shipper_detail.shipper AND
+			 shipper_detail.shipper = object.shipper AND
+			object.part = 'PALLET' AND
+			 object.serial =:lSerial
+
+  
+" arguments=(("lSerial", string)) )
+text(band=detail alignment="1" text="Serial:"border="0" color="0" x="37" y="4" height="64" width="402"  name=object_serial_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Part:"border="0" color="0" x="37" y="128" height="64" width="402"  name=object_part_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Last Date:"border="0" color="0" x="37" y="252" height="64" width="402"  name=object_last_date_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Quantity:"border="0" color="0" x="37" y="376" height="64" width="402"  name=object_quantity_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Supp:"border="0" color="0" x="270" y="500" height="64" width="169"  name=edi_setups_supplier_code_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Cust Part:"border="0" color="0" x="151" y="624" height="64" width="288"  name=order_header_customer_part_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Cust Po:"border="0" color="0" x="187" y="748" height="64" width="247"  name=order_header_customer_po_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Name:"border="0" color="0" x="37" y="872" height="64" width="402"  name=part_name_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="462" y="620" height="76" width="1120" format="[general]"  name=custpart edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="457" y="748" height="76" width="800" format="[general]"  name=po edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="480" y="860" height="76" width="640" format="[general]"  name=destination edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="603" y="996" height="76" width="960" format="[general]"  name=zone_code edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="1970" y="964" height="76" width="320" format="[general]"  name=dock_code edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="1595" y="1096" height="76" width="960" format="[general]"  name=line_feed_code edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="1097" y="1300" height="76" width="800" format="[general]"  name=engineering_level edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="590" y="1088" height="76" width="960" format="[general]"  name=release_no edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="0" x="594" y="1196" height="76" width="1376" format="[general]"  name=order_header_order_no edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="0" color="0" x="471" y="376" height="76" width="1376" format="[general]"  name=quan edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="466" y="8" height="76" width="1376" format="[general]"  name=object_serial edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="457" y="248" height="76" width="928" format="[shortdate] [time]"  name=object_last_date edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="0" x="553" y="128" height="76" width="800" format="[general]"  name=part edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="0" x="485" y="492" height="76" width="640" format="[general]"  name=edi_setups_supplier_code edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" cellpadding="0" cellspacing="0" generatecss="no" nowrap="yes")  

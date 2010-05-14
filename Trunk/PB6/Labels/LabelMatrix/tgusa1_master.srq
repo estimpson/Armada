@@ -1,0 +1,38 @@
+$PBExportHeader$tgusa1_master.srq
+  SELECT "object"."serial",   
+         "object"."part",   
+         "object"."last_date",   
+         "object"."quantity",   
+         "edi_setups"."supplier_code",   
+         "order_header"."customer_part" CUSTPART,   
+         "part"."name",   
+         "shipper_detail"."customer_po" PO,   
+         "order_header"."destination",   
+         "order_header"."zone_code",   
+         "order_header"."dock_code",   
+         "order_header"."line_feed_code",   
+         "order_header"."engineering_level",   
+         "order_header"."line11",   
+         "order_header"."line12",   
+         "order_header"."line13",   
+         "order_header"."line14",   
+         "order_header"."line15",   
+         "order_header"."line16",   
+         "order_header"."line17",   
+         "shipper_detail"."qty_packed",   
+         "shipper_detail"."release_no"  
+    FROM "edi_setups",   
+         "object",   
+         "order_header",   
+         "part",   
+         "shipper_detail"  
+   WHERE ( "edi_setups"."destination" = "object"."destination" ) and  
+         ( "order_header"."destination" = "object"."destination" ) and  
+         ( "order_header"."blanket_part" = "object"."part" ) and  
+         ( "part"."part" >= "object"."part" ) and  
+         ( "part"."part" = "shipper_detail"."part" ) and  
+         ( "shipper_detail"."order_no" = "order_header"."order_no" ) and  
+         ( "object"."shipper" = "shipper_detail"."shipper" ) and  
+         ( "edi_setups"."destination" = "order_header"."destination" ) and  
+         ( ( "object"."serial" = :serial ) )    
+ ARG(NAME = "serial" TYPE = string) 
