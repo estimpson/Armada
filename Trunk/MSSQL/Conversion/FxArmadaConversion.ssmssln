@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# SQL Server Management Studio Solution File, Format Version 11.00
+Project("{4F2E2C19-372F-40D8-9FA7-9D2138C6997A}") = "Conversion", "Conversion.ssmssqlproj", "{C4557FC6-079E-45CD-AD32-C094F1C97011}"
+EndProject
+Project("{4F2E2C19-372F-40D8-9FA7-9D2138C6997A}") = "LoadTables", "..\LoadTables\LoadTables.ssmssqlproj", "{8948C424-3F8A-4C54-B6BB-08CA5AE5E16E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Default|Default = Default|Default
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C4557FC6-079E-45CD-AD32-C094F1C97011}.Default|Default.ActiveCfg = Default
+		{8948C424-3F8A-4C54-B6BB-08CA5AE5E16E}.Default|Default.ActiveCfg = Default
+		{D6EC83EB-3EE9-4452-AD22-52543D1C73B2}.Default|Default.ActiveCfg = Default
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
