@@ -1,0 +1,172 @@
+<?xml version="1.0"?>
+<SqlWorkbenchSqlProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Name="Conversion">
+  <Items>
+    <LogicalFolder Name="Connections" Type="2" Sorted="true">
+      <Items>
+        <ConnectionNode Name="FTEESW520\SQL2012:FORE-THOUGHT\estimpson">
+          <Created>2012-09-18T16:03:00.1528759-04:00</Created>
+          <Type>SQL</Type>
+          <Server>FTEESW520\SQL2012</Server>
+          <UserName />
+          <Authentication>Windows Authentication</Authentication>
+          <InitialDB />
+          <LoginTimeout>15</LoginTimeout>
+          <ExecutionTimeout>0</ExecutionTimeout>
+          <ConnectionProtocol>NotSpecified</ConnectionProtocol>
+          <ApplicationName>Microsoft SQL Server Management Studio - Query</ApplicationName>
+        </ConnectionNode>
+        <ConnectionNode Name="fxarmada-sql01\FX:sa">
+          <Created>2012-10-11T11:55:06.1848511-04:00</Created>
+          <Type>SQL</Type>
+          <Server>fxarmada-sql01\FX</Server>
+          <UserName>sa</UserName>
+          <Authentication>SQL</Authentication>
+          <InitialDB />
+          <LoginTimeout>15</LoginTimeout>
+          <ExecutionTimeout>0</ExecutionTimeout>
+          <ConnectionProtocol>NotSpecified</ConnectionProtocol>
+          <ApplicationName>Microsoft SQL Server Management Studio - Query</ApplicationName>
+        </ConnectionNode>
+      </Items>
+    </LogicalFolder>
+    <LogicalFolder Name="Queries" Type="0" Sorted="true">
+      <Items>
+        <FileNode Name="0.Drop Foreign Keys.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:FTEESW520\SQL2012:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>FTEESW520\SQL2012</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>0.Drop Foreign Keys.sql</FullPath>
+        </FileNode>
+        <FileNode Name="0a.Cleanup Raw Data.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:FTEESW520\SQL2012:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>FTEESW520\SQL2012</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>0a.Cleanup Raw Data.sql</FullPath>
+        </FileNode>
+        <FileNode Name="1.Generate - MatchingTableDefinitions.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:fxarmada-sql01\FX:False:sa</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>fxarmada-sql01\FX</AssociatedConnSrvName>
+          <AssociatedConnUserName>sa</AssociatedConnUserName>
+          <FullPath>1.Generate - MatchingTableDefinitions.sql</FullPath>
+        </FileNode>
+        <FileNode Name="1.Run - MatchingTableDefinitions.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:FTEESW520\SQL2012:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>FTEESW520\SQL2012</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>1.Run - MatchingTableDefinitions.sql</FullPath>
+        </FileNode>
+        <FileNode Name="2.Generate - Non-MactchingNewColumnsWithNoIdentity.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:FTEESW520\SQL2012:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>FTEESW520\SQL2012</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>2.Generate - Non-MactchingNewColumnsWithNoIdentity.sql</FullPath>
+        </FileNode>
+        <FileNode Name="2.Run - Non-MactchingNewColumnsWithNoIdentity.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:FTEESW520\SQL2012:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>FTEESW520\SQL2012</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>2.Run - Non-MactchingNewColumnsWithNoIdentity.sql</FullPath>
+        </FileNode>
+        <FileNode Name="3.Generate - MatchingWithIdentity.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:fxarmada-sql01\FX:False:sa</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>fxarmada-sql01\FX</AssociatedConnSrvName>
+          <AssociatedConnUserName>sa</AssociatedConnUserName>
+          <FullPath>3.Generate - MatchingWithIdentity.sql</FullPath>
+        </FileNode>
+        <FileNode Name="3.Run - MatchingWithIdentity.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:FTEESW520\SQL2012:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>FTEESW520\SQL2012</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>3.Run - MatchingWithIdentity.sql</FullPath>
+        </FileNode>
+        <FileNode Name="4.Generate - Non-MatchingWithIdentity.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:fxarmada-sql01\FX:False:sa</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>fxarmada-sql01\FX</AssociatedConnSrvName>
+          <AssociatedConnUserName>sa</AssociatedConnUserName>
+          <FullPath>4.Generate - Non-MatchingWithIdentity.sql</FullPath>
+        </FileNode>
+        <FileNode Name="4.Run - Non-MatchingWithIdentity.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:FTEESW520\SQL2012:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>FTEESW520\SQL2012</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>4.Run - Non-MatchingWithIdentity.sql</FullPath>
+        </FileNode>
+        <FileNode Name="x1.CreateVendorDestinations.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:FTEESW520\SQL2012:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>FTEESW520\SQL2012</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>x1.CreateVendorDestinations.sql</FullPath>
+        </FileNode>
+        <FileNode Name="x2.AddPOInquiry.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:FTEESW520\SQL2012:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>FTEESW520\SQL2012</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>x2.AddPOInquiry.sql</FullPath>
+        </FileNode>
+        <FileNode Name="x3.CreateEESUser.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:FTEESW520\SQL2012:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>FTEESW520\SQL2012</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>x3.CreateEESUser.sql</FullPath>
+        </FileNode>
+        <FileNode Name="x4.PopulateUsers.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:FTEESW520\SQL2012:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>FTEESW520\SQL2012</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>x4.PopulateUsers.sql</FullPath>
+        </FileNode>
+        <FileNode Name="x5.PopulateMenuItems.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:FTEESW520\SQL2012:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>FTEESW520\SQL2012</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>x5.PopulateMenuItems.sql</FullPath>
+        </FileNode>
+        <FileNode Name="x5a.PopulateMenuStructure.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:FTEESW520\SQL2012:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>FTEESW520\SQL2012</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>x5a.PopulateMenuStructure.sql</FullPath>
+        </FileNode>
+        <FileNode Name="x5b.PopulateMenuWithOP.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:FTEESW520\SQL2012:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>FTEESW520\SQL2012</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>x5b.PopulateMenuWithOP.sql</FullPath>
+        </FileNode>
+        <FileNode Name="x6.PopulateNumberSequence.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:FTEESW520\SQL2012:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>FTEESW520\SQL2012</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>x6.PopulateNumberSequence.sql</FullPath>
+        </FileNode>
+        <FileNode Name="x6a.PopulateNumberSequenceKeys.sql">
+          <AssociatedConnectionMoniker />
+          <AssociatedConnSrvName />
+          <AssociatedConnUserName />
+          <FullPath>x6a.PopulateNumberSequenceKeys.sql</FullPath>
+        </FileNode>
+        <FileNode Name="x7.PopulateStatusDefn.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:FTEESW520\SQL2012:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>FTEESW520\SQL2012</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>x7.PopulateStatusDefn.sql</FullPath>
+        </FileNode>
+        <FileNode Name="x7.PopulateTypeDefn.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:FTEESW520\SQL2012:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>FTEESW520\SQL2012</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>x7.PopulateTypeDefn.sql</FullPath>
+        </FileNode>
+        <FileNode Name="x8.PopulateXRt.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:FTEESW520\SQL2012:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>FTEESW520\SQL2012</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>x8.PopulateXRt.sql</FullPath>
+        </FileNode>
+      </Items>
+    </LogicalFolder>
+    <LogicalFolder Name="Miscellaneous" Type="3" Sorted="true">
+      <Items />
+    </LogicalFolder>
+  </Items>
+</SqlWorkbenchSqlProject>
