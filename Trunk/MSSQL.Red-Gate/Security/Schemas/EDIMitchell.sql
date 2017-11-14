@@ -1,0 +1,3 @@
+CREATE SCHEMA [EDIMitchell]
+AUTHORIZATION [dbo]
+GO

@@ -1,0 +1,3 @@
+CREATE SCHEMA [Email]
+AUTHORIZATION [Email]
+GO
