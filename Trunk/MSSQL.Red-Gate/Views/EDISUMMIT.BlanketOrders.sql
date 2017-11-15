@@ -2,7 +2,8 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE view [EDISUMMIT].[BlanketOrders]
+
+create view [EDISUMMIT].[BlanketOrders]
 as
 select
 	oh.model_year
@@ -34,7 +35,7 @@ select
 			and order_no = oh.order_no
 	)
 ,	PackageType = oh.package_type
---,	StandardPack = coalesce(pp.quantity, pi.standard_pack)
+,	StandardPack = coalesce(pp.quantity, pi.standard_pack)
 ,	UnitWeight = pi.unit_weight
 ,	AccumShipped = oh.our_cum
 ,	ProcessReleases = coalesce(es.ProcessEDI, 0)
@@ -55,9 +56,9 @@ from
 		on es.destination = oh.destination
 	join dbo.part_inventory pi
 		on pi.part = oh.blanket_part
-	--left join dbo.part_packaging pp
-	--	on pp.part = oh.blanket_part
-	--	and pp.code = oh.package_type
+	left join dbo.part_packaging pp
+		on pp.part = oh.blanket_part
+		and pp.code = oh.package_type
 	left join dbo.shipper s
 		on s.id = oh.shipper
 where

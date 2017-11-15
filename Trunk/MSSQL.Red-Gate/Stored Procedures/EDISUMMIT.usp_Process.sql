@@ -2,10 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
-
-
-
 CREATE procedure [EDISUMMIT].[usp_Process]
 	@TranDT datetime = null out
 ,	@Result integer = null out
@@ -363,7 +359,7 @@ declare
 	@RawReleases table
 (	RowID int not null IDENTITY(1, 1) primary key
 ,	Status int default(0)
-, ReleaseType int
+,	ReleaseType int
 ,	OrderNo int
 ,	Type tinyint
 ,	ReleaseDT datetime
@@ -379,12 +375,16 @@ declare
 ,	DockCode varchar(30) null
 ,	LineFeedCode varchar(30) null
 ,	ReserveLineFeedCode varchar(30) null
+,	StandardPack numeric(20,6) null
 ,	QtyRelease numeric(20,6)
 ,	StdQtyRelease numeric(20,6)
+,	QtyReleaseRounded numeric(20,6)
 ,	ReferenceAccum numeric(20,6)
 ,	CustomerAccum numeric(20,6)
 ,	RelPrior numeric(20,6)
 ,	RelPost numeric(20,6)
+,	RelPriorRounded numeric(20,6)
+,	RelPostRounded numeric(20,6)
 ,	NewDocument int
 ,	unique
 	(	OrderNo
@@ -408,7 +408,7 @@ declare
 insert
 	@RawReleases
 (	ReleaseType
-, OrderNo
+,	OrderNo
 ,	Type
 ,	ReleaseDT
 ,	BlanketPart
@@ -418,6 +418,7 @@ insert
 ,	ModelYear
 ,	OrderUnit
 ,	ReleaseNo
+,	StandardPack
 ,	QtyRelease
 ,	StdQtyRelease
 ,	ReferenceAccum
@@ -425,8 +426,7 @@ insert
 ,	NewDocument
 )
 /*		Add releases due today when behind and no release for today exists. */
-
-Select
+select
 	ReleaseType = 1
 ,	OrderNo = bo.BlanketOrderNo
 ,	Type = 1
@@ -438,6 +438,7 @@ Select
 ,	ModelYear = min(bo.ModelYear)
 ,	OrderUnit = min(bo.OrderUnit)
 ,	ReleaseNo = 'Accum Demand'
+,	StandardPack = max(bo.StandardPack)
 ,	QtyRelease = 0
 ,	StdQtyRelease = 0
 ,	ReferenceAccum = case bo.ReferenceAccum 
@@ -550,6 +551,7 @@ select
 ,	ModelYear = bo.ModelYear
 ,	OrderUnit = bo.OrderUnit
 ,	ReleaseNo = fr.ReleaseNo
+,	StandardPack = bo.StandardPack
 ,	QtyRelease = fr.ReleaseQty
 ,	StdQtyRelease = fr.ReleaseQty
 ,	ReferenceAccum = case bo.ReferenceAccum 
@@ -636,6 +638,7 @@ select
 ,	ModelYear = bo.ModelYear
 ,	OrderUnit = bo.OrderUnit
 ,	ReleaseNo = fr.ReleaseNo
+,	StandardPack = bo.StandardPack
 ,	QtyRelease = fr.ReleaseQty
 ,	StdQtyRelease = fr.ReleaseQty
 ,	ReferenceAccum = case bo.ReferenceAccum 
@@ -786,6 +789,13 @@ set
 from
 	@RawReleases rr
 
+update
+	rr
+set
+	rr.RelPostRounded = CustomerAccum + coalesce(ceiling((RelPost - CustomerAccum) / nullif(StandardPack, 0)) * StandardPack, RelPost - CustomerAccum)
+from
+	@RawReleases rr
+
 	
 --/*		Calculate orders to update. */
 --update
@@ -816,7 +826,8 @@ from
 update
 	rr
 set
-	RelPost = case when rr.ReferenceAccum > rr.RelPost then rr.ReferenceAccum else rr.RelPost end
+	rr.RelPost = case when rr.ReferenceAccum > rr.RelPost then rr.ReferenceAccum else rr.RelPost end
+,	rr.RelPostRounded = case when rr.ReferenceAccum > rr.RelPostRounded then rr.ReferenceAccum else rr.RelPostRounded end
 from
 	@RawReleases rr
 
@@ -824,9 +835,17 @@ from
 update
 	rr
 set
-	RelPrior = coalesce (
+	rr.RelPrior = coalesce (
 	(	select
 			max(RelPost)
+		from
+			@RawReleases
+		where
+			OrderNo = rr.OrderNo
+			and	RowID < rr.RowID), ReferenceAccum)
+,	rr.RelPriorRounded = coalesce (
+	(	select
+			max(RelPostRounded)
 		from
 			@RawReleases
 		where
@@ -836,22 +855,21 @@ from
 	@RawReleases rr
 
 		--For Armada Only..Update Release Number with Accum Increase if customer's accum causes the qty to be increased
-	update
+update
 	rr
 set
-		releaseNo = 'Accum Increase'
+	releaseNo = 'Accum Increase'
 from
 	@RawReleases rr
 where
-		RelPost-RelPrior > QtyRelease
-
-
+	RelPostRounded - RelPriorRounded > QtyRelease
 
 update
 	rr
 set
-	QtyRelease = RelPost - RelPrior
-,	StdQtyRelease = RelPost - RelPrior
+	rr.QtyRelease = RelPost - RelPrior
+,	rr.StdQtyRelease = RelPostRounded - RelPriorRounded
+,	rr.QtyReleaseRounded = RelPostRounded - RelPriorRounded
 from
 	@RawReleases rr
 
@@ -862,8 +880,7 @@ set
 from
 	@RawReleases rr
 where
-	QtyRelease <= 0
-
+	QtyReleaseRounded <= 0
 
 /* Move Planning Release dates beyond last Ship Schedule Date that has a quantity due*/
 update
@@ -875,6 +892,7 @@ from
 where
 	rr.ReleaseType = 2
 	and rr.ReleaseDT <= (select max(ReleaseDT) from @RawReleases where OrderNo = rr.OrderNo and ReleaseType = 1 and Status>-1)
+
 /*	Calculate order line numbers and committed quantity. */
 update
 	rr
@@ -990,7 +1008,7 @@ if	@Testing = 0 begin
 	,	part_number = rr.BlanketPart
 	,	product_name = (select name from dbo.part where part = rr.BlanketPart)
 	,	type = case rr.Type when 1 then 'F' when 2 then 'P' end
-	,	quantity = rr.RelPost - rr.relPrior
+	,	quantity = rr.QtyReleaseRounded
 	,	status = ''
 	,	notes = 'Processed Date : '+ convert(varchar, getdate(), 120) + ' ~ ' + case rr.Type when 1 then 'EDI Processed Release' when 2 then 'EDI Processed Release' end
 	,	unit = (select unit from order_header where order_no = rr.OrderNo)
@@ -1003,18 +1021,18 @@ if	@Testing = 0 begin
 	,	ship_type = 'N'
 	,	packline_qty = 0
 	,	packaging_type = bo.PackageType
-	,	weight = (rr.RelPost - rr.relPrior) * bo.UnitWeight
+	,	weight = (rr.StdQtyRelease) * bo.UnitWeight
 	,	plant = (select plant from order_header where order_no = rr.OrderNo)
 	,	week_no = datediff(wk, (select fiscal_year_begin from parameters), rr.ReleaseDT) + 1
-	,	std_qty = rr.RelPost - rr.relPrior
-	,	our_cum = rr.RelPrior
-	,	the_cum = rr.RelPost
+	,	std_qty = rr.StdQtyRelease
+	,	our_cum = rr.RelPriorRounded
+	,	the_cum = rr.RelPostRounded
 	,	price = (select price from order_header where order_no = rr.OrderNo)
 	,	alternate_price = (select alternate_price from order_header where order_no = rr.OrderNo)
 	,	committed_qty = coalesce
 		(	case
-				when rr.QtyShipper > rr.RelPost - bo.AccumShipped then rr.RelPost - rr.relPrior
-				when rr.QtyShipper > rr.RelPrior - bo.AccumShipped then rr.QtyShipper - (rr.RelPrior - bo.AccumShipped)
+				when rr.QtyShipper > rr.RelPostRounded - bo.AccumShipped then rr.StdQtyRelease
+				when rr.QtyShipper > rr.RelPriorRounded - bo.AccumShipped then rr.QtyShipper - (rr.RelPriorRounded - bo.AccumShipped)
 			end
 		,	0
 		)
@@ -1264,6 +1282,8 @@ else begin
 		,	ReferenceAccum
 		,	RelPrior
 		,	RelPost
+		,	RelPriorRounded
+		,	RelPostRounded
 		,	ReleaseDT
 		from
 			@RawReleases
@@ -1294,7 +1314,7 @@ else begin
 	,	part_number = rr.BlanketPart
 	,	product_name = (select name from dbo.part where part = rr.BlanketPart)
 	,	type = case rr.Type when 1 then 'F' when 2 then 'P' end
-	,	quantity = rr.RelPost - rr.relPrior
+	,	quantity = rr.QtyReleaseRounded
 	,	status = ''
 	,	notes = 'Processed Date : '+ convert(varchar, getdate(), 120) + ' ~ ' + case rr.Type when 1 then 'EDI Processed Release' when 2 then 'EDI Processed Release' end
 	,	unit = (select unit from order_header where order_no = rr.OrderNo)
@@ -1307,18 +1327,18 @@ else begin
 	,	ship_type = 'N'
 	,	packline_qty = 0
 	,	packaging_type = bo.PackageType
-	,	weight = (rr.RelPost - rr.relPrior) * bo.UnitWeight
+	,	weight = (rr.StdQtyRelease) * bo.UnitWeight
 	,	plant = (select plant from order_header where order_no = rr.OrderNo)
 	,	week_no = datediff(wk, (select fiscal_year_begin from parameters), rr.ReleaseDT) + 1
-	,	std_qty = rr.RelPost - rr.relPrior
-	,	our_cum = rr.RelPrior
-	,	the_cum = rr.RelPost
+	,	std_qty = rr.StdQtyRelease
+	,	our_cum = rr.RelPriorRounded
+	,	the_cum = rr.RelPostRounded
 	,	price = (select price from order_header where order_no = rr.OrderNo)
 	,	alternate_price = (select alternate_price from order_header where order_no = rr.OrderNo)
 	,	committed_qty = coalesce
 		(	case
-				when rr.QtyShipper > rr.RelPost - bo.AccumShipped then rr.RelPost - rr.relPrior
-				when rr.QtyShipper > rr.RelPrior - bo.AccumShipped then rr.QtyShipper - (rr.RelPrior - bo.AccumShipped)
+				when rr.QtyShipper > rr.RelPostRounded - bo.AccumShipped then rr.StdQtyRelease
+				when rr.QtyShipper > rr.RelPriorRounded - bo.AccumShipped then rr.QtyShipper - (rr.RelPriorRounded - bo.AccumShipped)
 			end
 		,	0
 		)
@@ -1918,9 +1938,6 @@ select
 	@Error, @ProcReturn, @TranDT, @ProcResult
 go
 
-
-go
-
 --commit transaction
 rollback transaction
 
@@ -1935,55 +1952,4 @@ go
 Results {
 }
 */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 GO
