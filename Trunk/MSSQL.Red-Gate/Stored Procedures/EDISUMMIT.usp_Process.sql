@@ -862,7 +862,8 @@ set
 from
 	@RawReleases rr
 where
-	RelPostRounded - RelPriorRounded > QtyRelease
+	CustomerAccum > ReferenceAccum
+	and RelPriorRounded = ReferenceAccum
 
 update
 	rr
