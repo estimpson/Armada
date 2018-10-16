@@ -30,6 +30,29 @@ declare
 	@TranCount smallint
 
 set	@TranCount = @@TranCount
+
+--- <SP Begin Logging>
+declare
+	@LogID int
+
+insert
+	FxSYS.USP_Calls
+(	USP_Name
+,	BeginDT
+,	InArguments
+)
+select
+	USP_Name = user_name(objectproperty(@@procid, 'OwnerId')) + '.' + object_name(@@procid)
+,	BeginDT = getdate()
+,	InArguments =
+		'@User = ' + coalesce('''' + @User + '''', '<null>')
+		+ ', @ReceiverObjectID = ' + coalesce(convert(varchar, @ReceiverObjectID), 'null')
+		+ ', @TranDT = ' + coalesce(convert(varchar, @TranDT, 121), 'null')
+		+ ', @Result = ' + coalesce(convert(varchar, @Result), 'null')
+
+set	@LogID = scope_identity()
+--- </SP Begin Logging>
+
 if	@TranCount = 0 begin
 	begin tran @ProcName
 end
@@ -556,6 +579,20 @@ if	@TranCount = 0 begin
 	commit tran @ProcName
 end
 ---	</CloseTran AutoCommit=Yes>
+
+--- <SP End Logging>
+update
+	uc
+set
+	EndDT = getdate()
+,	OutArguments =
+		'@TranDT = ' + coalesce(convert(varchar, @TranDT, 121), 'null')
+		+ ', @Result = ' + coalesce(convert(varchar, @Result), 'null')
+from
+	FXSYS.USP_Calls uc
+where
+	RowID = @LogID
+--- </SP End Logging>
 
 ---	<Return>
 set	@Result = 0

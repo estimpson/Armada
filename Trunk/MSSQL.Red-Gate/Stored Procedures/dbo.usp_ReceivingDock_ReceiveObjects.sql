@@ -143,7 +143,39 @@ set	@ProcName = user_name(objectproperty (@@procid, 'OwnerId')) + '.' + object_n
 --- <Tran required=Yes autoCreate=Yes tranDTParm=Yes>
 declare	@TranCount smallint
 
-set	@TranCount = @@TranCount
+set	@TranCount = @@trancount
+
+--- <SP Begin Logging>
+declare
+	@LogID int
+
+insert
+	FxSYS.USP_Calls
+(	USP_Name
+,	BeginDT
+,	InArguments
+)
+select
+	USP_Name = user_name(objectproperty(@@procid, 'OwnerId')) + '.' + object_name(@@procid)
+,	BeginDT = getdate()
+,	InArguments =
+		'@User = ' + coalesce('''' + @User + '''', '<null>')
+		+ ', @ReceiverObjectID = ' + coalesce(convert(varchar, @PONumber), 'null')
+		+ ', @PartCode = ' + coalesce('''' + @PartCode + '''', 'null')
+		+ ', @PackageType = ' + coalesce('''' + @PackageType + '''', 'null')
+		+ ', @PerBoxQty = ' + coalesce(convert(varchar, @PerBoxQty), 'null')
+		+ ', @NewObjects = ' + coalesce(convert(varchar, @NewObjects), 'null')
+		+ ', @Shipper = ' + coalesce('''' + @Shipper + '''', 'null')
+		+ ', @LotNumber = ' + coalesce('''' + @LotNumber + '''', 'null')
+		+ ', @Location = ' + coalesce('''' + @Location + '''', 'null')
+		+ ', @UserDefinedStatus = ' + coalesce('''' + @UserDefinedStatus + '''', 'null')
+		+ ', @SerialNumber = ' + coalesce(convert(varchar, @SerialNumber), 'null')
+		+ ', @TranDT = ' + coalesce(convert(varchar, @TranDT, 121), 'null')
+		+ ', @Result = ' + coalesce(convert(varchar, @Result), 'null')
+
+set	@LogID = scope_identity()
+--- </SP Begin Logging>
+
 if	@TranCount = 0 begin
 	begin tran @ProcName
 end
@@ -242,6 +274,21 @@ if	@TranCount = 0 begin
 	commit transaction @ProcName
 end
 --</CloseTran Required=Yes AutoCreate=Yes>
+
+--- <SP End Logging>
+update
+	uc
+set
+	EndDT = getdate()
+,	OutArguments =
+		'@SerialNumber = ' + coalesce(convert(varchar, @SerialNumber), 'null')
+		+ ', @TranDT = ' + coalesce(convert(varchar, @TranDT, 121), 'null')
+		+ ', @Result = ' + coalesce(convert(varchar, @Result), 'null')
+from
+	FXSYS.USP_Calls uc
+where
+	RowID = @LogID
+--- </SP End Logging>
 
 --	II.	Return.
 set	@Result = 0
