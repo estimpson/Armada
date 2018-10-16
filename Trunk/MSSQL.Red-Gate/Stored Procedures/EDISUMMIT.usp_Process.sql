@@ -2,7 +2,8 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE procedure [EDISUMMIT].[usp_Process]
+
+create procedure [EDISUMMIT].[usp_Process]
 	@TranDT datetime = null out
 ,	@Result integer = null out
 ,	@Testing int = 1
@@ -792,7 +793,7 @@ from
 update
 	rr
 set
-	rr.RelPostRounded = CustomerAccum + coalesce(ceiling((RelPost - CustomerAccum) / nullif(StandardPack, 0)) * StandardPack, RelPost - CustomerAccum)
+	rr.RelPostRounded = CustomerAccum + coalesce(floor((RelPost - CustomerAccum) / nullif(StandardPack, 0)) * StandardPack, RelPost - CustomerAccum)
 from
 	@RawReleases rr
 
