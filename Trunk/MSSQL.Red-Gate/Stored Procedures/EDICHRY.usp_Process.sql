@@ -6,6 +6,8 @@ GO
 
 
 
+
+
 CREATE procedure [EDICHRY].[usp_Process]
 	@TranDT datetime = null out
 ,	@Result integer = null out
@@ -1173,6 +1175,50 @@ if	@Testing = 0 begin
 			return
 		end
 		
+		
+		--- <Update rows="*">
+		set	@TableName = 'dbo.order_header'
+		
+		update
+			oh
+		set
+			line12 = rtrim(prs.MoparPartNumber)
+		from
+			dbo.order_header oh
+		join
+				ediChry.blanketOrders bo
+		on
+				bo.BlanketOrderNo = oh.order_no
+		join
+				(Select * From @Current830s) cpr 
+			on
+				cpr.CustomerPart = bo.customerpart and
+				cpr.ShipToCode = bo.EDIShipToCode and
+				(	bo.CheckCustomerPOPlanning = 0
+							or bo.CustomerPO = cpr.CustomerPO
+				)
+					and	(	bo.CheckModelYearPlanning= 0
+							or bo.ModelYear830 = cpr.CustomerModelYear
+				)
+		  join
+				ediChry.PlanningMoparPartNumber prs
+		on
+				prs.RawDocumentGUID = cpr.RawDocumentGUID and
+				prs.CustomerPart = cpr.CustomerPart and
+				coalesce(prs.CustomerPO,'') = cpr.CustomerPO and
+				prs.CustomerModelYear = cpr.CustomerModelYear  and
+				prs.ShipToCode = cpr.ShipToCode
+		
+		select
+			@Error = @@Error,
+			@RowCount = @@Rowcount
+		
+		if	@Error != 0 begin
+			set	@Result = 999999
+			RAISERROR ('Error updating table %s in procedure %s.  Error: %d', 16, 1, @TableName, @ProcName, @Error)
+			rollback tran @ProcName
+			return
+		end
 		--- <Update rows="*">
 		set	@TableName = 'dbo.order_header'
 		
@@ -1904,9 +1950,6 @@ select
 	@Error, @ProcReturn, @TranDT, @ProcResult
 go
 
-
-go
-
 commit transaction
 --rollback transaction
 
@@ -1921,6 +1964,8 @@ go
 Results {
 }
 */
+
+
 
 
 
