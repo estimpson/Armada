@@ -19,6 +19,7 @@ BEGIN
 
 	SELECT
 		PalletSerial = oPallet.serial
+	,	PalletSerialTenDigitTesla = right(('0000000000' + convert(varchar, oPallet.serial)), 10)
 	,	PalletSerialIrvin = RIGHT(('000000000' + CONVERT(VARCHAR, oPallet.serial)), 9)
 	,	PalletSerialPaddedNineNines =  RIGHT(('999999999' + CONVERT(VARCHAR, oPallet.serial)), 9)
 	,   LotNumber = oBox.lot
@@ -123,6 +124,8 @@ BEGIN
 	,	CompanyAddress2 = parm.address_2
 	,	CompanyAddress3 = parm.address_3
 	,	PhoneNumber = parm.phone_number
+	,	TeslaPOline = lss.CustomerPOLine
+	,	ReleaseNumber =  sd.release_no
 	FROM
 		parameters parm
 		CROSS JOIN object oPallet
@@ -151,6 +154,10 @@ BEGIN
 				ON oh.order_no = sd.order_no
 			ON sd.shipper = oPallet.shipper
 			AND sd.part_original = oBox.part
+
+		left join EDI4010.LastShipSchedule lss
+			on lss.ShipToCode = coalesce(es.ediShipToID, es.parent_destination)
+			and lss.CustomerPart = oh.customer_part
 	WHERE
 		oPallet.serial = @Serial
 END

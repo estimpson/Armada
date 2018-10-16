@@ -11,8 +11,27 @@ CREATE function [FT].[fn_GetThreeDigitDate]
 returns char(3)
 as
 begin
---- <Body>
-	-- Convert to three digit date
+	--- <Body>
+	declare
+		@baseThirtySixDate varchar(3)
+	,	@dayDiff int
+	,	@allDigits varchar(36)
+	,	@threeDigitDate char(3)
+
+	set @baseThirtySixDate = ''
+	set @dayDiff = datediff(day, '20170101', @Date) -- start date provided by Tesla in their Tesla 3dig date spreadsheet
+	set @allDigits = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+	while (@dayDiff > 0) begin
+		set @baseThirtySixDate = substring(@allDigits, @dayDiff % 36 + 1, 1) + @baseThirtySixDate
+		set @dayDiff = @dayDiff / 36
+	end
+  
+	set @threeDigitDate = right(('000' + @baseThirtySixDate), 3)
+
+
+
+/*
 	declare 
 		@DayNumber int
 	,	@MonthNumber int
@@ -153,11 +172,16 @@ begin
 			@ThreeDigitDate char(3)
 
 		set @ThreeDigitDate = @YearChar + @MonthChar + @DayChar 
+*/
 --- </Body>
+
 
 ---	<Return>
 	return
-		@ThreeDigitDate
+		@threeDigitDate
 end
+--- </Return>
+
+
 
 GO

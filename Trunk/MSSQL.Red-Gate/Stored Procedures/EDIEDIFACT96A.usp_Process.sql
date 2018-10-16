@@ -6,53 +6,54 @@ GO
 
 
 
-CREATE procedure [EDIEDIFACT96A].[usp_Process]
-	@TranDT datetime = null out
-,	@Result integer = null out
-,	@Testing int = 1
+
+CREATE PROCEDURE [EDIEDIFACT96A].[usp_Process]
+	@TranDT DATETIME = NULL OUT
+,	@Result INTEGER = NULL OUT
+,	@Testing INT = 1
 --<Debug>
-,	@Debug integer = 0
+,	@Debug INTEGER = 0
 --</Debug>
-as
-set nocount on
-set ansi_warnings on
-set	@Result = 999999
+AS
+SET NOCOUNT ON
+SET ANSI_WARNINGS ON
+SET	@Result = 999999
 
 --<Debug>
-declare	@ProcStartDT datetime
-declare	@StartDT datetime
-if @Debug & 1 = 1 begin
-	set	@StartDT = GetDate ()
-	print	'START.   ' + Convert (varchar (50), @StartDT)
-	set	@ProcStartDT = GetDate ()
-end
+DECLARE	@ProcStartDT DATETIME
+DECLARE	@StartDT DATETIME
+IF @Debug & 1 = 1 BEGIN
+	SET	@StartDT = GETDATE ()
+	PRINT	'START.   ' + CONVERT (VARCHAR (50), @StartDT)
+	SET	@ProcStartDT = GETDATE ()
+END
 --</Debug>
 
 --- <Error Handling>
-declare
+DECLARE
 	@CallProcName sysname,
 	@TableName sysname,
 	@ProcName sysname,
-	@ProcReturn integer,
-	@ProcResult integer,
-	@Error integer,
-	@RowCount integer
+	@ProcReturn INTEGER,
+	@ProcResult INTEGER,
+	@Error INTEGER,
+	@RowCount INTEGER
 
-set	@ProcName = user_name(objectproperty(@@procid, 'OwnerId')) + '.' + object_name(@@procid)  -- e.g. EDIEDIFACT96A.usp_Test
+SET	@ProcName = USER_NAME(OBJECTPROPERTY(@@procid, 'OwnerId')) + '.' + OBJECT_NAME(@@procid)  -- e.g. EDIEDIFACT96A.usp_Test
 --- </Error Handling>
 
 --- <Tran Required=Yes AutoCreate=Yes TranDTParm=Yes>
-declare
-	@TranCount smallint
+DECLARE
+	@TranCount SMALLINT
 
-set	@TranCount = @@TranCount
-if	@TranCount = 0 begin
-	begin tran @ProcName
-end
-else begin
-	save tran @ProcName
-end
-set	@TranDT = coalesce(@TranDT, GetDate())
+SET	@TranCount = @@TranCount
+IF	@TranCount = 0 BEGIN
+	BEGIN TRAN @ProcName
+END
+ELSE BEGIN
+	SAVE TRAN @ProcName
+END
+SET	@TranDT = COALESCE(@TranDT, GETDATE())
 --- </Tran>
 
 ---	<ArgumentValidation>
@@ -61,30 +62,30 @@ set	@TranDT = coalesce(@TranDT, GetDate())
 
 --- <Body>
 --<Debug>
-if @Debug & 1 = 1 begin
-	print	'Determine the current 830s and 862s.'
-	print	'	Active are all 862s for a Ship To / Ship From / last Document DT / last Imported Version (for Document Number / Control Number).'
-	set	@StartDT = GetDate ()
-end
+IF @Debug & 1 = 1 BEGIN
+	PRINT	'Determine the current 830s and 862s.'
+	PRINT	'	Active are all 862s for a Ship To / Ship From / last Document DT / last Imported Version (for Document Number / Control Number).'
+	SET	@StartDT = GETDATE ()
+END
 --</Debug>
 /*	Determine the current 830s and 862s. */
 /*		Active are all 862s for a Ship To / Ship From / last Document DT / last Imported Version (for Document Number / Control Number).*/
-declare
-	@Current862s table
-(	RawDocumentGUID uniqueidentifier
-,	ReleaseNo varchar(50)
-,	ShipToCode varchar(15)
-,	ShipFromCode varchar(15)
-,	ConsigneeCode varchar(15)
-,	CustomerPart varchar(35)
-,	CustomerPO varchar(35)
-,	CustomerModelYear varchar(35)
-,	NewDocument int
+DECLARE
+	@Current862s TABLE
+(	RawDocumentGUID UNIQUEIDENTIFIER
+,	ReleaseNo VARCHAR(50)
+,	ShipToCode VARCHAR(15)
+,	ShipFromCode VARCHAR(15)
+,	ConsigneeCode VARCHAR(15)
+,	CustomerPart VARCHAR(35)
+,	CustomerPO VARCHAR(35)
+,	CustomerModelYear VARCHAR(35)
+,	NewDocument INT
 )
 
-insert
+INSERT
 	@Current862s
-select distinct
+SELECT DISTINCT
 	RawDocumentGUID
 ,	ReleaseNo
 ,   ShipToCode
@@ -94,33 +95,33 @@ select distinct
 ,   CustomerPO
 ,	CustomerModelYear
 ,   NewDocument
-from
+FROM
 	EDIEDIFACT96A.CurrentShipSchedules ()
 
 --<Debug>
-if @Debug & 1 = 1 begin
-	print	'	Active are last Imported version of last Doc Number of last Document DT for every combination
+IF @Debug & 1 = 1 BEGIN
+	PRINT	'	Active are last Imported version of last Doc Number of last Document DT for every combination
 		of ShipTo, ShipFrom, InterCompany, and CustomerPart.'
-end
+END
 --</Debug>
 /*		Active are last Imported version of last Doc Number of last Document DT for every combination
 		of ShipTo, ShipFrom, InterCompany, and CustomerPart.  */
-declare
-	@Current830s table
-(	RawDocumentGUID uniqueidentifier
-,	ReleaseNo varchar(50)
-,	ShipToCode varchar(15)
-,	ShipFromCode varchar(15)
-,	ConsigneeCode varchar(15)
-,	CustomerPart varchar(35)
-,	CustomerPO varchar(35)
-,	CustomerModelYear varchar(35)
-,	NewDocument int
+DECLARE
+	@Current830s TABLE
+(	RawDocumentGUID UNIQUEIDENTIFIER
+,	ReleaseNo VARCHAR(50)
+,	ShipToCode VARCHAR(15)
+,	ShipFromCode VARCHAR(15)
+,	ConsigneeCode VARCHAR(15)
+,	CustomerPart VARCHAR(35)
+,	CustomerPO VARCHAR(35)
+,	CustomerModelYear VARCHAR(35)
+,	NewDocument INT
 )
 
-insert
+INSERT
 	@Current830s
-select distinct
+SELECT DISTINCT
 	RawDocumentGUID
 ,	ReleaseNo
 ,   ShipToCode
@@ -130,7 +131,7 @@ select distinct
 ,   CustomerPO
 ,	CustomerModelYear
 ,   NewDocument
-from
+FROM
 	EDIEDIFACT96A.CurrentPlanningReleases ()
 
 --<Debug>
@@ -1670,7 +1671,14 @@ join
 		coalesce(a.newDocument,0) = 1
 
 Update oh
-		set oh.fab_cum = coalesce(pra.LastAccumQty,0)
+		set oh.fab_cum = 
+			case bo.AdjustmentAccum 
+												When 'N' 
+												then coalesce(convert(int,bo.AccumShipped),0)
+												When 'P' 
+												then coalesce(convert(int,praa.PriorCUM),0)
+												else coalesce(convert(int,pra.LastAccumQty),0)
+												END
 from
 	@Current830s  a
 	 Join 
@@ -1698,8 +1706,7 @@ and
 		coalesce(praa.CustomerPO,'') = coalesce(a.customerPO,'') and
 		coalesce(praa.CustomerModelYear,'') = coalesce(a.customerModelYear,'')
 join
-		order_header oh on oh.order_no = bo.BlanketOrderNo
-										
+		order_header oh on oh.order_no = bo.BlanketOrderNo										
 	Where
 		coalesce(a.newDocument,0) = 1
 
@@ -1919,9 +1926,6 @@ select
 	@Error, @ProcReturn, @TranDT, @ProcResult
 go
 
-
-go
-
 --commit transaction
 rollback transaction
 
@@ -1936,6 +1940,7 @@ go
 Results {
 }
 */
+
 
 
 

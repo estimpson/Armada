@@ -4,6 +4,7 @@ SET ANSI_NULLS ON
 GO
 
 
+
 CREATE VIEW [custom].[ftvw_MasterBOL_Ford]
 
 AS
@@ -25,7 +26,9 @@ sd.part_name,
 sd.qty_packed,
 sd.gross_weight,
 es.supplier_code,
-COALESCE(d2.address_5,'') + CONVERT(VARCHAR(25), RIGHT( '000' + CONVERT( VARCHAR(25), DATEPART(DAYOFYEAR, COALESCE((SELECT MAX(date_stamp) FROM shipper s2 WHERE s2.bill_of_lading_number = bol.bol_number), GETDATE()))),3)) AS FordBillOfladingNumber
+COALESCE(d2.address_5,'') + CONVERT(VARCHAR(25), RIGHT( '000' + CONVERT( VARCHAR(25), DATEPART(DAYOFYEAR, COALESCE((SELECT MAX(date_stamp) FROM shipper s2 WHERE s2.bill_of_lading_number = bol.bol_number), GETDATE()))),3)) AS FordBillOfladingNumber,
+mf2.message1,
+mf2.message2
 FROM
 	Shipper s
 JOIN
@@ -38,11 +41,14 @@ JOIN
 	Bill_of_lading bol ON bol.bol_number = s.bill_of_lading_number
 LEFT JOIN
 	destination d2 ON d2.destination = bol.destination
+LEFT JOIN
+	dbo.destination_message_file mf2 ON mf2.destination = d2.destination
 CROSS JOIN
 	dbo.parameters parms
 
 --	SELECT * FROM custom.ftvw_MasterBOL_Ford WHERE (name LIKE 'FORD%' OR Name LIKE 'FMC%') ORDER BY bol_number DESC
 
 --SELECT * FROM custom.ftvw_MasterBOL_Ford WHERE bol_number =	157241
+
 
 GO

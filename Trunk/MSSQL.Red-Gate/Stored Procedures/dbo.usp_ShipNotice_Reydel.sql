@@ -4,11 +4,13 @@ SET ANSI_NULLS ON
 GO
 
 
-CREATE PROCEDURE [dbo].[usp_ShipNotice_Inteva]  (@shipper INT)
+
+
+CREATE PROCEDURE [dbo].[usp_ShipNotice_Reydel]  (@shipper INT)
 AS
 BEGIN
 
---dbo.usp_ShipNotice_Inteva 346747
+--dbo.usp_ShipNotice_Reydel 348309
 SET ANSI_PADDING ON
 --ASN Header
 
@@ -44,13 +46,14 @@ DECLARE
 	@EQD_02_01_TrailerNumber CHAR(17),
 	@REFBMQual CHAR(2) = 'MB',
 	@REFPKQual CHAR(3),
+	@REFPKQual2 CHAR(2) ='PK',
 	@REFCNQual CHAR(3) = 'CN',
 	@REFBMValue CHAR(35),
 	@REFPKValue CHAR(35),
 	@REFCNValue CHAR(35),
 	@FOB CHAR(2),
 	@SupplierName CHAR(75),
-	@SupplierCode CHAR(35),
+	@SupplierCode CHAR(8),
 	@ShipToName CHAR(35),
 	@ShipToID CHAR(35),
 	@NADShipToID2 CHAR(25),
@@ -194,11 +197,17 @@ INSERT	#ASNFlatFile (LineData)
 				
 			)
 			
-
+INSERT	#ASNFlatFile (LineData)
+	SELECT	(	'03'
+				+ @REFPKQual2
+				+ @REFPKValue
+				
+			)
+			
 
 INSERT	#ASNFlatFile (LineData)
 	SELECT	(	'04'
-				+ @NADMaterialIssuerID
+				+ SPACE(9)
 				+ @NADQual92
 				+ @NADShipToID
 				+ @LOC02_DockCode
@@ -637,6 +646,8 @@ ORDER BY
 SET ANSI_PADDING OFF
 
 END
+
+
 
 
 

@@ -5,7 +5,9 @@ GO
 
 
 
-Create procedure [EDICHRY].[usp_Stage_2]
+
+
+CREATE procedure [EDICHRY].[usp_Stage_2]
 	@TranDT datetime = null out
 ,	@Result integer = null  out
 as
@@ -265,6 +267,30 @@ execute
 	/*@ProcReturn = */dbo.sp_rename
 	@objname = N'EDICHRY.StagingPlanningReleases'
 ,	@newName = N'StagingPlanningReleasesT'
+
+set	@Error = @@Error
+if	@Error != 0 begin
+	set	@Result = 900501
+	RAISERROR ('Error encountered in %s.  Error: %d while calling %s', 16, 1, @ProcName, @Error, @CallProcName)
+	rollback tran @ProcName
+	return	@Result
+end
+if	@ProcReturn != 0 begin
+	set	@Result = 900502
+	RAISERROR ('Error encountered in %s.  ProcReturn: %d while calling %s', 16, 1, @ProcName, @ProcReturn, @CallProcName)
+	rollback tran @ProcName
+	return	@Result
+end
+--- </Call>
+
+
+/*				- StagingPlanningMoparPartNumber to StagingPlanningMoparPartNumberT.*/
+--- <Call>	
+set	@CallProcName = 'dbo.sp_rename'
+execute
+	/*@ProcReturn = */dbo.sp_rename
+	@objname = N'EDICHRY.StagingPlanningMoparPartNumber'
+,	@newName = N'StagingPlanningMoparPartNumberT'
 
 set	@Error = @@Error
 if	@Error != 0 begin
@@ -959,6 +985,51 @@ if	@Error != 0 begin
 end
 --- </Insert>
 
+/*				- StagingPlanningMoparPartNumberT to ReleasePlanMoparPartNumber.*/
+--- <Insert rows="*">
+set	@TableName = 'EDICHRY.PlanningMoparPartNumber'
+
+insert
+	EDICHRY.PlanningMoparPartNumber
+(	[RawDocumentGUID]
+      ,[ReleaseNo]
+      ,[ShipToCode]
+      ,[ConsigneeCode]
+      ,[ShipFromCode]
+      ,[SupplierCode]
+      ,[CustomerPart]
+      ,[CustomerPO]
+      ,[CustomerPOLine]
+      ,[CustomerModelYear]
+      ,[MoparPartNumber]
+)
+select
+		[RawDocumentGUID]
+      ,[ReleaseNo]
+      ,[ShipToCode]
+      ,[ConsigneeCode]
+      ,[ShipFromCode]
+      ,[SupplierCode]
+      ,[CustomerPart]
+      ,[CustomerPO]
+      ,[CustomerPOLine]
+      ,[CustomerModelYear]
+      ,[MoparPartNumber]
+from
+	EDICHRY.StagingPlanningMoparPartNumberT sfr
+
+select
+	@Error = @@Error,
+	@RowCount = @@Rowcount
+
+if	@Error != 0 begin
+	set	@Result = 999999
+	RAISERROR ('Error inserting into table %s in procedure %s.  Error: %d', 16, 1, @TableName, @ProcName, @Error)
+	rollback tran @ProcName
+	return
+end
+--- </Insert>
+
 /*		- truncate data from staging tables.*/
 truncate table
 	EDICHRY.StagingShipScheduleHeadersT
@@ -980,6 +1051,8 @@ truncate table
 	EDICHRY.StagingPlanningAuthAccumsT
 truncate table
 	EDICHRY.StagingPlanningReleasesT
+truncate table
+	EDICHRY.StagingPlanningMoparPartNumberT
 
 /*		- rename staging tables to prevent any additional data being written to them and to ensure they are not involved in a transaction.*/
 /*			- rename StagingShipSchedule tables...*/
@@ -1216,6 +1289,30 @@ if	@ProcReturn != 0 begin
 	return	@Result
 end
 --- </Call>
+/*				- StagingPlanningMoparPartNumberT to StagingPlanningMoparPartNumber.*/
+--- <Call>	
+set	@CallProcName = 'dbo.sp_rename'
+execute
+	/*@ProcReturn = */dbo.sp_rename
+	@objname = N'EDICHRY.StagingPlanningMoparPartNumberT'
+,	@newName = N'StagingPlanningMoparPartNumber'
+
+set	@Error = @@Error
+if	@Error != 0 begin
+	set	@Result = 900501
+	RAISERROR ('Error encountered in %s.  Error: %d while calling %s', 16, 1, @ProcName, @Error, @CallProcName)
+	rollback tran @ProcName
+	return	@Result
+end
+if	@ProcReturn != 0 begin
+	set	@Result = 900502
+	RAISERROR ('Error encountered in %s.  ProcReturn: %d while calling %s', 16, 1, @ProcName, @ProcReturn, @CallProcName)
+	rollback tran @ProcName
+	return	@Result
+end
+--- </Call>
+
+
 --- </Body>
 
 ---	<Return>
@@ -1332,6 +1429,8 @@ go
 Results {
 }
 */
+
+
 
 
 

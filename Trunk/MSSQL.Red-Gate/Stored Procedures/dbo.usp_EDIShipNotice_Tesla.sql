@@ -5,18 +5,19 @@ GO
 
 
 
+
 CREATE PROCEDURE [dbo].[usp_EDIShipNotice_Tesla]  (@shipper INT)
 AS
 BEGIN
 -- Test
--- Exec [dbo].[usp_EDIShipNotice_Tesla] 337127
+-- Exec [dbo].[usp_EDIShipNotice_Tesla] 346271
 
 /*
 
 SP returns both ASN flat file and Invoice Flat File
    
   
-    856 Overlay: TLO_856_D_v4010_TESLA SOTPI-PI_160707     
+    856 Overlay: TLO_856_D_v4010_TESLA SOTPI-PI_160707   
 
     810 Overlay : TMO_810_D_v4010_TESLA MOTORS_160203
 
@@ -24,115 +25,81 @@ SP returns both ASN flat file and Invoice Flat File
 
 */
 
-set ANSI_Padding on
+SET ANSI_PADDING ON
 --ASN Header
 
-declare
+DECLARE
 --Variables for Flat File
 
 
 --//Line
-		@TradingPartner	char(12),
-		@DESADV char(10),
-		@ShipperIDHeader char(30),
-		@PartialComplete char(1) = '' ,
+		@TradingPartner	CHAR(12),
+		@DESADV CHAR(10),
+		@ShipperIDHeader CHAR(30),
+		@PartialComplete CHAR(1) = '' ,
 
 --Header
 
-		@1BSN01_Purpose char(2) = '00',										-- Purpose Code
-		@1BSN02_ShipperID char(30),											--Shipper.id
-		@1BSN03_SystemDate char(8),											--Getdate() 'CCYYMMDD'
-		@1BSN04_SystemTime char(8),											--Getdate() 'HHMM'
+		@1BSN01_Purpose CHAR(2) = '00',										-- Purpose Code
+		@1BSN02_ShipperID CHAR(30),											--Shipper.id
+		@1BSN03_SystemDate CHAR(8),											--Getdate() 'CCYYMMDD'
+		@1BSN04_SystemTime CHAR(8),											--Getdate() 'HHMM'
 
 		
-		@1MEA01_PDQualifier char(2) = 'PD',															
-		@1MEA02_GrossWeightQualifier char(3) = 'G',			--
-		@1MEA03_Grossweight char(22),										--shipper.gross_weight
-		@1MEA02_NetWeightQualifier char(3) = 'N',				--
-		@1MEA03_Netweight char(22),											--shipper.net_weight
-		@1MEA04_WeightUOM char(2) = 'LB',		
+		@1MEA01_PDQualifier CHAR(2) = 'PD',															
+		@1MEA02_GrossWeightQualifier CHAR(3) = 'G',			--
+		@1MEA03_Grossweight CHAR(22),										--shipper.gross_weight
+		@1MEA02_NetWeightQualifier CHAR(3) = 'N',				--
+		@1MEA03_Netweight CHAR(22),											--shipper.net_weight
+		@1MEA04_WeightUOM CHAR(2) = 'LB',		
 
 	
-		@1TD101_PackCodeCNT90 char(5) = 'BOX90',				--Loose Container Indicator
-		@1TD102_PackCountCNT90 char(8),								--count(1) of loose objects
-		@1TD101_PackCodePLT90 char(5) = 'PLT90',				--Pallet Indicator
-		@1TD102_PackCountPLT90 char(8)	,							--count(1) of distinct pallets
+		@1TD101_PackCodeCNT90 CHAR(5) = 'BOX90',				--Loose Container Indicator
+		@1TD102_PackCountCNT90 CHAR(8),								--count(1) of loose objects
+		@1TD101_PackCodePLT90 CHAR(5) = 'PLT90',				--Pallet Indicator
+		@1TD102_PackCountPLT90 CHAR(8)	,							--count(1) of distinct pallets
 
 
-		@1TD501_RoutingSequence char(1) = 'B'	,					--Routing Sequence Code; appears to be B for all shipments
-		@1TD502_IdCodeType char(2) = '2'	,							--'2'
-		@1TD503_CarrierSCAC char(78)	,								--shipper.carrier
-		@1TD504_ShipperTransMode char(2)	,						--shipper.trans_mode
+		@1TD501_RoutingSequence CHAR(1) = 'B'	,					--Routing Sequence Code; appears to be B for all shipments
+		@1TD502_IdCodeType CHAR(2) = '2'	,							--'2'
+		@1TD503_CarrierSCAC CHAR(78)	,								--shipper.carrier
+		@1TD504_ShipperTransMode CHAR(2)	,						--shipper.trans_mode
 
-		@1TD301_EquipmentDesc char(2) = 'TL',						--'TL'
-		@1TD303_EquipmentNumber char(10),							--shipper.truck_number
+		@1TD301_EquipmentDesc CHAR(2) = 'TL',						--'TL'
+		@1TD303_EquipmentNumber CHAR(10),							--shipper.truck_number
 
-		@REF02_ProNumberQualifier char(3)  = 'CN',			--Tesla wants  pro  number here
-		@REF02_ProNumber char(30),									--Tesla wants Pro number
-		@REF02_BillofLadingQualifier char(3)  = 'BM',		--Tesla wants trailer number here
-		@REF02_BillofLading char(30),									--Tesla wants trailer number here
+		@REF02_ProNumberQualifier CHAR(3)  = 'CN',			--Tesla wants  pro  number here
+		@REF02_ProNumber CHAR(30),									--Tesla wants Pro number
+		@REF02_BillofLadingQualifier CHAR(3)  = 'BM',		--Tesla wants trailer number here
+		@REF02_BillofLading CHAR(30),									--Tesla wants trailer number here
 
-		@1DTM01_DateShippedQualifier char(3) = '011',				--date shipped qualifier "011"
-		@1DTM02_DateShipped char(8),										--shipper.date_shipped 'CCYYMMDD'
-		@1DTM03_TimeShipped char(8),										--shipper.date_shipped 'HHMM'
-		@1DTM04_TimeZone char(2),												-- dbo.udfGetDSTIndication(date_shipped) returns either 'ED' or 'ET'
+		@1DTM01_DateShippedQualifier CHAR(3) = '011',				--date shipped qualifier "011"
+		@1DTM02_DateShipped CHAR(8),										--shipper.date_shipped 'CCYYMMDD'
+		@1DTM03_TimeShipped CHAR(8),										--shipper.date_shipped 'HHMM'
+		@1DTM04_TimeZone CHAR(2),												-- dbo.udfGetDSTIndication(date_shipped) returns either 'ED' or 'ET'
 		
 
-		@1N103_ShipFromQualifier char(3) = 'SF',
-		@1N104_ShipFromCode char(78),
-		@1N103_ShipFromName char(60),
-		@1N103_ShipFromAddress char(55),
+		@1N103_ShipFromQualifier CHAR(3) = 'SF',
+		@1N104_ShipFromCode CHAR(78),
+		@1N103_ShipFromName CHAR(60),
+		@1N103_ShipFromAddress CHAR(55),
 
-		@1N103_ShiptoQualifier char(3) = 'ST',
-		@1N104_ShiptoCode char(78),
-		@1N103_ShiptoName char(60),
-		@1N103_ShiptoAddress char(55),
+		@1N103_ShiptoQualifier CHAR(3) = 'ST',
+		@1N104_ShiptoCode CHAR(78),
+		@1N103_ShiptoName CHAR(60),
+		@1N103_ShiptoAddress CHAR(55)
+		
+		SELECT @REF02_ProNumber =  ISNULL(MAX(release_no),'')
+		FROM
+			Shipper_detail sd
+		WHERE 
+			sd.shipper = @shipper 
+			AND			sd.release_no LIKE '%-%'
 		
 
-
-
-
-	
-
-
---Detail
-
-		@2CPS01CPSCounter char(12),
-		@2CPS03CPSIndicator char(3),
-		@1PAC01PackageCount char(10),
-		@1PAC01PackageType char(17),
-		@1PCI01MarkingInstructions char(3),
-		@3RFF010ProNumber char(35),
-		@1LIN01LineItem char(20) = '001',
-		@1LIN02CustomerPartBP char(2) = 'BP',
-		@1LIN03CustomerPart char(30),
-		@1LIN04KanbanRC char(2) = 'RC',
-		@1LIN05Kanban char(30),
-		@1SN102QtyShipped char(12),
-		@1SN103QtyShippedUM char(2) ='EA',
-		@1PIAModelYear char(35),
-		@2QTY010QtyTypeShipped char(3) ,
-		@2QTY010QtyShipped char(14),
-		@2QTY010QtyShippedUM char(3) ,
-		@2QTY010AccumTypeShipped char(3) ,
-		@2QTY010AccumShipped char(14),
-		@2QTY010AccumShippedUM char(3),
-		@1RFF010CustomerPOType char(3),
-		@1RFF010CustomerPO char(25),
-		@2REF02InvoiceNumber char(30),
-		@1PRF01ManifestReceiverNo char(22),
-
-
-	--Variables for Processing Data
-
-	@PackTypeType int,
-	@InternalPart varchar(25),
-	@PackageType varchar(25),
-	@PalletPackageType varchar(25),
-	@CPS03Indicator int
 		
-	select
-		@TradingPartner	= coalesce(nullif(es.trading_partner_code,''), 'Tesla'),
+	SELECT
+		@TradingPartner	= COALESCE(NULLIF(es.trading_partner_code,''), 'Tesla'),
 		@1BSN02_ShipperID  =  s.id,
 		@1BSN03_SystemDate = CONVERT(VARCHAR(25), GETDATE(), 112)+LEFT(CONVERT(VARCHAR(25), GETDATE(), 108),2) +SUBSTRING(CONVERT(VARCHAR(25), GETDATE(), 108),4,2),
 		@1BSN04_SystemTime = left(replace(convert(char, getdate(), 108), ':', ''),4),
@@ -142,8 +109,7 @@ declare
 		@1TD503_CarrierSCAC = Coalesce(s.ship_via,''),
 		@1TD504_ShipperTransMode = coalesce(s.trans_mode, 'LT'),
 		@1TD303_EquipmentNumber = Coalesce(s.truck_number, convert(varchar(15),s.id)),
-		@REF02_BillofLading = coalesce(s.truck_number,convert(varchar(15),s.bill_of_lading_number), convert(varchar(15),s.id)),
-		@REF02_ProNumber = coalesce(s.pro_number, convert(varchar(15),s.id)),		
+		@REF02_BillofLading = coalesce(convert(varchar(15),s.bill_of_lading_number), convert(varchar(15),s.id)),				
 		@1TD504_ShipperTransMode = coalesce(s.trans_mode, 'LT'),
 		@1TD503_CarrierSCAC = Coalesce(s.ship_via,''),
 		@1DTM02_DateShipped= CONVERT(VARCHAR(25), s.date_shipped, 112)+LEFT(CONVERT(VARCHAR(25), s.date_shipped, 108),2) +SUBSTRING(CONVERT(VARCHAR(25), s.date_shipped, 108),4,2),
@@ -177,8 +143,8 @@ INSERT	#ASNFlatFile (LineData)
 	SELECT	('//STX12//856'
 						+  @TradingPartner 
 						+  @1BSN02_ShipperID
-						--+ 'P')
-						+  @PartialComplete )
+						+ 'P')
+						--+  @PartialComplete )
 
 
 INSERT	#ASNFlatFile (LineData)
@@ -275,151 +241,138 @@ INSERT	#ASNFlatFile (LineData)
 						)
 
 
- --ASN Detail
- /*
+ --ASN Detail 
+
+Declare
+		@2CPS01CPSCounter char(12),
+		@2CPS03CPSIndicator char(3),
+		@1PAC01PackageCount char(10),
+		@1PAC01PackageType char(17),
+		@1PCI01MarkingInstructions char(3),
+		@3RFF010ProNumber char(35),
+		@1LIN01LineItem char(20) = '001',
+		@1LIN02CustomerPartBP char(2) = 'BP',
+		@1LIN03CustomerPart char(30),
+		@1LIN04KanbanRC char(2) = 'RC',
+		@1LIN05Kanban char(30),
+		@1SN102QtyShipped char(12),
+		@1SN103QtyShippedUM char(2) ='EA',
+		@1PIAModelYear char(35),
+		@2QTY010QtyTypeShipped char(3) ,
+		@2QTY010QtyShipped char(14),
+		@2QTY010QtyShippedUM char(3) ,
+		@2QTY010AccumTypeShipped char(3) ,
+		@2QTY010AccumShipped char(14),
+		@2QTY010AccumShippedUM char(3),
+		@1RFF010CustomerPOType char(3),
+		@1RFF010CustomerPO char(25),
+		@2REF02InvoiceNumber char(30),
+		@1PRF01ManifestReceiverNo char(22),
+
+
+	--Variables for Processing Data
+
+	@PackTypeType int,
+	@InternalPart varchar(25),
+	@PackageType varchar(25),
+	@PalletPackageType varchar(25),
+	@CPS03Indicator int
+
+
+
+
+
 declare	@ShipperDetail table (
 	ID int identity(1,1),
-	InvoiceNumber int, 
-	KanbanNumber varchar(30),
-	CustomerPart char(30),
-	ManifestReceiverNo char(22),
-	QtyShipped int, primary key (ID))
+	CustomerPart varchar(30),
+	CustomerPO varchar(22),
+	PODate VARCHAR(15),
+	CustomerPOLine VARCHAR(30),
+	SerialQty INT,
+	QtyShipped INT
+	PRIMARY key (ID))
 	
 insert	@ShipperDetail 
-(	InvoiceNumber,
-	KanbanNumber,
-	CustomerPart,
-	ManifestReceiverNo,
+(	CustomerPart,
+	CustomerPO,
+	PODate,
+	CustomerPOLine,
+	SerialQty,
 	QtyShipped
 	)
 	
-select
-	coalesce(s.invoice_number,@Shipper),
-	coalesce(st.Kanban,' ' ),
-	md.CustomerPart,
-	CASE WHEN md.ManifestNumber LIKE '%-%' THEN SUBSTRING(md.ManifestNumber,1,PATINDEX('%-%', md.ManifestNumber)-1) ELSE md.ManifestNumber END,
-	md.Quantity
+SELECT
+	distinct
+	sd.customer_part,
+	sd.customer_po,
+	MIN(	CONVERT(VARCHAR(8), oh.order_date, 112)),
+	MIN(COALESCE(NULLIF(lss.cpl, ''), '99999')),
+	--COALESCE(NULLIF(MIN(oh.engineering_level),''), '001'),
+	at.quantity,
+	sum(at.quantity)
 from
 	shipper s
+JOIN
+	edi_setups es ON es.destination = s.destination
 join
-		editoyota.Pickups mp on mp.ShipperID = s.id
-join
-		editoyota.ManifestDetails md on md.PickUpID = mp.RowID
-JOIN	
-		EDIToyota.ShipTos st ON st.EDIShipToCode = mp.ShipToCode
+	shipper_detail sd ON sd.shipper = s.id
+JOIN
+	dbo.order_header oh ON oh.order_no =  sd.order_no
+JOIN
+	dbo.audit_trail at ON at.shipper = CONVERT(VARCHAR(50), @shipper )  
+	AND	at.part = sd.part_original
+	AND at.type = 'S'
+OUTER APPLY 
+	( 
+		SELECT 
+			TOP 1 lss.CustomerPOLine cpl
+			FROM 
+				edi4010.LastShipSchedule lss
+			WHERE lss.fxDestination = s.destination
+			AND		lss.CustomerPart = sd.customer_part	) AS lss
 Where
 	s.id = @shipper
+GROUP BY
+	sd.customer_po,
+	sd.customer_part,
+	at.quantity
 	
 	
-/*declare	@AuditTrailSerial table (
-Part varchar(25),
-ObjectPackageType varchar(35),
-PalletPackageType varchar(35),
+declare	@AuditTrailSerial table (
+CustomerPart varchar(25),
+CustomerPO varchar(50),
 SerialQuantity int,
-ParentSerial int,
-Serial int, 
+Serial VARCHAR(50), 
 id int identity primary key (id))
 	
 insert	@AuditTrailSerial 
-(		Part,
-		ObjectPackageType,
-		PalletPackageType,	
+(		CustomerPart,
+		CustomerPO,		
 		SerialQuantity,
-		ParentSerial,
 		Serial 
 )
 	
 select
-	at.part,
-	coalesce( pm.name, at.package_type,'0000CART'),
-	Coalesce((Select max(package_type) 
-		from audit_trail at2
-		left join package_materials pm2 on pm2.code =  at2.package_Type
-		where		at2.serial = at.parent_serial and
-						at2.shipper = convert(varchar(15),@shipper)  and
-						at2.type = 'S'and
-						at2.part = 'PALLET'
-		),'0000PALT'),
+	sd.customer_part,
+	sd.customer_po,
 	quantity,
-	isNull(at.parent_serial,0),
-	serial
+	'1J0053702040'+ REPLACE(CONVERT(VARCHAR(10), sd.date_shipped, 1), '/', '') + RIGHT(CONVERT(VARCHAR(25), serial),3)
 from
 	dbo.audit_trail at
-left join
-	dbo.package_materials pm on pm.code = at.package_type
+JOIN
+	shipper_detail sd ON sd.part_original = at.part 
+	AND sd.shipper = @shipper
 Where
-	at.shipper = convert(varchar(15),@shipper) and
-	at.type = 'S' and
-	part != 'Pallet'
-order by		isNull(at.parent_serial,0), 
-						part, 
-						serial
-
---declare	@AuditTrailPartPackGroupRangeID table (
---Part varchar(25),
---PackageType varchar(35),
---PartPackQty int,
---Serial int,
---RangeID int, primary key (Serial))
-
-
---insert	@AuditTrailPartPackGroupRangeID
---(	Part,
---	PackageType,
---	PartPackQty,
---	Serial,
---	RangeID
---)
-
---Select 
---	atl.part,
---	atl.PackageType,
---	SerialQuantity,
---	Serial,
---	Serial-id
-	
---From
---	@AuditTrailSerial atL
---join
---	@AuditTrailPartPackGroup atG on
---	atG.part = atl.part and
---	atg.packageType = atl.PackageType and
---	atg.partPackQty = atl.SerialQuantity
+	at.shipper = convert(varchar(25),@shipper) and
+	at.type = 'S' 
+order by			1, 
+						3
 
 
 
---declare	@AuditTrailPartPackGroupSerialRange table (
---Part varchar(25),
---PackageType varchar(35),
---PartPackQty int,
---SerialRange varchar(50), primary key (SerialRange))
-
-
---insert	@AuditTrailPartPackGroupSerialRange
---(	Part,
---	PackageType,
---	PartPackQty,
---	SerialRange
---)
-
---Select 
---	part,
---	PackageType,
---	PartPackQty,
---	Case when min(serial) = max(serial) 
---		then convert(varchar(15), max(serial)) 
---		else convert(varchar(15), min(serial)) + ':' + convert(varchar(15), max(serial)) end
---From
---	@AuditTrailPartPackGroupRangeID atR
-
---group by
---	part,
---	PackageType,
---	PartPackQty,
---	RangeID
-
-
-/*	Select * From @ShipperDetail
+	/*
+	Select * From @ShipperDetail
+	SELECT * FROM @AuditTrailSerial
 	Select * From @AuditTrailLooseSerial
 	Select * From @AuditTrailPartPackGroupRangeID
 	Select * From @AuditTrailPartPackGroup
@@ -428,7 +381,7 @@ order by		isNull(at.parent_serial,0),
 
 
 --Delcare Variables for ASN Details		
-/*
+
 declare	
 	@LineItemID char(6),
 	@REF02_PalletSerial char(2),
@@ -453,8 +406,9 @@ declare
 	@LIN02_CustomerPO char(48) ,
 	@LIN02_CHIDtype char(2) = 'CH',
 	@LIN02_CountryOfOrigin char(48) = 'HN' ,
+	@SerialQty Int,
 	@SN102_QuantityShipped char(12),
-	@SN103_QuantityShippedUM char(2) = 'PC',
+	@SN103_QuantityShippedUM char(2) = 'EA',
 	@SN104_AccumQuantityShipped char(17),
 	@REF01_PKIDType char(3),
 	@REF02_PackingSlipID char(78),
@@ -476,10 +430,14 @@ declare
 	@PartQty char(12),
 	@PartAccum char(12),
 	@PartUM char(3),
-	@CustomerPO char(35),
+	@CustomerPart varchar(50),
+	@CustomerPO varchar(50),
+	@CustomerPOFF char(22),
+	@CustomerPODate VARCHAR(8),
+	@CustomerPODateFF char(8),
+	@CustomerPOLineNoFF char(20),
 	@CustomerECL char(35),
 	@CustomerECLQual char(3),
-	@PackageType char(17),
 	@DunnagePackType char(17),
 	@DunnageCount char(10),
 	@DunnageIdentifier char(3),
@@ -490,278 +448,175 @@ declare
 	@DockCode char(25),
 	@PCI_S char(3),
 	@PCI_M char(3),
-	@SupplierSerial char(35),
+	@MAN02SupplierSerial char(48),
 	@CPS03 Char(3),
 	@UM char(3)
 	 
---Populate Static Variables
-select	@CountryOfOrigin = 'CA'
-select	@PartUM = 'EA'	
-select	@PCI_S = 'S'
-select	@PCI_M = 'M'
-Select	@DunnageIdentifier = '37'
-Select	@DunnagePackType = 'YazakiDunnage'
-Select	@UM = 'C62'
-Select  @PCIQualifier = '17'
-Select 	@CPS03 = 1
-Select	@SupplierPartQual = 'SA'
-Select	@CustomerECLQual = 'DR'
-Select	@REF02_InvoiceIDID = @shipper
-Select	@REF02_PackingSlipID = @shipper
- */
  
- 
- */		
+	
  Declare
-		Manifest cursor local for
+		PONumber cursor local for
 
 Select
-		Distinct
-		InvoiceNumber = InvoiceNumber,
-		ManifestNo = ManifestReceiverNo
+		SD.CustomerPO,
+		MIN(SD.PODate),
+		MIN(SD.PODate)
 From
 		@ShipperDetail SD
+	GROUP BY
+	SD.CustomerPO
+
 
 open
-	Manifest
+	PONumber
 
 while
 	1 = 1 begin
 	
 	fetch
-		Manifest
+		PONumber
 	into
-		@2REF02InvoiceNumber,
-		@1PRF01ManifestReceiverNo
+		@CustomerPO,
+		@CustomerPODate,
+		@CustomerPODateFF
 
 		if	@@FETCH_STATUS != 0 begin
 		break
 	end
+		Select @CustomerPOFF = @CustomerPO
+		--PRINT @CustomerPOFF
+				Insert	#ASNFlatFile (LineData)
+					Select  '15' 									
+							+ @CustomerPOFF
+							+ @CustomerPODateFF
 
-		Insert	#ASNFlatFile (LineData)
-					Select  '12' 									
-							+ @1PRF01ManifestReceiverNo
-
-	Insert	#ASNFlatFile (LineData)
-					Select  '13' 									
-							+ @2REF02InvoiceNumber
-
-	Insert	#ASNFlatFile (LineData)
-					Select  '14' 									
-							+ @1N104_SupplierCode
-
-
+	
 declare
-	PartsPerManifest cursor local for
+	CustomerpartQtyPerPO cursor local for
 select
 	CustomerPart = customerpart,
-	KanbanNumber = KanbanNumber,
-	QtyShipped = convert(int, QtyShipped)
+	CustomerPOLine = CustomerPOLine,
+	AtQuantity =  SD.SerialQty,
+	QtyShipped = QtyShipped
 From
 	@ShipperDetail SD
-	where
-		SD.ManifestReceiverNo = @1PRF01ManifestReceiverNo
+where
+	SD.CustomerPO = @CustomerPO
+	--AND SD.PODate = @CustomerPODate
+	
 
 open
-	PartsPerManifest
+	CustomerpartQtyPerPO
 
 while
-	1 = 1 begin
+	1 = 1 BEGIN
 	
 	fetch
-		PartsPerManifest
+		CustomerpartQtyPerPO
 	into
-		@1LIN03CustomerPart,
-		@1LIN05Kanban,
-		@1SN102QtyShipped
-			
-	if	@@FETCH_STATUS != 0 begin
+		@CustomerPart,
+		@CustomerPOLineNoFF,
+		@SerialQty,
+		@SN102_QuantityShipped
+
+		if	@@FETCH_STATUS != 0 begin
 		break
-	end
+		END 
 
-
-
-	Insert	#ASNFlatFile (LineData)
-					Select  '15' 									
-							+ @1LIN01LineItem
-							+ @1LIN02CustomerPartBP
-							+ @1LIN03CustomerPart
-							--+ @1LIN04KanbanRC
-
-		Insert	#ASNFlatFile (LineData)
-					Select  '16' 									
-							+ SPACE(30)
-							+ @1SN102QtyShipped
-							+ @1SN103QtyShippedUM
 	
+
+				declare
+				SerialsPerPOCustomerpartQty cursor local for
+				select
+					serial = Serial
+				From
+					@AuditTrailSerial AT
+					where
+						AT.CustomerPO = @CustomerPO
+						AND AT.Customerpart = @Customerpart
+						AND AT.SerialQuantity = @SerialQty
 	
-/*
-		Insert	#ASNFlatFile (LineData)
-		Select '27'
-				+		@LIN02_BPIDtype
-				+		@LIN02_CustomerPart
-				+		@LIN02_VPIDtype
 
-		Insert	#ASNFlatFile (LineData)
-		Select '28'
-				+		@LIN02_VendorPart
-				+		@LIN02_PDIDtype
-
-		Insert	#ASNFlatFile (LineData)
-		Select '29'
-				+		@LIN02_PartDescription
-				+		@LIN02_POIDtype
-
-		Insert	#ASNFlatFile (LineData)
-		Select '30'
-				+		@LIN02_CustomerPO
-
-		Insert	#ASNFlatFile (LineData)
-		Select '34'
-				+		space(48)
-				+		@LIN02_CHIDtype
-
-		Insert	#ASNFlatFile (LineData)
-		Select '35'
-				+		@LIN02_CountryOfOrigin
-
-		Insert	#ASNFlatFile (LineData)
-		Select '36'
-				+		space(48)
-				+		@SN102_QuantityShipped
-				+		@SN103_QuantityShippedUM
-
-		Insert	#ASNFlatFile (LineData)
-		Select '37'
-				+		@SN104_AccumQuantityShipped
-
-		Insert	#ASNFlatFile (LineData)
-		Select '39'
-				+		@REF01_IVIDType
-
-		Insert	#ASNFlatFile (LineData)
-		Select '40'
-				+		@REF02_InvoiceIDID
-
-		Insert	#ASNFlatFile (LineData)
-		Select '39'
-				+		@REF01_PKIDType
-
-		Insert	#ASNFlatFile (LineData)
-		Select '40'
-				+		@REF02_PackingSlipID
-*/
-/*
-		declare PartPack cursor local for
-			select
-				1,
-				count(serial),
-				ObjectPackageType				
-			From
-				@AuditTrailSerial
-			where
-				part = @InternalPart
-				group by
-				ObjectPackageType
-				union
-			 Select
-			  2,
-				count(Distinct ParentSerial),
-				PalletPackageType				
-			From
-				@AuditTrailSerial
-			where
-				part = @InternalPart and
-				ParentSerial > 0
-				group by
-				PalletPackageType
-				order by 1,2
-												
-			open
-				PartPack
-
-			while
-				1 = 1 begin
-							
-				fetch
-					PartPack
-				into
-					@PackTypeType,
-					@1PAC01PackageCount,
-					@1PAC01PackageType
-					
-								
-																								
-				if	@@FETCH_STATUS != 0 begin
+					open
+						SerialsPerPOCustomerpartQty
+					while
+					1 = 1 begin	
+					fetch
+						SerialsPerPOCustomerpartQty
+					into
+						@MAN02SupplierSerial
+			
+					if	@@FETCH_STATUS != 0 begin
 					break
-				end
-									Insert	#ASNFlatFile (LineData)
-										Select  '10' 									
-										+ @1PAC01PackageCount
-										+ @1PAC01PackageType
-							
-					end		
-					close
-						PartPack
-					deallocate
-						PartPack
-						
+					end
+
+					INSERT	#ASNFlatFile (LineData)
+					SELECT  '23' 									
+							+ 'GM'
+							+ @MAN02SupplierSerial
+					END
 					
-
-			Insert	#ASNFlatFile (LineData)
-										Select  '14' 									
-										+ @2LIN030CustomerPart
-										+ @1PIAModelYear
-
-			Insert	#ASNFlatFile (LineData)
-										Select  '16' 									
-										+ @2QTY010QtyTypeShipped
-										+ @2QTY010QtyShipped
-										+	@2QTY010QtyShippedUM
-
-		Insert			#ASNFlatFile (LineData)
-										Select  '16' 									
-										+ @2QTY010AccumTypeShipped
-										+ @2QTY010AccumShipped
-										+	@2QTY010AccumShippedUM
-
-			Insert			#ASNFlatFile (LineData)
-										Select  '17' 									
-										+ space(3)
-										+ @1RFF010CustomerPO
-	*/									
-end
+		
 close
-	PartsPerManifest
+	SerialsPerPOCustomerpartQty
+
+		SELECT @LIN02_CustomerPart = @CustomerPart
+			INSERT	#ASNFlatFile (LineData)
+					Select  '24' 									
+							+ @CustomerPOLineNoFF
+							+ @1LIN02CustomerPartBP
+							+ @LIN02_CustomerPart
+			Insert	#ASNFlatFile (LineData)
+					Select  '26' 									
+							+ SPACE(48)
+							+ @SN102_QuantityShipped
+							+ @SN103_QuantityShippedUM
+		
+ 
+DEALLOCATE
+	SerialsPerPOCustomerpartQty	
+
+END
+CLOSE
+	CustomerpartQtyPerPO
+ 
+DEALLOCATE
+	CustomerpartQtyPerPO
+
+END
+close
+	PONumber
  
 deallocate
-	PartsPerManifest
+	PONumber
 
-end
-close
-	Manifest
- 
-deallocate
-	Manifest
+
+    
+
 
 --Get 810 data
-*/
 
 
-/*
+
+
 
 --Declare Variables for 810 Flat File
 
 DECLARE @1BIG01InvoiceDate CHAR(8),
-				@1BIG02InvoiceNumber CHAR(5),
+				 @1BIG01PODate CHAR(8),
+				@1BIG02InvoiceNumber CHAR(22),
+				@PackingList CHAR(30),
+				@BuyersAgent CHAR(78) = '111267',
+				@AssignedID CHAR(20),
 				@1IT01KanbanCard CHAR(4),
 				@1IT102QtyInvoiced CHAR(12), 
-				@1IT104UnitPrice CHAR(16),
+				@1IT104UnitPrice CHAR(19),
 				@1IT102QtyInvoicedNumeric NUMERIC(20,6), 
 				@1IT104UnitPriceNumeric NUMERIC(20,6),
 				@1IT105BasisOfUnitPrice CHAR(2) = 'QT',
 				@1IT106PartQualifier CHAR(2) = 'PN',
-				@1IT107CustomerPart CHAR(12),
+				@1IT107CustomerPart CHAR(48),
+				@1IT1CustomerPO CHAR(48),
 				@1IT108PackageDrawingQual CHAR(2) = 'PK',
 				@1IT109PackageDrawing CHAR(12) = '1',
 				@1IT110 CHAR(2) = 'ZZ', 
@@ -769,16 +624,21 @@ DECLARE @1BIG01InvoiceDate CHAR(8),
 				@1REF01MKQualifier CHAR(2) = 'MK',
 				@1REF02Manifest CHAR(30),
 				@1DTM02PickUpDate CHAR(8),
-				@1TDS01InvoiceAmount CHAR(12),
-				@PartNumber VARCHAR(25)
+				@1TDS01InvoiceAmount CHAR(17),
+				@PartNumber VARCHAR(25),
+				@ISSUnits CHAR(12),
+				@ISSWeight CHAR(12)
 
 SELECT
 		
-		@1BIG01InvoiceDate= CONVERT(VARCHAR(25), s.date_shipped, 112)+LEFT(CONVERT(VARCHAR(25), s.date_shipped, 108),2) +SUBSTRING(CONVERT(VARCHAR(25), s.date_shipped, 108),4,2),
-		
-		@1BIG02InvoiceNumber = '01560',
-
-		@1IT01KanbanCard = COALESCE( 'M390', es.material_issuer, 'M390')
+		@1BIG01InvoiceDate= CONVERT(VARCHAR(25), s.date_shipped, 112)/*+LEFT(CONVERT(VARCHAR(25), s.date_shipped, 108),2) +SUBSTRING(CONVERT(VARCHAR(25), s.date_shipped, 108),4,2)*/,		
+		@1BIG02InvoiceNumber = s.id,
+		@PackingList = s.id,
+		@1BIG01PODate =  
+			( SELECT MIN(CONVERT(VARCHAR(8), oh.order_date, 112))
+				FROM order_header oh 
+				JOIN		shipper_detail sd ON oh.order_no = sd.order_no 
+				AND		sd.shipper = @shipper )
 
 		
 
@@ -797,53 +657,85 @@ SELECT
 
 
 DECLARE	@InvoiceDetail TABLE (
-	ManifestNumber VARCHAR(25),
 	PartNumber VARCHAR(25),
 	CustomerPart VARCHAR(50),
+	CustomerPO VARCHAR(50),
+	CustomerPOLine VARCHAR(50),
 	DockCode VARCHAR(30),
 	QtyShipped INT,
-	Price NUMERIC(20,6))
+	Price NUMERIC(20,6),
+	LineWeight INTEGER)
 	
 INSERT	@InvoiceDetail 
-(	ManifestNumber,
-	PartNumber,
+(	PartNumber,
 	CustomerPart,
-	DockCode,
+	CustomerPO,
+	CustomerPOLine,
 	QtyShipped,
-	Price
+	Price,
+	Lineweight
 	)
 	
 SELECT
 	
-	md.ManifestNumber,
 	sd.part_original,
-	md.customerpart,
-	mp.ShipToCode,
-	md.Quantity,
-	sd.alternate_price
+	sd.customer_part,
+	sd.customer_po,
+	lss.cpl,
+	sd.qty_packed,
+	sd.alternate_price,
+	sd.qty_packed*piv.unit_weight
 FROM
 	shipper_detail sd
 JOIN
 	shipper s ON s.id = @shipper
 JOIN
-		EDIToyota.Pickups mp ON mp.ShipperID = @shipper
-JOIN
-		EDIToyota.ManifestDetails md ON md.PickupID= mp.RowID
+	dbo.part_inventory piv 
+	ON piv.part = sd.part_original
+OUTER APPLY
+( 
+		SELECT 
+			TOP 1 lss.CustomerPOLine cpl
+			FROM 
+				edi4010.LastShipSchedule lss
+			WHERE lss.fxDestination = s.destination
+			AND		lss.CustomerPart = sd.customer_part	) AS lss
 WHERE
-	sd.shipper = @shipper AND
-	sd.order_no = md.OrderNo
+	sd.shipper = @shipper 
 	
-DECLARE
+
+
+	INSERT	#ASNFlatFile (LineData)
+	SELECT	('//STX12//810'
+						+  @TradingPartner 
+						+  @1BSN02_ShipperID
+						+  'P' )
+
+INSERT	#ASNFlatFile (LineData)
+	SELECT	(	'01'
+				+		@1BIG01InvoiceDate
+				+		@1BIG02InvoiceNumber
+				+		@1BIG01PODate
+				+		'USD'
+				+		@PackingList
+						)
+
+
+	INSERT	#ASNFlatFile (LineData)
+					SELECT  '02' 									
+							+ @BuyersAgent
+
+		DECLARE
 	InvoiceLine CURSOR LOCAL FOR
 SELECT
-	ManifestNumber,
 	PartNumber,
-	Customerpart
-	, DockCode
+	Customerpart,
+	CustomerPO
+	,InvoiceDetail.CustomerPOLine
 	,	ROUND(QtyShipped,0)
-	,	ROUND(Price,4)
+	,	ROUND(Price,5)
 	,	ROUND(QtyShipped,0)
-	,	ROUND(Price,4)
+	,	ROUND(Price,5)
 FROM
 	@InvoiceDetail InvoiceDetail
 
@@ -857,70 +749,39 @@ WHILE
 	FETCH
 		InvoiceLine
 	INTO
-		@1REF02Manifest,
 		@PartNumber,
 		@1IT107CustomerPart
-		,@1IT111
+	,	@1IT1CustomerPO
+	,	@AssignedID
 	,	@1IT102QtyInvoiced
-	, @1IT104UnitPrice
+	,	@1IT104UnitPrice
 	,	@1IT102QtyInvoicedNumeric
-	, @1IT104UnitPriceNumeric
+	,	@1IT104UnitPriceNumeric
 			
 			
 	IF	@@FETCH_STATUS != 0 BEGIN
 		BREAK
 	END
 
-	INSERT	#ASNFlatFile (LineData)
-	SELECT	('//STX12//810'
-						+  @TradingPartner 
-						+  @ShipperIDHeader
-						+  'P' )
-
 INSERT	#ASNFlatFile (LineData)
-	SELECT	(	'01'
-				+		@1BIG01InvoiceDate
-				+		@1BIG02InvoiceNumber
-						)
-
-
-	INSERT	#ASNFlatFile (LineData)
-					SELECT  '02' 									
-							+ @1IT01KanbanCard
+					SELECT  '06' 									
+							+ @AssignedID
 							+ @1IT102QtyInvoiced
+							+ 'EA'
 							+ @1IT104UnitPrice
-							+ @1IT105BasisOfUnitPrice
-							+ @1IT106PartQualifier
-							+ @1IT107CustomerPart
-							+ @1IT108PackageDrawingQual
-							+ @1IT109PackageDrawing
-							+ @1IT110
-							+ @1IT111
-
-	INSERT	#ASNFlatFile (LineData)
-					SELECT  '03' 									
-							+ @1REF01MKQualifier
-							+ @1REF02Manifest
-
-
-	INSERT	#ASNFlatFile (LineData)
-					SELECT  '04' 									
-							+ @1BIG01InvoiceDate
-
-
-
-SELECT @1TDS01InvoiceAmount = SUBSTRING(CONVERT(VARCHAR(MAX),ROUND(SUM(@1IT102QtyInvoicedNumeric*@1IT104UnitPriceNumeric) ,2)),1,PATINDEX('%.%', CONVERT(VARCHAR(MAX),ROUND(SUM(@1IT102QtyInvoicedNumeric*@1IT104UnitPriceNumeric) ,2)))-1 ) +
-		SUBSTRING(CONVERT(VARCHAR(MAX),ROUND(SUM(@1IT102QtyInvoicedNumeric*@1IT104UnitPriceNumeric) ,2)),PATINDEX('%.%', CONVERT(VARCHAR(MAX),ROUND(SUM(@1IT102QtyInvoicedNumeric*@1IT104UnitPriceNumeric) ,2)))+1, 2)
-
+							+ SPACE(2)
+							+ 'IN'
 
 INSERT	#ASNFlatFile (LineData)
-					SELECT  '05' 									
-							+ @1TDS01InvoiceAmount
+					SELECT  '07' 									
+							+  @1IT107CustomerPart
+							+ 'PO'
 
+INSERT	#ASNFlatFile (LineData)
+					SELECT  '08' 									
+							+  @1IT1CustomerPO
 
-	
-	
-								
+			
 END
 CLOSE
 	InvoiceLine	
@@ -928,12 +789,37 @@ CLOSE
 DEALLOCATE
 	InvoiceLine	
 
+	SELECT @1TDS01InvoiceAmount =  REPLACE(CAST(ROUND(SUM(qtyShipped*price), 2) AS MONEY) , '.', '') 
+	--SELECT @1TDS01InvoiceAmount =  CAST(ROUND(SUM(qtyShipped*price), 2) AS MONEY) 
+FROM
+	@InvoiceDetail
+	
+	SELECT @ISSUnits =  CAST(ROUND(SUM(QtyShipped), 0) AS INTEGER) 
+	FROM 
+	@InvoiceDetail
 
-	*/
+	SELECT @ISSWeight =  CAST(ROUND(SUM(LineWeight), 0) AS INTEGER) 
+	FROM 
+	@InvoiceDetail
+
+	INSERT	#ASNFlatFile (LineData)
+					SELECT  '11' 									
+							+  @1TDS01InvoiceAmount
+
+
+	INSERT	#ASNFlatFile (LineData)
+					SELECT  '12' 									
+							+  @ISSUnits
+							+ 'EA'
+							+ @ISSWeight
+							+ 'LB'
+
+
+	
 
 SELECT 
 	--LEFT((LineData +convert(char(1), (lineID % 2 ))),80)
-	 LineData + CASE WHEN LEFT(linedata,2) IN ('04', '10') THEN '' ELSE RIGHT(CONVERT(CHAR(2), (lineID )),2) END
+	 LineData + CASE WHEN LEFT(linedata,2) IN ('04', '10', '02') THEN '' ELSE RIGHT(CONVERT(CHAR(2), (lineID )),2) END
 FROM 
 	#ASNFlatFile
 ORDER BY 
@@ -944,6 +830,14 @@ ORDER BY
 SET ANSI_PADDING OFF	
 END
          
+
+
+
+
+
+
+
+
 
 
 

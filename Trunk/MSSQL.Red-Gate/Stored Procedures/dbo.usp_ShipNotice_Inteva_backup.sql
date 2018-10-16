@@ -4,11 +4,12 @@ SET ANSI_NULLS ON
 GO
 
 
-CREATE PROCEDURE [dbo].[usp_ShipNotice_Inteva]  (@shipper INT)
+
+CREATE PROCEDURE [dbo].[usp_ShipNotice_Inteva_backup]  (@shipper INT)
 AS
 BEGIN
 
---dbo.usp_ShipNotice_Inteva 346747
+--dbo.usp_ShipNotice_Inteva_backup 346747
 SET ANSI_PADDING ON
 --ASN Header
 
@@ -239,9 +240,7 @@ declare	@ShipperDetail table (
 	CustomerECL varchar(35),
 	DockCode varchar(35),
 	StorageLocation varchar(50),
-	SummedATQty int,
-	ATQty INT,
-	SerialCount INT,
+	Qty int,
 	AccumShipped int primary key (ID))
 	
 insert	@ShipperDetail 
@@ -251,9 +250,7 @@ insert	@ShipperDetail
 	CustomerECL,
 	DockCode,
 	StorageLocation,
-	SummedATQty,
-	ATQty,
-	SerialCount,
+	Qty,
 	AccumShipped
 	)
 	
@@ -264,9 +261,7 @@ select
 	coalesce(oh.engineering_level,oh.customer_part,''),
 	coalesce(s.shipping_dock,''),
 	coalesce(oh.line11,'0001'),
-	MAX(ATQty.SummedAtQty),
-	MAX(ATQty.AtQty),
-	COUNT(1),
+	SUM(qty_packed),
 	MAX(sd.accum_shipped)
 from
 	shipper_detail sd
@@ -274,27 +269,15 @@ join
 	order_header oh on oh.order_no = sd.order_no
 join
 	shipper s on s.id = @shipper
-OUTER APPLY
-	 (
-	SELECT SUM(quantity) SummedAtQty, part, at2.quantity atQty
-	FROM 
-		dbo.audit_trail at2
-	WHERE at2.Shipper = CONVERT(VARCHAR(20), @shipper ) AND
-					at2.type = 'S' AND
-                    at2.part =  sd.part_original
-		GROUP BY at2.part, at2.quantity
-	) AS ATQty
-	
-	WHERE
+Where
 	sd.shipper = @shipper
 GROUP BY
-	part_original,
+part_original,
 	sd.customer_part,
 	sd.customer_po,
 	coalesce(oh.engineering_level,oh.customer_part,''),
 	coalesce(s.shipping_dock,''),
-	coalesce(oh.line11,'0001'),
-	ATQty.AtQty
+	coalesce(oh.line11,'0001')
 	
 	
 declare	@AuditTrailLooseSerial table (
@@ -467,9 +450,7 @@ DECLARE
 	@Kanban CHAR(35) = '0000000',
 	@KanbanQual CHAR(3)= 'AL',
 	@ModelYear CHAR(35),
-	@SerialQty CHAR(35) ,
-	@SerialQtyint int ,
-	@SerialCount CHAR(10)
+	@SerialQty CHAR(35) 
 
 	 
 --Populate Static Variables
@@ -497,11 +478,8 @@ SELECT
 	CustomerECL = customerECL,
 	DockCode = DockCode,
 	StorageLocation = StorageLocation,
-	SerialQty = CONVERT(INT, SD.ATQty),
-	SummedSerialQty = SD.SummedATQty,
-	SerialCount = SD.SerialCount,
-	AccumShipped = CONVERT(INT, AccumShipped),
-	'KLT42'
+	QtyShipped = CONVERT(INT, Qty),
+	AccumShipped = CONVERT(INT, AccumShipped)
 FROM
 	@ShipperDetail SD
 JOIN
@@ -524,15 +502,43 @@ WHILE
 		@CustomerECL,
 		@DockCode,
 		@PCIStorage,
-		@SerialQtyint,
 		@PartQty,
-		@SerialCount,
-		@PartAccum,
-		@PackageType
+		@PartAccum
 			
 	IF	@@FETCH_STATUS != 0 BEGIN
 		BREAK
-	END		
+	END
+
+		
+
+
+		DECLARE PartPack CURSOR LOCAL FOR
+			SELECT
+				*
+			FROM
+				@AuditTrailPartPackGroup
+			WHERE
+				part = @Part
+												
+			OPEN
+				PartPack
+
+			WHILE
+				1 = 1 BEGIN
+							
+				FETCH
+					PartPack
+				INTO
+					@Part,
+					@PackageType,
+					@PartPackQty,
+					@PartPackCount
+								
+																								
+				IF	@@FETCH_STATUS != 0 BEGIN
+					BREAK
+				END
+					SELECT @DunnageCount = FLOOR((CONVERT(INT,@PartPackQty) -.1)/6)+1
 																					
 					INSERT	#ASNFlatFile (LineData)
 					SELECT  '09' 
@@ -541,7 +547,7 @@ WHILE
 							--+ @DunnagePackType
 							+ @CPS03	
 							+ SPACE(22)									
-							+ @SerialCount
+							+ @PartPackCount
 							+ @PackageType
 				
 																		
@@ -555,7 +561,7 @@ WHILE
 									@AuditTrailLooseSerial
 								WHERE
 									part = @part
-									AND SerialQuantity =  @SerialQtyint
+									AND SerialQuantity = @PartPackQty
 																				
 
 							OPEN
@@ -586,7 +592,12 @@ WHILE
 																		
 														
 																					
-					
+					END
+							
+					CLOSE
+						PartPack
+					DEALLOCATE
+						PartPack
 	
 
 		SELECT @SupplierPart = @Part
@@ -637,6 +648,7 @@ ORDER BY
 SET ANSI_PADDING OFF
 
 END
+
 
 
 
