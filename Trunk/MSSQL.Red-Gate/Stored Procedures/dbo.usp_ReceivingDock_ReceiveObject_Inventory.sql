@@ -2,7 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 CREATE procedure [dbo].[usp_ReceivingDock_ReceiveObject_Inventory]
 	@User varchar(5)
 ,	@PONumber int
@@ -58,9 +57,15 @@ set	@TranDT = coalesce(@TranDT, GetDate())
 ---	</ArgumentValidation>
 
 --- <Body>
+/*	Empty location is null. */
+set @Location = nullif(@Location, '')
+
 declare
-	@atType char(1) = case when @TransferReceipt = 1 then 'T' else 'R' end
-,	@atRemarks varchar(10) = case when @TransferReceipt = 1 then 'Transfer' else 'Receipt' end
+	@atType char(1)
+,	@atRemarks varchar(10)
+
+set @atType = case when @TransferReceipt = 1 then 'T' else 'R' end
+set @atRemarks = case when @TransferReceipt = 1 then 'Transfer' else 'Receipt' end
 
 /*	Handle intercompany and transfer receipts by setting the appropriate object properties. */
 if	@IntercompanyReceipt = 1
@@ -446,7 +451,7 @@ if	@ProcReturn != 0 begin
 	rollback tran @ProcName
 	return	@Result
 end
-if	@ProcResult != 0 begin
+if	@ProcResult not in (0, 100) begin
 	set	@Result = 900502
 	RAISERROR ('Error encountered in %s.  ProcResult: %d while calling %s', 16, 1, @ProcName, @ProcResult, @CallProcName)
 	rollback tran @ProcName
@@ -520,5 +525,4 @@ go
 Results {
 }
 */
-
 GO
