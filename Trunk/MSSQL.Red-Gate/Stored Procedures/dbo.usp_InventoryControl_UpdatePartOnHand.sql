@@ -37,7 +37,24 @@ set	@TranDT = coalesce(@TranDT, GetDate())
 --- </Tran>
 
 ---	<ArgumentValidation>
+if	@PartCode is not null
+	and not exists
+		(	select
+				*
+			from
+				dbo.part p
+			where
+				p.part = @PartCode
+		) begin
 
+	---	<CloseTran AutoCommit=Yes>
+	if	@TranCount = 0 begin
+		commit tran @ProcName
+	end
+	---	</CloseTran AutoCommit=Yes>
+	set	@Result = 100
+	return
+end
 ---	</ArgumentValidation>
 
 --- <Body>
@@ -115,18 +132,17 @@ if	@RowCount != @expectedRowCount
 		rollback tran @ProcName
 		return
 	end
-	--if	@RowCount != 1 begin
-	--	set	@Result = 999999
-	--	RAISERROR ('Error inserting into table %s in procedure %s.  Rows inserted: %d.  Expected rows: 1.', 16, 1, @TableName, @ProcName, @RowCount)
-	--	rollback tran @ProcName
-	--	return
-	--end
 	--- </Insert>
 	
 end
 --- </Update>
-
 --- </Body>
+
+---	<CloseTran AutoCommit=Yes>
+if	@TranCount = 0 begin
+	commit tran @ProcName
+end
+---	</CloseTran AutoCommit=Yes>
 
 ---	<Return>
 set	@Result = 0
