@@ -2,9 +2,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
-
-create procedure [dbo].[usp_Purchasing_AddReceipt]
+CREATE procedure [dbo].[usp_Purchasing_AddReceipt]
 	@User varchar(5)
 ,	@PONumber int
 ,	@PartCode varchar(25) = null
@@ -212,10 +210,10 @@ end
 
 /*	Write receipt history. */
 --- <Insert>
-set	@TableName = 'po_detail_history'
+set	@TableName = 'dbo.po_detail_history'
 
 insert
-	po_detail_history
+	dbo.po_detail_history
 (	po_number, vendor_code, part_number, description, unit_of_measure
 , 	date_due, requisition_number, status, type, last_recvd_date
 ,	last_recvd_amount, cross_reference_part, account_code, notes, quantity
@@ -224,7 +222,7 @@ insert
 ,	release_no, ship_to_destination, terms, week_no, plant
 ,	invoice_number, standard_qty, sales_order, dropship_oe_row_id, ship_type
 ,	dropship_shipper, price_unit, ship_via, release_type, alternate_price)
-SELECT
+select
 	pd.po_number, pd.vendor_code, pd.part_number, pd.description, pd.unit_of_measure
 ,	pd.date_due, pd.requisition_number, pd.status, pd.type, pd.last_recvd_date
 ,	pd.last_recvd_amount, pd.cross_reference_part, pd.account_code, pd.notes, pd.quantity
@@ -233,102 +231,102 @@ SELECT
 ,	pd.release_no, pd.ship_to_destination, pd.terms, pd.week_no, pd.plant
 ,	pd.invoice_number, pd.standard_qty, pd.sales_order, pd.dropship_oe_row_id, pd.ship_type
 ,	pd.dropship_shipper, pd.price_unit, pd.ship_via, pd.release_type, pd.alternate_price
-FROM
+from
 	dbo.po_detail pd
-	JOIN @POReleases pr
-		ON pr.PONumber = pd.po_number
-		AND pr.PartCode = pd.part_number
-		AND pr.DueDT = pd.date_due
-		AND pr.RowID = pd.row_id
-		AND pr.QtyReceived + pr.QtyOverReceived > 0
+	join @POReleases pr
+		on pr.PONumber = pd.po_number
+		and pr.PartCode = pd.part_number
+		and pr.DueDT = pd.date_due
+		and pr.RowID = pd.row_id
+		and pr.QtyReceived + pr.QtyOverReceived > 0
 
-SELECT
+select
 	@Error = @@Error
 ,	@RowCount = @@Rowcount
 
-IF	@Error != 0 BEGIN
-	SET	@Result = 999999
+if	@Error != 0 begin
+	set	@Result = 999999
 	RAISERROR ('Error inserting into table %s in procedure %s.  Error: %d', 16, 1, @TableName, @ProcName, @Error)
-	ROLLBACK TRAN @ProcName
-	RETURN @Result
-END
+	rollback tran @ProcName
+	return @Result
+end
 --- </Insert>
 
 /*	If blanket, delete completed releases. */
-IF	EXISTS
-		(	SELECT
+if	exists
+		(	select
 				*
-			FROM
+			from
 				dbo.po_header ph
-			WHERE
+			where
 				ph.po_number = @PONumber
-				AND ph.type = 'B'
-		) BEGIN
+				and ph.type = 'B'
+		) begin
 
 	--- <Delete rows="*">
-	SET	@TableName = 'dbo.po_detail'
+	set	@TableName = 'dbo.po_detail'
 	
-	DELETE
+	delete
 		pd
-	FROM
+	from
 		dbo.po_detail pd
-		JOIN @POReleases pr
-			ON pr.PONumber = pd.po_number
-			AND pr.PartCode = pd.part_number
-			AND pr.DueDT = pd.date_due
-			AND pr.RowID = pd.row_id
-	WHERE
+		join @POReleases pr
+			on pr.PONumber = pd.po_number
+			and pr.PartCode = pd.part_number
+			and pr.DueDT = pd.date_due
+			and pr.RowID = pd.row_id
+	where
 		pd.balance <= 0
 		
-	SELECT
+	select
 		@Error = @@Error,
 		@RowCount = @@Rowcount
 	
-	IF	@Error != 0 BEGIN
-		SET	@Result = 999999
+	if	@Error != 0 begin
+		set	@Result = 999999
 		RAISERROR ('Error deleting from table %s in procedure %s.  Error: %d', 16, 1, @TableName, @ProcName, @Error)
-		ROLLBACK TRAN @ProcName
-		RETURN
-	END
+		rollback tran @ProcName
+		return
+	end
 	--- </Delete>
-END
+end
 
 /*	Update part-vendor relationship. */
 --- <Update rows="1">
-SET	@TableName = 'dbo.part_vendor'
+set	@TableName = 'dbo.part_vendor'
 
-UPDATE
+update
 	pv
-SET
-	accum_received = COALESCE(accum_received, 0) + @QtyReceived
-FROM
+set
+	accum_received = coalesce(accum_received, 0) + @QtyReceived
+from
 	dbo.part_vendor pv
-WHERE
+where
 	pv.part = @PartCode
-	AND	pv.vendor =
-		(	SELECT
-				MAX(ph.vendor_code)
-			FROM
+	and	pv.vendor =
+		(	select
+				max(ph.vendor_code)
+			from
 				dbo.po_header ph
-			WHERE
+			where
 				ph.po_number = @PONumber
 		)
 
-SELECT
+select
 	@Error = @@Error
 ,	@RowCount = @@Rowcount
 
-IF	@Error != 0 BEGIN
-	SET	@Result = 999999
+if	@Error != 0 begin
+	set	@Result = 999999
 	RAISERROR ('Error updating table %s in procedure %s.  Error: %d', 16, 1, @TableName, @ProcName, @Error)
-	ROLLBACK TRAN @ProcName
-	RETURN
-END
-IF	@RowCount != 1 BEGIN
+	rollback tran @ProcName
+	return
+end
+if	@RowCount != 1 begin
 	--- <Insert rows="1">
-	SET	@TableName = 'dbo.part_vendor'
+	set	@TableName = 'dbo.part_vendor'
 	
-	INSERT
+	insert
 		dbo.part_vendor
 	(	part
 	,	vendor
@@ -337,50 +335,50 @@ IF	@RowCount != 1 BEGIN
 	,	part_name
 	,	note
 	)
-	SELECT
+	select
 		part = @PartCode
 	,	vendor = ph.vendor_code
-	,	vendor_part = COALESCE(ph.blanket_vendor_part, '')
+	,	vendor_part = coalesce(ph.blanket_vendor_part, '')
 	,	accum_received = @QtyReceived
-	,	part_name = COALESCE(p.name, 'Non-recurring')
+	,	part_name = coalesce(p.name, 'Non-recurring')
 	,	note = 'Auto-created during receipt'
-	FROM
+	from
 		dbo.po_header ph
-			LEFT JOIN dbo.part p
-				ON p.part = @PartCode
-	WHERE
+			left join dbo.part p
+				on p.part = @PartCode
+	where
 		ph.po_number = @PONumber
 	
-	SELECT
+	select
 		@Error = @@Error,
 		@RowCount = @@Rowcount
 	
-	IF	@Error != 0 BEGIN
-		SET	@Result = 999999
+	if	@Error != 0 begin
+		set	@Result = 999999
 		RAISERROR ('Error inserting into table %s in procedure %s.  Error: %d', 16, 1, @TableName, @ProcName, @Error)
-		ROLLBACK TRAN @ProcName
-		RETURN
-	END
-	IF	@RowCount != 1 BEGIN
-		SET	@Result = 999999
+		rollback tran @ProcName
+		return
+	end
+	if	@RowCount != 1 begin
+		set	@Result = 999999
 		RAISERROR ('Error inserting into table %s in procedure %s.  Rows inserted: %d.  Expected rows: 1.', 16, 1, @TableName, @ProcName, @RowCount)
-		ROLLBACK TRAN @ProcName
-		RETURN
-	END
+		rollback tran @ProcName
+		return
+	end
 	--- </Insert>
-END
+end
 --- </Update>
 --- </Body>
 
 ---	<CloseTran AutoCommit=Yes>
-IF	@TranCount = 0 BEGIN
-	COMMIT TRAN @ProcName
-END
+if	@TranCount = 0 begin
+	commit tran @ProcName
+end
 ---	</CloseTran AutoCommit=Yes>
 
 ---	<Return>
-SET	@Result = 0
-RETURN
+set	@Result = 0
+return
 	@Result
 --- </Return>
 
@@ -445,5 +443,4 @@ go
 Results {
 }
 */
-
 GO
