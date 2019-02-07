@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<SqlWorkbenchSqlProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Name="EDI.Summit">
+  <Items>
+    <LogicalFolder Name="Connections" Type="2" Sorted="true">
+      <Items>
+        <ConnectionNode Name="Armada:estimpson">
+          <Created>2017-11-14T15:57:50.2884246-05:00</Created>
+          <Type>SQL</Type>
+          <Server>Armada</Server>
+          <UserName>estimpson</UserName>
+          <Authentication>SQL</Authentication>
+          <InitialDB>FxArmada</InitialDB>
+          <LoginTimeout>15</LoginTimeout>
+          <ExecutionTimeout>0</ExecutionTimeout>
+          <ConnectionProtocol>NotSpecified</ConnectionProtocol>
+          <ApplicationName>Microsoft SQL Server Management Studio - Query</ApplicationName>
+        </ConnectionNode>
+      </Items>
+    </LogicalFolder>
+    <LogicalFolder Name="Queries" Type="0" Sorted="true">
+      <Items>
+        <FileNode Name="Procedure.FxArmada.EDISUMMIT.usp_Process.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:Armada:False:estimpson</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>Armada</AssociatedConnSrvName>
+          <AssociatedConnUserName>estimpson</AssociatedConnUserName>
+          <FullPath>Procedure.FxArmada.EDISUMMIT.usp_Process.sql</FullPath>
+        </FileNode>
+        <FileNode Name="Script.Test EDISUMMIt.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:Armada:False:estimpson</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>Armada</AssociatedConnSrvName>
+          <AssociatedConnUserName>estimpson</AssociatedConnUserName>
+          <FullPath>Script.Test EDISUMMIt.sql</FullPath>
+        </FileNode>
+        <FileNode Name="View.FxArmada.EDISUMMIT.BlanketOrders.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:Armada:False:estimpson</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>Armada</AssociatedConnSrvName>
+          <AssociatedConnUserName>estimpson</AssociatedConnUserName>
+          <FullPath>View.FxArmada.EDISUMMIT.BlanketOrders.sql</FullPath>
+        </FileNode>
+      </Items>
+    </LogicalFolder>
+    <LogicalFolder Name="Miscellaneous" Type="3" Sorted="true">
+      <Items />
+    </LogicalFolder>
+  </Items>
+</SqlWorkbenchSqlProject>

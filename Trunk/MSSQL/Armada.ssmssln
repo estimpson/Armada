@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# SQL Server Management Studio Solution File, Format Version 11.00
+Project("{4F2E2C19-372F-40D8-9FA7-9D2138C6997A}") = "EDI.Summit", "EDI.Summit\EDI.Summit.ssmssqlproj", "{4A1C39F1-3613-4762-AB8E-3EF65348D1A1}"
+EndProject
+Project("{4F2E2C19-372F-40D8-9FA7-9D2138C6997A}") = "Custom.OrderHeaderAdditional", "Custom.OrderHeaderAdditional\Custom.OrderHeaderAdditional.ssmssqlproj", "{353D2783-7078-4A5B-B1D5-4A5C3BA7139C}"
+EndProject
+Project("{4F2E2C19-372F-40D8-9FA7-9D2138C6997A}") = "ReceivingDock", "ReceivingDock\ReceivingDock.ssmssqlproj", "{5893E204-76B1-4C63-9620-6709B0D654FB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Default|Default = Default|Default
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4A1C39F1-3613-4762-AB8E-3EF65348D1A1}.Default|Default.ActiveCfg = Default
+		{353D2783-7078-4A5B-B1D5-4A5C3BA7139C}.Default|Default.ActiveCfg = Default
+		{DD3733FC-95EC-4DEC-86CE-B1B825DFAE23}.Default|Default.ActiveCfg = Default
+		{5893E204-76B1-4C63-9620-6709B0D654FB}.Default|Default.ActiveCfg = Default
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
