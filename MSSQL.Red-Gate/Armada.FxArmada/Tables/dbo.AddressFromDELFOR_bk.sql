@@ -1,0 +1,30 @@
+CREATE TABLE [dbo].[AddressFromDELFOR_bk]
+(
+[RawDocumentGUID] [uniqueidentifier] NOT NULL,
+[ReleaseNo] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ConsigneeCode] [varchar] (35) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ShipFromCode] [varchar] (35) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SupplierCode] [varchar] (35) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SupplierAdd1] [varchar] (35) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SupplierAdd2] [varchar] (35) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SupplierAdd3] [varchar] (35) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SupplierAdd4] [varchar] (35) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SupplierName] [varchar] (35) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SupplierStreet] [varchar] (35) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SupplierCity] [varchar] (35) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SupplierCountrySUB] [varchar] (35) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SupplierPostalCode] [varchar] (35) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SupplierCountry] [varchar] (35) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ShipToCode] [varchar] (35) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ShipToAdd1] [varchar] (35) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ShipToAdd2] [varchar] (35) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ShipToAdd3] [varchar] (35) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ShipToAdd4] [varchar] (35) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ShipToName] [varchar] (35) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ShipToStreet] [varchar] (35) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ShipToCity] [varchar] (35) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ShipToCountrySUB] [varchar] (35) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ShipToPostalCode] [varchar] (35) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ShipToCountry] [varchar] (35) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+) ON [PRIMARY]
+GO
