@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <AutoRefresh>0</AutoRefresh>
+  <DataSources>
+    <DataSource Name="SagePayroll_ARMDataSet">
+      <ConnectionProperties>
+        <DataProvider>SQL</DataProvider>
+        <ConnectString>Data Source=192.0.0.9\FX;Initial Catalog=SagePayroll_ARM</ConnectString>
+      </ConnectionProperties>
+      <rd:SecurityType>DataBase</rd:SecurityType>
+      <rd:DataSourceID>4f0a57bf-131a-4099-a721-3e4aba4e925a</rd:DataSourceID>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="taxesDataSet">
+      <Query>
+        <DataSourceName>SagePayroll_ARMDataSet</DataSourceName>
+        <QueryParameters>
+          <QueryParameter Name="@CheckHeader">
+            <Value>=Parameters!CheckHeader.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@BeginCheckDate">
+            <Value>=Parameters!BeginCheckDate.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@EndCheckDate">
+            <Value>=Parameters!EndCheckDate.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@BeginEmployee">
+            <Value>=Parameters!BeginEmployee.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@EndEmployee">
+            <Value>=Parameters!EndEmployee.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@Class1">
+            <Value>=Parameters!Class1.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@IncludeZerosFlag">
+            <Value>=Parameters!IncludeZerosFlag.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@TrialFlag">
+            <Value>=Parameters!TrialFlag.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+        <CommandType>StoredProcedure</CommandType>
+        <CommandText>ftsp_CheckTaxesData</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="EARNDED">
+          <DataField>EARNDED</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="SHORTDESC">
+          <DataField>SHORTDESC</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="EEXTEND">
+          <DataField>EEXTEND</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+      </Fields>
+      <rd:DataSetInfo>
+        <rd:DataSetName>SagePayroll_ARMDataSet</rd:DataSetName>
+        <rd:SchemaPath>C:\GitHub\Armada\Reporting\PayrollRegister\SagePayroll_ARMDataSet.xsd</rd:SchemaPath>
+        <rd:TableName>ftsp_CheckTaxesData</rd:TableName>
+        <rd:TableAdapterFillMethod>Fill</rd:TableAdapterFillMethod>
+        <rd:TableAdapterGetDataMethod>GetData</rd:TableAdapterGetDataMethod>
+        <rd:TableAdapterName>ftsp_CheckTaxesDataTableAdapter</rd:TableAdapterName>
+      </rd:DataSetInfo>
+    </DataSet>
+  </DataSets>
+  <ReportSections>
+    <ReportSection>
+      <Body>
+        <ReportItems>
+          <Tablix Name="Tablix1">
+            <TablixBody>
+              <TablixColumns>
+                <TablixColumn>
+                  <Width>1.2in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>0.75in</Width>
+                </TablixColumn>
+              </TablixColumns>
+              <TablixRows>
+                <TablixRow>
+                  <Height>0.175in</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="SHORTDESC">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!SHORTDESC.Value</Value>
+                                  <Style>
+                                    <FontSize>7.5pt</FontSize>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>SHORTDESC</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="EEXTEND">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!EEXTEND.Value</Value>
+                                  <Style>
+                                    <FontSize>7.5pt</FontSize>
+                                    <Format>0.00;(0.00)</Format>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>EEXTEND</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+              </TablixRows>
+            </TablixBody>
+            <TablixColumnHierarchy>
+              <TablixMembers>
+                <TablixMember />
+                <TablixMember />
+              </TablixMembers>
+            </TablixColumnHierarchy>
+            <TablixRowHierarchy>
+              <TablixMembers>
+                <TablixMember>
+                  <Group Name="Details" />
+                </TablixMember>
+              </TablixMembers>
+            </TablixRowHierarchy>
+            <DataSetName>taxesDataSet</DataSetName>
+            <Height>0.175in</Height>
+            <Width>1.95in</Width>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Tablix>
+        </ReportItems>
+        <Height>0.175in</Height>
+        <Style />
+      </Body>
+      <Width>1.95in</Width>
+      <Page>
+        <LeftMargin>1in</LeftMargin>
+        <RightMargin>1in</RightMargin>
+        <TopMargin>1in</TopMargin>
+        <BottomMargin>1in</BottomMargin>
+        <Style />
+      </Page>
+    </ReportSection>
+  </ReportSections>
+  <ReportParameters>
+    <ReportParameter Name="CheckHeader">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>Check Header</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="BeginCheckDate">
+      <DataType>DateTime</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>Begin Check Date</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="EndCheckDate">
+      <DataType>DateTime</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>End Check Date</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="BeginEmployee">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>Begin Employee</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="EndEmployee">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>End Employee</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Class1">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>Class1</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="IncludeZerosFlag">
+      <DataType>Integer</DataType>
+      <Nullable>true</Nullable>
+      <DefaultValue>
+        <Values>
+          <Value>0</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Include Zeros Flag</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="TrialFlag">
+      <DataType>Integer</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>Trial Flag</Prompt>
+    </ReportParameter>
+  </ReportParameters>
+  <ReportParametersLayout>
+    <GridLayoutDefinition>
+      <NumberOfColumns>2</NumberOfColumns>
+      <NumberOfRows>4</NumberOfRows>
+      <CellDefinitions>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>CheckHeader</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>1</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>BeginCheckDate</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>1</RowIndex>
+          <ParameterName>EndCheckDate</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>1</ColumnIndex>
+          <RowIndex>1</RowIndex>
+          <ParameterName>BeginEmployee</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>2</RowIndex>
+          <ParameterName>EndEmployee</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>1</ColumnIndex>
+          <RowIndex>2</RowIndex>
+          <ParameterName>Class1</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>3</RowIndex>
+          <ParameterName>IncludeZerosFlag</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>1</ColumnIndex>
+          <RowIndex>3</RowIndex>
+          <ParameterName>TrialFlag</ParameterName>
+        </CellDefinition>
+      </CellDefinitions>
+    </GridLayoutDefinition>
+  </ReportParametersLayout>
+  <rd:ReportUnitType>Inch</rd:ReportUnitType>
+  <rd:ReportID>3911f80f-d4ac-4768-9ad2-6f2f156a2218</rd:ReportID>
+</Report>

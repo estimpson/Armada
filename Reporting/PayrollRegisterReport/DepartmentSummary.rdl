@@ -1,0 +1,717 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <AutoRefresh>0</AutoRefresh>
+  <DataSources>
+    <DataSource Name="SagePayroll_ARMDataSet">
+      <ConnectionProperties>
+        <DataProvider>SQL</DataProvider>
+        <ConnectString>Data Source=192.0.0.9\FX;Initial Catalog=SagePayroll_ARM</ConnectString>
+      </ConnectionProperties>
+      <rd:SecurityType>DataBase</rd:SecurityType>
+      <rd:DataSourceID>4f0a57bf-131a-4099-a721-3e4aba4e925a</rd:DataSourceID>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="checkSummaryDataSet">
+      <Query>
+        <DataSourceName>SagePayroll_ARMDataSet</DataSourceName>
+        <QueryParameters>
+          <QueryParameter Name="@CheckHeader">
+            <Value>=Parameters!CheckHeader.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@BeginCheckDate">
+            <Value>=Parameters!BeginCheckDate.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@EndCheckDate">
+            <Value>=Parameters!EndCheckDate.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@BeginEmployee">
+            <Value>=Parameters!BeginEmployee.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@EndEmployee">
+            <Value>=Parameters!EndEmployee.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@Class1">
+            <Value>=Parameters!Class1.Value</Value>
+            <rd:UserDefined>true</rd:UserDefined>
+          </QueryParameter>
+          <QueryParameter Name="@TrialFlag">
+            <Value>=Parameters!TrialFlag.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+        <CommandType>StoredProcedure</CommandType>
+        <CommandText>ftsp_CheckSummary</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="GrossHours">
+          <DataField>GrossHours</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="GrossEarned">
+          <DataField>GrossEarned</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="EMPLOYEE">
+          <DataField>EMPLOYEE</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="FULLNAME">
+          <DataField>FULLNAME</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="TaxesWithHeld">
+          <DataField>TaxesWithHeld</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="Deductions">
+          <DataField>Deductions</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="SSN">
+          <DataField>SSN</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="TRANSDATE">
+          <DataField>TRANSDATE</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+      </Fields>
+      <rd:DataSetInfo>
+        <rd:DataSetName>SagePayroll_ARMDataSet</rd:DataSetName>
+        <rd:SchemaPath>C:\GitHub\Armada\Reporting\PayrollRegister\SagePayroll_ARMDataSet.xsd</rd:SchemaPath>
+        <rd:TableName>ftsp_CheckSummary</rd:TableName>
+        <rd:TableAdapterFillMethod>Fill</rd:TableAdapterFillMethod>
+        <rd:TableAdapterGetDataMethod>GetData</rd:TableAdapterGetDataMethod>
+        <rd:TableAdapterName>ftsp_CheckSummaryTableAdapter</rd:TableAdapterName>
+      </rd:DataSetInfo>
+    </DataSet>
+  </DataSets>
+  <ReportSections>
+    <ReportSection>
+      <Body>
+        <ReportItems>
+          <Subreport Name="earningsSR">
+            <ReportName>Earnings</ReportName>
+            <Parameters>
+              <Parameter Name="CheckHeader">
+                <Value>=Parameters!CheckHeader.Value</Value>
+              </Parameter>
+              <Parameter Name="BeginCheckDate">
+                <Value>=Parameters!BeginCheckDate.Value</Value>
+              </Parameter>
+              <Parameter Name="EndCheckDate">
+                <Value>=Parameters!EndCheckDate.Value</Value>
+              </Parameter>
+              <Parameter Name="BeginEmployee">
+                <Value>=Parameters!BeginEmployee.Value</Value>
+              </Parameter>
+              <Parameter Name="EndEmployee">
+                <Value>=Parameters!EndEmployee.Value</Value>
+              </Parameter>
+              <Parameter Name="Class1">
+                <Value>=Parameters!Class1.Value</Value>
+              </Parameter>
+              <Parameter Name="IncludeZerosFlag">
+                <Value>0</Value>
+              </Parameter>
+              <Parameter Name="TrialFlag">
+                <Value>=Parameters!TrialFlag.Value</Value>
+              </Parameter>
+            </Parameters>
+            <Top>0.375in</Top>
+            <Height>3in</Height>
+            <Width>2.95in</Width>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Subreport>
+          <Subreport Name="taxesSR">
+            <ReportName>Taxes</ReportName>
+            <Parameters>
+              <Parameter Name="CheckHeader">
+                <Value>=Parameters!CheckHeader.Value</Value>
+              </Parameter>
+              <Parameter Name="BeginCheckDate">
+                <Value>=Parameters!BeginCheckDate.Value</Value>
+              </Parameter>
+              <Parameter Name="EndCheckDate">
+                <Value>=Parameters!EndCheckDate.Value</Value>
+              </Parameter>
+              <Parameter Name="BeginEmployee">
+                <Value>=Parameters!BeginEmployee.Value</Value>
+              </Parameter>
+              <Parameter Name="EndEmployee">
+                <Value>=Parameters!EndEmployee.Value</Value>
+              </Parameter>
+              <Parameter Name="Class1">
+                <Value>=Parameters!Class1.Value</Value>
+              </Parameter>
+              <Parameter Name="IncludeZerosFlag">
+                <Value>0</Value>
+              </Parameter>
+              <Parameter Name="TrialFlag">
+                <Value>=Parameters!TrialFlag.Value</Value>
+              </Parameter>
+            </Parameters>
+            <Top>0.375in</Top>
+            <Left>3.25in</Left>
+            <Height>3in</Height>
+            <Width>1.95in</Width>
+            <ZIndex>1</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Subreport>
+          <Subreport Name="deductionSR">
+            <ReportName>Deductions</ReportName>
+            <Parameters>
+              <Parameter Name="CheckHeader">
+                <Value>=Parameters!CheckHeader.Value</Value>
+              </Parameter>
+              <Parameter Name="BeginCheckDate">
+                <Value>=Parameters!BeginCheckDate.Value</Value>
+              </Parameter>
+              <Parameter Name="EndCheckDate">
+                <Value>=Parameters!EndCheckDate.Value</Value>
+              </Parameter>
+              <Parameter Name="BeginEmployee">
+                <Value>=Parameters!BeginEmployee.Value</Value>
+              </Parameter>
+              <Parameter Name="EndEmployee">
+                <Value>=Parameters!EndEmployee.Value</Value>
+              </Parameter>
+              <Parameter Name="Class1">
+                <Value>=Parameters!Class1.Value</Value>
+              </Parameter>
+              <Parameter Name="IncludeZerosFlag">
+                <Value>0</Value>
+              </Parameter>
+              <Parameter Name="TrialFlag">
+                <Value>=Parameters!TrialFlag.Value</Value>
+              </Parameter>
+            </Parameters>
+            <Top>0.375in</Top>
+            <Left>5.65in</Left>
+            <Height>3in</Height>
+            <Width>2.35in</Width>
+            <ZIndex>2</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Subreport>
+          <Textbox Name="Textbox1">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>GROSS</Value>
+                    <Style>
+                      <FontSize>7.5pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox1</rd:DefaultName>
+            <Top>3.42083in</Top>
+            <Height>0.23667in</Height>
+            <Width>0.65625in</Width>
+            <ZIndex>3</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Line Name="Line3">
+            <Height>0in</Height>
+            <Width>8in</Width>
+            <ZIndex>4</ZIndex>
+            <Style>
+              <Border>
+                <Style>Solid</Style>
+              </Border>
+            </Style>
+          </Line>
+          <Line Name="Line4">
+            <Top>0.30035in</Top>
+            <Height>0in</Height>
+            <Width>8in</Width>
+            <ZIndex>5</ZIndex>
+            <Style>
+              <Border>
+                <Style>Solid</Style>
+              </Border>
+            </Style>
+          </Line>
+          <Textbox Name="Textbox6">
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>= "TOTALS FOR " &amp; Parameters!Class1.Value</Value>
+                    <Style>
+                      <FontSize>12pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox6</rd:DefaultName>
+            <Top>0.02917in</Top>
+            <Height>0.225in</Height>
+            <Width>2.88764in</Width>
+            <ZIndex>6</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="GrossHours">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>=Sum(Fields!GrossHours.Value, "checkSummaryDataSet")</Value>
+                    <Style>
+                      <FontSize>7.5pt</FontSize>
+                      <Format>0.00;(0.00)</Format>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Right</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>GrossHours</rd:DefaultName>
+            <Top>3.40278in</Top>
+            <Left>1.68056in</Left>
+            <Height>0.25in</Height>
+            <Width>0.5in</Width>
+            <ZIndex>7</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="GrossEarned">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>=Sum(Fields!GrossEarned.Value, "checkSummaryDataSet")</Value>
+                    <Style>
+                      <FontSize>7.5pt</FontSize>
+                      <Format>0.00;(0.00)</Format>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Right</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>GrossEarned</rd:DefaultName>
+            <Top>3.40278in</Top>
+            <Left>2.2in</Left>
+            <Height>0.25in</Height>
+            <Width>0.75in</Width>
+            <ZIndex>8</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="TaxesWithHeld">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>=Sum(Fields!TaxesWithHeld.Value, "checkSummaryDataSet")</Value>
+                    <Style>
+                      <FontSize>7.5pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Right</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>TaxesWithHeld</rd:DefaultName>
+            <Top>3.40278in</Top>
+            <Left>4.2in</Left>
+            <Height>0.25in</Height>
+            <Width>1in</Width>
+            <ZIndex>9</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="Deductions">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>=Sum(Fields!Deductions.Value, "checkSummaryDataSet")</Value>
+                    <Style>
+                      <FontSize>7.5pt</FontSize>
+                      <Format>0.00;(0.00)</Format>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Right</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Deductions</rd:DefaultName>
+            <Top>3.40278in</Top>
+            <Left>7in</Left>
+            <Height>0.25in</Height>
+            <Width>1in</Width>
+            <ZIndex>10</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Line Name="Line2">
+            <Top>3.69376in</Top>
+            <Left>5.65in</Left>
+            <Height>0in</Height>
+            <Width>2.35in</Width>
+            <ZIndex>11</ZIndex>
+            <Style>
+              <Border>
+                <Style>Solid</Style>
+              </Border>
+            </Style>
+          </Line>
+          <Textbox Name="Textbox2">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>TAXES</Value>
+                    <Style>
+                      <FontSize>7.5pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox1</rd:DefaultName>
+            <Top>3.40278in</Top>
+            <Left>3.25in</Left>
+            <Height>0.23667in</Height>
+            <Width>0.65625in</Width>
+            <ZIndex>12</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox3">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>DEDUCTIONS</Value>
+                    <Style>
+                      <FontSize>7.5pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox1</rd:DefaultName>
+            <Top>3.41251in</Top>
+            <Left>5.65in</Left>
+            <Height>0.23667in</Height>
+            <Width>0.92708in</Width>
+            <ZIndex>13</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox4">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>PAY AMOUNT</Value>
+                    <Style>
+                      <FontSize>7.5pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox1</rd:DefaultName>
+            <Top>3.7632in</Top>
+            <Left>5.65in</Left>
+            <Height>0.23667in</Height>
+            <Width>0.92708in</Width>
+            <ZIndex>14</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="Deductions2">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>=Sum(Fields!GrossEarned.Value, "checkSummaryDataSet") - Sum(Fields!TaxesWithHeld.Value, "checkSummaryDataSet") - Sum(Fields!Deductions.Value, "checkSummaryDataSet")</Value>
+                    <Style>
+                      <FontSize>7.5pt</FontSize>
+                      <Format>0.00;(0.00)</Format>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Right</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Deductions</rd:DefaultName>
+            <Top>3.7632in</Top>
+            <Left>7in</Left>
+            <Height>0.25in</Height>
+            <Width>1in</Width>
+            <ZIndex>15</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Line Name="Line7">
+            <Top>3.38576in</Top>
+            <Height>0in</Height>
+            <Width>2.95in</Width>
+            <ZIndex>16</ZIndex>
+            <Style>
+              <Border>
+                <Style>Solid</Style>
+              </Border>
+            </Style>
+          </Line>
+          <Line Name="Line6">
+            <Top>3.38576in</Top>
+            <Left>3.2375in</Left>
+            <Height>0in</Height>
+            <Width>1.95in</Width>
+            <ZIndex>17</ZIndex>
+            <Style>
+              <Border>
+                <Style>Solid</Style>
+              </Border>
+            </Style>
+          </Line>
+          <Line Name="Line5">
+            <Top>3.38576in</Top>
+            <Left>5.6375in</Left>
+            <Height>0in</Height>
+            <Width>2.35in</Width>
+            <ZIndex>18</ZIndex>
+            <Style>
+              <Border>
+                <Style>Solid</Style>
+              </Border>
+            </Style>
+          </Line>
+        </ReportItems>
+        <Height>4.01736in</Height>
+        <Style />
+      </Body>
+      <Width>8in</Width>
+      <Page>
+        <LeftMargin>1in</LeftMargin>
+        <RightMargin>1in</RightMargin>
+        <TopMargin>1in</TopMargin>
+        <BottomMargin>1in</BottomMargin>
+        <Style />
+      </Page>
+    </ReportSection>
+  </ReportSections>
+  <ReportParameters>
+    <ReportParameter Name="CheckHeader">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>Check Header</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="BeginCheckDate">
+      <DataType>DateTime</DataType>
+      <Nullable>true</Nullable>
+      <DefaultValue>
+        <Values>
+          <Value>11/11/2020 12:00:00 AM</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Begin Check Date</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="EndCheckDate">
+      <DataType>DateTime</DataType>
+      <Nullable>true</Nullable>
+      <DefaultValue>
+        <Values>
+          <Value>11/11/2020 12:00:00 AM</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>End Check Date</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="BeginEmployee">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>Begin Employee</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="EndEmployee">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>End Employee</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Class1">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>OFFICE</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Class1</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="TrialFlag">
+      <DataType>Integer</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>Trial Flag</Prompt>
+    </ReportParameter>
+  </ReportParameters>
+  <ReportParametersLayout>
+    <GridLayoutDefinition>
+      <NumberOfColumns>2</NumberOfColumns>
+      <NumberOfRows>4</NumberOfRows>
+      <CellDefinitions>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>CheckHeader</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>1</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>BeginCheckDate</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>1</RowIndex>
+          <ParameterName>EndCheckDate</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>1</ColumnIndex>
+          <RowIndex>1</RowIndex>
+          <ParameterName>BeginEmployee</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>2</RowIndex>
+          <ParameterName>EndEmployee</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>1</ColumnIndex>
+          <RowIndex>2</RowIndex>
+          <ParameterName>Class1</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>3</RowIndex>
+          <ParameterName>TrialFlag</ParameterName>
+        </CellDefinition>
+      </CellDefinitions>
+    </GridLayoutDefinition>
+  </ReportParametersLayout>
+  <rd:ReportUnitType>Inch</rd:ReportUnitType>
+  <rd:ReportID>7584741e-2df8-4e09-9bdc-a852e4d747f0</rd:ReportID>
+</Report>
