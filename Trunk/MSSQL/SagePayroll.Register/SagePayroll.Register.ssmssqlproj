@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<SqlWorkbenchSqlProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Name="SagePayroll.Register">
+  <Items>
+    <LogicalFolder Name="Connections" Type="2" Sorted="true">
+      <Items>
+        <ConnectionNode Name="192.0.0.9\FX:estimpson">
+          <Created>2020-12-18T08:06:51.7037201-05:00</Created>
+          <Type>SQL</Type>
+          <Server>192.0.0.9\FX</Server>
+          <UserName>estimpson</UserName>
+          <Authentication>SQL</Authentication>
+          <InitialDB>SagePayroll_ARM</InitialDB>
+          <LoginTimeout>30</LoginTimeout>
+          <ExecutionTimeout>0</ExecutionTimeout>
+          <ConnectionProtocol>NotSpecified</ConnectionProtocol>
+          <ApplicationName>Microsoft SQL Server Management Studio - Query</ApplicationName>
+        </ConnectionNode>
+        <ConnectionNode Name="armada:estimpson">
+          <Created>2020-12-24T08:45:46.6755213-05:00</Created>
+          <Type>SQL</Type>
+          <Server>armada</Server>
+          <UserName>estimpson</UserName>
+          <Authentication>SQL</Authentication>
+          <InitialDB />
+          <LoginTimeout>30</LoginTimeout>
+          <ExecutionTimeout>0</ExecutionTimeout>
+          <ConnectionProtocol>NotSpecified</ConnectionProtocol>
+          <ApplicationName>Microsoft SQL Server Management Studio - Query</ApplicationName>
+        </ConnectionNode>
+      </Items>
+    </LogicalFolder>
+    <LogicalFolder Name="Queries" Type="0" Sorted="true">
+      <Items>
+        <FileNode Name="sp.dbo.ftsp_CheckDeductionsData.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:192.0.0.9\FX:False:estimpson</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>192.0.0.9\FX</AssociatedConnSrvName>
+          <AssociatedConnUserName>estimpson</AssociatedConnUserName>
+          <FullPath>sp.dbo.ftsp_CheckDeductionsData.sql</FullPath>
+        </FileNode>
+        <FileNode Name="sp.dbo.ftsp_CheckEarningsData.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:192.0.0.9\FX:False:estimpson</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>192.0.0.9\FX</AssociatedConnSrvName>
+          <AssociatedConnUserName>estimpson</AssociatedConnUserName>
+          <FullPath>sp.dbo.ftsp_CheckEarningsData.sql</FullPath>
+        </FileNode>
+        <FileNode Name="sp.dbo.ftsp_CheckList.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:192.0.0.9\FX:False:estimpson</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>192.0.0.9\FX</AssociatedConnSrvName>
+          <AssociatedConnUserName>estimpson</AssociatedConnUserName>
+          <FullPath>sp.dbo.ftsp_CheckList.sql</FullPath>
+        </FileNode>
+        <FileNode Name="sp.dbo.ftsp_CheckSummary.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:192.0.0.9\FX:False:estimpson</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>192.0.0.9\FX</AssociatedConnSrvName>
+          <AssociatedConnUserName>estimpson</AssociatedConnUserName>
+          <FullPath>sp.dbo.ftsp_CheckSummary.sql</FullPath>
+        </FileNode>
+        <FileNode Name="sp.dbo.ftsp_CheckTaxesData.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:192.0.0.9\FX:False:estimpson</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>192.0.0.9\FX</AssociatedConnSrvName>
+          <AssociatedConnUserName>estimpson</AssociatedConnUserName>
+          <FullPath>sp.dbo.ftsp_CheckTaxesData.sql</FullPath>
+        </FileNode>
+        <FileNode Name="sp.dbo.ftsp_Payroll_Register(obsolete).sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:armada:False:estimpson</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>armada</AssociatedConnSrvName>
+          <AssociatedConnUserName>estimpson</AssociatedConnUserName>
+          <FullPath>sp.dbo.ftsp_Payroll_Register(obsolete).sql</FullPath>
+        </FileNode>
+        <FileNode Name="Test Script.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:192.0.0.9\FX:False:estimpson</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>192.0.0.9\FX</AssociatedConnSrvName>
+          <AssociatedConnUserName>estimpson</AssociatedConnUserName>
+          <FullPath>Test Script.sql</FullPath>
+        </FileNode>
+      </Items>
+    </LogicalFolder>
+    <LogicalFolder Name="Miscellaneous" Type="3" Sorted="true">
+      <Items />
+    </LogicalFolder>
+  </Items>
+</SqlWorkbenchSqlProject>
