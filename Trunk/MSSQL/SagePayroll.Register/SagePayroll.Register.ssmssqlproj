@@ -15,18 +15,6 @@
           <ConnectionProtocol>NotSpecified</ConnectionProtocol>
           <ApplicationName>Microsoft SQL Server Management Studio - Query</ApplicationName>
         </ConnectionNode>
-        <ConnectionNode Name="armada:estimpson">
-          <Created>2020-12-24T08:45:46.6755213-05:00</Created>
-          <Type>SQL</Type>
-          <Server>armada</Server>
-          <UserName>estimpson</UserName>
-          <Authentication>SQL</Authentication>
-          <InitialDB />
-          <LoginTimeout>30</LoginTimeout>
-          <ExecutionTimeout>0</ExecutionTimeout>
-          <ConnectionProtocol>NotSpecified</ConnectionProtocol>
-          <ApplicationName>Microsoft SQL Server Management Studio - Query</ApplicationName>
-        </ConnectionNode>
       </Items>
     </LogicalFolder>
     <LogicalFolder Name="Queries" Type="0" Sorted="true">
@@ -62,9 +50,9 @@
           <FullPath>sp.dbo.ftsp_CheckTaxesData.sql</FullPath>
         </FileNode>
         <FileNode Name="sp.dbo.ftsp_Payroll_Register(obsolete).sql">
-          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:armada:False:estimpson</AssociatedConnectionMoniker>
-          <AssociatedConnSrvName>armada</AssociatedConnSrvName>
-          <AssociatedConnUserName>estimpson</AssociatedConnUserName>
+          <AssociatedConnectionMoniker />
+          <AssociatedConnSrvName />
+          <AssociatedConnUserName />
           <FullPath>sp.dbo.ftsp_Payroll_Register(obsolete).sql</FullPath>
         </FileNode>
         <FileNode Name="Test Script.sql">
