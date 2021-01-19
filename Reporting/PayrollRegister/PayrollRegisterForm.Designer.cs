@@ -54,14 +54,19 @@ namespace PayrollRegister
             this.label8 = new System.Windows.Forms.Label();
             this.uxBeginEmployee = new System.Windows.Forms.ComboBox();
             this.uxRunReport = new System.Windows.Forms.Button();
+            this.label10 = new System.Windows.Forms.Label();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.headerHeader = new System.Windows.Forms.TableLayoutPanel();
             this.label1 = new System.Windows.Forms.Label();
             this.uxShowParameters = new System.Windows.Forms.Button();
+            this.uxNameSort = new System.Windows.Forms.RadioButton();
+            this.uxNumberSort = new System.Windows.Forms.RadioButton();
             this.wholeScreen.SuspendLayout();
             this.header.SuspendLayout();
             this.parameters.SuspendLayout();
             this.tableLayoutPanel5.SuspendLayout();
             this.tableLayoutPanel6.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
             this.headerHeader.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -85,10 +90,10 @@ namespace PayrollRegister
             // 
             this.reportViewer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.reportViewer1.LocalReport.ReportEmbeddedResource = "PayrollRegister.Reports.PayrollRegister.rdlc";
-            this.reportViewer1.Location = new System.Drawing.Point(3, 460);
+            this.reportViewer1.Location = new System.Drawing.Point(3, 520);
             this.reportViewer1.Name = "reportViewer1";
             this.reportViewer1.ServerReport.BearerToken = null;
-            this.reportViewer1.Size = new System.Drawing.Size(1003, 331);
+            this.reportViewer1.Size = new System.Drawing.Size(1003, 271);
             this.reportViewer1.TabIndex = 4;
             // 
             // header
@@ -105,7 +110,7 @@ namespace PayrollRegister
             this.header.RowCount = 2;
             this.header.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.header.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.header.Size = new System.Drawing.Size(1003, 451);
+            this.header.Size = new System.Drawing.Size(1003, 511);
             this.header.TabIndex = 0;
             // 
             // parameters
@@ -115,7 +120,7 @@ namespace PayrollRegister
             this.parameters.CellBorderStyle = System.Windows.Forms.TableLayoutPanelCellBorderStyle.Single;
             this.parameters.ColumnCount = 2;
             this.parameters.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 73.69669F));
-            this.parameters.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 351F));
+            this.parameters.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 353F));
             this.parameters.Controls.Add(this.uxDepartment, 1, 3);
             this.parameters.Controls.Add(this.label9, 0, 3);
             this.parameters.Controls.Add(this.label6, 0, 2);
@@ -124,17 +129,20 @@ namespace PayrollRegister
             this.parameters.Controls.Add(this.label3, 0, 1);
             this.parameters.Controls.Add(this.tableLayoutPanel5, 1, 1);
             this.parameters.Controls.Add(this.tableLayoutPanel6, 1, 2);
-            this.parameters.Controls.Add(this.uxRunReport, 1, 4);
+            this.parameters.Controls.Add(this.uxRunReport, 1, 5);
+            this.parameters.Controls.Add(this.label10, 0, 4);
+            this.parameters.Controls.Add(this.tableLayoutPanel1, 1, 4);
             this.parameters.Dock = System.Windows.Forms.DockStyle.Fill;
             this.parameters.Location = new System.Drawing.Point(3, 46);
             this.parameters.Name = "parameters";
-            this.parameters.RowCount = 5;
+            this.parameters.RowCount = 6;
             this.parameters.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.parameters.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.parameters.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.parameters.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.parameters.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.parameters.Size = new System.Drawing.Size(997, 402);
+            this.parameters.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.parameters.Size = new System.Drawing.Size(997, 462);
             this.parameters.TabIndex = 0;
             // 
             // uxDepartment
@@ -181,10 +189,11 @@ namespace PayrollRegister
             // 
             this.uxTrialFlag.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.uxTrialFlag.AutoSize = true;
+            this.uxTrialFlag.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.uxTrialFlag.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.uxTrialFlag.Location = new System.Drawing.Point(881, 4);
+            this.uxTrialFlag.Location = new System.Drawing.Point(884, 4);
             this.uxTrialFlag.Name = "uxTrialFlag";
-            this.uxTrialFlag.Size = new System.Drawing.Size(112, 21);
+            this.uxTrialFlag.Size = new System.Drawing.Size(109, 21);
             this.uxTrialFlag.TabIndex = 1;
             this.uxTrialFlag.Text = "Trial Register\r\n";
             this.uxTrialFlag.UseVisualStyleBackColor = true;
@@ -211,7 +220,7 @@ namespace PayrollRegister
             this.tableLayoutPanel5.Controls.Add(this.uxNoBeginDate, 0, 1);
             this.tableLayoutPanel5.Controls.Add(this.uxNoEndDate, 0, 4);
             this.tableLayoutPanel5.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel5.Location = new System.Drawing.Point(645, 29);
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(643, 29);
             this.tableLayoutPanel5.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.RowCount = 6;
@@ -222,7 +231,7 @@ namespace PayrollRegister
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(351, 146);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(353, 146);
             this.tableLayoutPanel5.TabIndex = 3;
             // 
             // uxPickEndDate
@@ -231,7 +240,7 @@ namespace PayrollRegister
             this.uxPickEndDate.CustomFormat = "\'No End Date\'";
             this.uxPickEndDate.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.uxPickEndDate.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.uxPickEndDate.Location = new System.Drawing.Point(197, 120);
+            this.uxPickEndDate.Location = new System.Drawing.Point(199, 120);
             this.uxPickEndDate.Name = "uxPickEndDate";
             this.uxPickEndDate.Size = new System.Drawing.Size(151, 23);
             this.uxPickEndDate.TabIndex = 5;
@@ -264,7 +273,7 @@ namespace PayrollRegister
             this.uxPickBeginDate.CustomFormat = "\'No Begin Date\'";
             this.uxPickBeginDate.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.uxPickBeginDate.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.uxPickBeginDate.Location = new System.Drawing.Point(197, 47);
+            this.uxPickBeginDate.Location = new System.Drawing.Point(199, 47);
             this.uxPickBeginDate.Name = "uxPickBeginDate";
             this.uxPickBeginDate.Size = new System.Drawing.Size(151, 23);
             this.uxPickBeginDate.TabIndex = 3;
@@ -277,10 +286,11 @@ namespace PayrollRegister
             this.uxNoBeginDate.AutoSize = true;
             this.uxNoBeginDate.Checked = true;
             this.uxNoBeginDate.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.uxNoBeginDate.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.uxNoBeginDate.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.uxNoBeginDate.Location = new System.Drawing.Point(229, 20);
+            this.uxNoBeginDate.Location = new System.Drawing.Point(234, 20);
             this.uxNoBeginDate.Name = "uxNoBeginDate";
-            this.uxNoBeginDate.Size = new System.Drawing.Size(119, 21);
+            this.uxNoBeginDate.Size = new System.Drawing.Size(116, 21);
             this.uxNoBeginDate.TabIndex = 2;
             this.uxNoBeginDate.Text = "No Begin Date";
             this.uxNoBeginDate.UseVisualStyleBackColor = true;
@@ -292,10 +302,11 @@ namespace PayrollRegister
             this.uxNoEndDate.AutoSize = true;
             this.uxNoEndDate.Checked = true;
             this.uxNoEndDate.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.uxNoEndDate.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.uxNoEndDate.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.uxNoEndDate.Location = new System.Drawing.Point(240, 93);
+            this.uxNoEndDate.Location = new System.Drawing.Point(245, 93);
             this.uxNoEndDate.Name = "uxNoEndDate";
-            this.uxNoEndDate.Size = new System.Drawing.Size(108, 21);
+            this.uxNoEndDate.Size = new System.Drawing.Size(105, 21);
             this.uxNoEndDate.TabIndex = 4;
             this.uxNoEndDate.Text = "No End Date";
             this.uxNoEndDate.UseVisualStyleBackColor = true;
@@ -313,7 +324,7 @@ namespace PayrollRegister
             this.tableLayoutPanel6.Controls.Add(this.label8, 0, 0);
             this.tableLayoutPanel6.Controls.Add(this.uxBeginEmployee, 0, 2);
             this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel6.Location = new System.Drawing.Point(645, 176);
+            this.tableLayoutPanel6.Location = new System.Drawing.Point(643, 176);
             this.tableLayoutPanel6.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 5;
@@ -323,7 +334,7 @@ namespace PayrollRegister
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel6.Size = new System.Drawing.Size(351, 149);
+            this.tableLayoutPanel6.Size = new System.Drawing.Size(353, 149);
             this.tableLayoutPanel6.TabIndex = 5;
             // 
             // uxNoEndEmployee
@@ -332,10 +343,11 @@ namespace PayrollRegister
             this.uxNoEndEmployee.AutoSize = true;
             this.uxNoEndEmployee.Checked = true;
             this.uxNoEndEmployee.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.uxNoEndEmployee.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.uxNoEndEmployee.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.uxNoEndEmployee.Location = new System.Drawing.Point(208, 94);
+            this.uxNoEndEmployee.Location = new System.Drawing.Point(213, 94);
             this.uxNoEndEmployee.Name = "uxNoEndEmployee";
-            this.uxNoEndEmployee.Size = new System.Drawing.Size(140, 21);
+            this.uxNoEndEmployee.Size = new System.Drawing.Size(137, 21);
             this.uxNoEndEmployee.TabIndex = 8;
             this.uxNoEndEmployee.Text = "No End Employee";
             this.uxNoEndEmployee.UseVisualStyleBackColor = true;
@@ -347,10 +359,11 @@ namespace PayrollRegister
             this.uxNoBeginEmployee.AutoSize = true;
             this.uxNoBeginEmployee.Checked = true;
             this.uxNoBeginEmployee.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.uxNoBeginEmployee.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.uxNoBeginEmployee.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.uxNoBeginEmployee.Location = new System.Drawing.Point(197, 20);
+            this.uxNoBeginEmployee.Location = new System.Drawing.Point(202, 20);
             this.uxNoBeginEmployee.Name = "uxNoBeginEmployee";
-            this.uxNoBeginEmployee.Size = new System.Drawing.Size(151, 21);
+            this.uxNoBeginEmployee.Size = new System.Drawing.Size(148, 21);
             this.uxNoBeginEmployee.TabIndex = 6;
             this.uxNoBeginEmployee.Text = "No Begin Employee";
             this.uxNoBeginEmployee.UseVisualStyleBackColor = true;
@@ -361,7 +374,7 @@ namespace PayrollRegister
             this.uxEndEmployee.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.uxEndEmployee.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.uxEndEmployee.FormattingEnabled = true;
-            this.uxEndEmployee.Location = new System.Drawing.Point(197, 121);
+            this.uxEndEmployee.Location = new System.Drawing.Point(199, 121);
             this.uxEndEmployee.Name = "uxEndEmployee";
             this.uxEndEmployee.Size = new System.Drawing.Size(151, 24);
             this.uxEndEmployee.TabIndex = 9;
@@ -392,7 +405,7 @@ namespace PayrollRegister
             this.uxBeginEmployee.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.uxBeginEmployee.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.uxBeginEmployee.FormattingEnabled = true;
-            this.uxBeginEmployee.Location = new System.Drawing.Point(197, 47);
+            this.uxBeginEmployee.Location = new System.Drawing.Point(199, 47);
             this.uxBeginEmployee.Name = "uxBeginEmployee";
             this.uxBeginEmployee.Size = new System.Drawing.Size(151, 24);
             this.uxBeginEmployee.TabIndex = 7;
@@ -402,7 +415,7 @@ namespace PayrollRegister
             // 
             this.uxRunReport.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.uxRunReport.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.uxRunReport.Location = new System.Drawing.Point(918, 368);
+            this.uxRunReport.Location = new System.Drawing.Point(918, 428);
             this.uxRunReport.Margin = new System.Windows.Forms.Padding(3, 10, 3, 10);
             this.uxRunReport.Name = "uxRunReport";
             this.uxRunReport.Size = new System.Drawing.Size(75, 23);
@@ -410,6 +423,32 @@ namespace PayrollRegister
             this.uxRunReport.Text = "Run Report";
             this.uxRunReport.UseVisualStyleBackColor = true;
             this.uxRunReport.Click += new System.EventHandler(this.runReportButton_Click);
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label10.Location = new System.Drawing.Point(4, 357);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(475, 17);
+            this.label10.TabIndex = 12;
+            this.label10.Text = "Choose between \"Sort by Employee Name\" or \"Sort by Employee Number\"";
+            // 
+            // tableLayoutPanel1
+            // 
+            this.tableLayoutPanel1.AutoSize = true;
+            this.tableLayoutPanel1.ColumnCount = 1;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.Controls.Add(this.uxNameSort, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.uxNumberSort, 0, 1);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(646, 360);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 2;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(347, 54);
+            this.tableLayoutPanel1.TabIndex = 13;
             // 
             // headerHeader
             // 
@@ -452,6 +491,34 @@ namespace PayrollRegister
             this.uxShowParameters.Visible = false;
             this.uxShowParameters.Click += new System.EventHandler(this.uxShowParameters_Click);
             // 
+            // uxNameSort
+            // 
+            this.uxNameSort.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.uxNameSort.AutoSize = true;
+            this.uxNameSort.Checked = true;
+            this.uxNameSort.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.uxNameSort.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.uxNameSort.Location = new System.Drawing.Point(167, 3);
+            this.uxNameSort.Name = "uxNameSort";
+            this.uxNameSort.Size = new System.Drawing.Size(177, 21);
+            this.uxNameSort.TabIndex = 0;
+            this.uxNameSort.TabStop = true;
+            this.uxNameSort.Text = "Sort by Employee Name";
+            this.uxNameSort.UseVisualStyleBackColor = true;
+            // 
+            // uxNumberSort
+            // 
+            this.uxNumberSort.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.uxNumberSort.AutoSize = true;
+            this.uxNumberSort.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.uxNumberSort.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.uxNumberSort.Location = new System.Drawing.Point(154, 30);
+            this.uxNumberSort.Name = "uxNumberSort";
+            this.uxNumberSort.Size = new System.Drawing.Size(190, 21);
+            this.uxNumberSort.TabIndex = 1;
+            this.uxNumberSort.Text = "Sort by Employee Number";
+            this.uxNumberSort.UseVisualStyleBackColor = true;
+            // 
             // PayrollRegisterForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -473,6 +540,8 @@ namespace PayrollRegister
             this.tableLayoutPanel5.PerformLayout();
             this.tableLayoutPanel6.ResumeLayout(false);
             this.tableLayoutPanel6.PerformLayout();
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel1.PerformLayout();
             this.headerHeader.ResumeLayout(false);
             this.headerHeader.PerformLayout();
             this.ResumeLayout(false);
@@ -508,5 +577,9 @@ namespace PayrollRegister
         private System.Windows.Forms.CheckBox uxNoEndDate;
         private System.Windows.Forms.CheckBox uxNoEndEmployee;
         private System.Windows.Forms.CheckBox uxNoBeginEmployee;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.RadioButton uxNameSort;
+        private System.Windows.Forms.RadioButton uxNumberSort;
     }
 }

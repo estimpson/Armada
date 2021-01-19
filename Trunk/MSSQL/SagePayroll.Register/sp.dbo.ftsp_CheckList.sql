@@ -6,6 +6,7 @@ alter procedure dbo.ftsp_CheckList
 ,	@EndEmployee char(12) = null
 ,	@Class1 char(6) = null
 ,	@TrialFlag int = 0
+,	@Sort varchar(10) = 'NAME'
 as
 select
 	chkH.CLASS1
@@ -27,7 +28,11 @@ where
 			(@TrialFlag = 0 and chkH.PRPOSTSTAT = 2))
 order by
 	chkH.CLASS1
-,	emp.FULLNAME
+,	case
+		when @Sort = 'NAME' then emp.FULLNAME
+		when @Sort = 'NUMBER' then chkH.EMPLOYEE
+		else emp.FULLNAME
+	end
 go
 
 exec dbo.ftsp_CheckList
@@ -53,11 +58,19 @@ exec dbo.ftsp_CheckList
 ,	@EndEmployee = null
 ,	@TrialFlag = 1
 
+exec dbo.ftsp_CheckList
+	@TransNumber = null
+,	@BeginCheckDate = '2021-01-06'
+,	@EndCheckDate = '2021-01-06'
+,	@BeginEmployee = null
+,	@EndEmployee = null
+,	@TrialFlag = 0
 
 exec dbo.ftsp_CheckList
 	@TransNumber = null
-,	@BeginCheckDate = null
-,	@EndCheckDate = null
-,	@BeginEmployee = '10001       '
-,	@EndEmployee = '10001       '
+,	@BeginCheckDate = '2021-01-06'
+,	@EndCheckDate = '2021-01-06'
+,	@BeginEmployee = null
+,	@EndEmployee = null
 ,	@TrialFlag = 0
+,	@Sort = 'NUMBER'

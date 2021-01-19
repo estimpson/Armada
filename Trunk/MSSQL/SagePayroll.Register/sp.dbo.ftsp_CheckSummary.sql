@@ -1,3 +1,5 @@
+use SagePayroll_ARM
+go
 alter procedure dbo.ftsp_CheckSummary
 	@CheckHeader char(33) = null
 ,	@BeginCheckDate datetime = null
@@ -17,6 +19,7 @@ select
 ,	FULLNAME = max(emp.FULLNAME)
 ,	SSN = 'XXX-XX-' + convert(char(4), max(right(rtrim(SSN),4)))
 ,	TRANSDATE = convert(datetime, left(max(convert(char(8),chkH.TRANSDATE)), 4) + '-' + substring(max(convert(char(8),chkH.TRANSDATE)),5,2) + '-' + right(max(convert(char(8),chkH.TRANSDATE)),2) )
+,	TRANSNUM = max(case when chkH.CHECKSTAT = 3 then chkH.TRANSNUM end)
 ,	GrossHours = sum(case when chkD.CATEGORY = 2 then chkD.HOURS end)
 ,	GrossEarned = sum(case when chkD.CATEGORY = 2 then chkD.EEXTEND end)
 ,	TaxesWithHeld = sum(case when chkD.CATEGORY in (7,8) then chkD.EEXTEND end)
@@ -94,5 +97,14 @@ exec dbo.ftsp_CheckSummary
 ,	@EndCheckDate = null
 ,	@BeginEmployee = '10002       '
 ,	@EndEmployee = '10002       '
+,	@Class1 = 'PLANT'
+,	@TrialFlag = 0
+
+exec dbo.ftsp_CheckSummary
+	@CheckHeader = null
+,	@BeginCheckDate = '2021-01-06'
+,	@EndCheckDate = '2021-01-06'
+,	@BeginEmployee = '10018       '
+,	@EndEmployee = '10018       '
 ,	@Class1 = 'PLANT'
 ,	@TrialFlag = 0

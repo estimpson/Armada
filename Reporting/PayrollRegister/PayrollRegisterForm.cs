@@ -33,6 +33,7 @@ namespace PayrollRegister
         private string _argEndEmployee = null;
         private string _argClass1 = null;
         private Int32? _argTrialFlag = 1;
+        private string _argSort = null;
 
         public PayrollRegisterForm()
         {
@@ -229,13 +230,24 @@ namespace PayrollRegister
             {
                 _argClass1 = null;
             }
+
+            if (uxNameSort.Checked)
+            {
+                _argSort = "NAME";
+            }
+            else if (uxNumberSort.Checked)
+            {
+                _argSort = "NUMBER";
+            }
+            else _argSort = null;
+
             _ftspCheckListTableAdapter.Fill(_sagePayrollDataSet.ftsp_CheckList, _argCheckNumber, _argBeginCheckDate,
-                _argEndCheckDate, _argBeginEmployee, _argEndEmployee, _argClass1, _argTrialFlag);
+                _argEndCheckDate, _argBeginEmployee, _argEndEmployee, _argClass1, _argTrialFlag, _argSort);
 
             // Create report data source
-            var dsSalesOrderDetails = new ReportDataSource("CheckList", (DataTable)_sagePayrollDataSet.ftsp_CheckList);
+            var dsCheckList = new ReportDataSource("CheckList", (DataTable)_sagePayrollDataSet.ftsp_CheckList);
             reportViewer1.LocalReport.DataSources.Clear();
-            reportViewer1.LocalReport.DataSources.Add(dsSalesOrderDetails);
+            reportViewer1.LocalReport.DataSources.Add(dsCheckList);
 
             // Create report parameter
             var rpTransNumber = new ReportParameter("TransNumber", (string)null);

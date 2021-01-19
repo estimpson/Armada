@@ -1626,6 +1626,8 @@ namespace PayrollRegister {
             
             private global::System.Data.DataColumn columnTRANSDATE;
             
+            private global::System.Data.DataColumn columnTRANSNUM;
+            
             private global::System.Data.DataColumn columnGrossHours;
             
             private global::System.Data.DataColumn columnGrossEarned;
@@ -1701,6 +1703,14 @@ namespace PayrollRegister {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public global::System.Data.DataColumn TRANSNUMColumn {
+                get {
+                    return this.columnTRANSNUM;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
             public global::System.Data.DataColumn GrossHoursColumn {
                 get {
                     return this.columnGrossHours;
@@ -1768,13 +1778,14 @@ namespace PayrollRegister {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public ftsp_CheckSummaryRow Addftsp_CheckSummaryRow(string EMPLOYEE, string FULLNAME, string SSN, System.DateTime TRANSDATE, decimal GrossHours, decimal GrossEarned, decimal TaxesWithHeld, decimal Deductions) {
+            public ftsp_CheckSummaryRow Addftsp_CheckSummaryRow(string EMPLOYEE, string FULLNAME, string SSN, System.DateTime TRANSDATE, string TRANSNUM, decimal GrossHours, decimal GrossEarned, decimal TaxesWithHeld, decimal Deductions) {
                 ftsp_CheckSummaryRow rowftsp_CheckSummaryRow = ((ftsp_CheckSummaryRow)(this.NewRow()));
                 object[] columnValuesArray = new object[] {
                         EMPLOYEE,
                         FULLNAME,
                         SSN,
                         TRANSDATE,
+                        TRANSNUM,
                         GrossHours,
                         GrossEarned,
                         TaxesWithHeld,
@@ -1805,6 +1816,7 @@ namespace PayrollRegister {
                 this.columnFULLNAME = base.Columns["FULLNAME"];
                 this.columnSSN = base.Columns["SSN"];
                 this.columnTRANSDATE = base.Columns["TRANSDATE"];
+                this.columnTRANSNUM = base.Columns["TRANSNUM"];
                 this.columnGrossHours = base.Columns["GrossHours"];
                 this.columnGrossEarned = base.Columns["GrossEarned"];
                 this.columnTaxesWithHeld = base.Columns["TaxesWithHeld"];
@@ -1822,6 +1834,8 @@ namespace PayrollRegister {
                 base.Columns.Add(this.columnSSN);
                 this.columnTRANSDATE = new global::System.Data.DataColumn("TRANSDATE", typeof(global::System.DateTime), null, global::System.Data.MappingType.Element);
                 base.Columns.Add(this.columnTRANSDATE);
+                this.columnTRANSNUM = new global::System.Data.DataColumn("TRANSNUM", typeof(string), null, global::System.Data.MappingType.Element);
+                base.Columns.Add(this.columnTRANSNUM);
                 this.columnGrossHours = new global::System.Data.DataColumn("GrossHours", typeof(decimal), null, global::System.Data.MappingType.Element);
                 base.Columns.Add(this.columnGrossHours);
                 this.columnGrossEarned = new global::System.Data.DataColumn("GrossEarned", typeof(decimal), null, global::System.Data.MappingType.Element);
@@ -2885,6 +2899,22 @@ namespace PayrollRegister {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public string TRANSNUM {
+                get {
+                    try {
+                        return ((string)(this[this.tableftsp_CheckSummary.TRANSNUMColumn]));
+                    }
+                    catch (global::System.InvalidCastException e) {
+                        throw new global::System.Data.StrongTypingException("The value for column \'TRANSNUM\' in table \'ftsp_CheckSummary\' is DBNull.", e);
+                    }
+                }
+                set {
+                    this[this.tableftsp_CheckSummary.TRANSNUMColumn] = value;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
             public decimal GrossHours {
                 get {
                     try {
@@ -2993,6 +3023,18 @@ namespace PayrollRegister {
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
             public void SetTRANSDATENull() {
                 this[this.tableftsp_CheckSummary.TRANSDATEColumn] = global::System.Convert.DBNull;
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public bool IsTRANSNUMNull() {
+                return this.IsNull(this.tableftsp_CheckSummary.TRANSNUMColumn);
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public void SetTRANSNUMNull() {
+                this[this.tableftsp_CheckSummary.TRANSNUMColumn] = global::System.Convert.DBNull;
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -4930,13 +4972,14 @@ namespace PayrollRegister.SagePayroll_ARMDataSetTableAdapters {
             this._commandCollection[0].Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@EndEmployee", global::System.Data.SqlDbType.Char, 12, global::System.Data.ParameterDirection.Input, 0, 0, null, global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
             this._commandCollection[0].Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@Class1", global::System.Data.SqlDbType.Char, 6, global::System.Data.ParameterDirection.Input, 0, 0, null, global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
             this._commandCollection[0].Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@TrialFlag", global::System.Data.SqlDbType.Int, 4, global::System.Data.ParameterDirection.Input, 10, 0, null, global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
+            this._commandCollection[0].Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@Sort", global::System.Data.SqlDbType.VarChar, 10, global::System.Data.ParameterDirection.Input, 0, 0, null, global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
         }
         
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
         [global::System.ComponentModel.DataObjectMethodAttribute(global::System.ComponentModel.DataObjectMethodType.Fill, true)]
-        public virtual int Fill(SagePayroll_ARMDataSet.ftsp_CheckListDataTable dataTable, global::System.Nullable<decimal> TransNumber, global::System.Nullable<global::System.DateTime> BeginCheckDate, global::System.Nullable<global::System.DateTime> EndCheckDate, string BeginEmployee, string EndEmployee, string Class1, global::System.Nullable<int> TrialFlag) {
+        public virtual int Fill(SagePayroll_ARMDataSet.ftsp_CheckListDataTable dataTable, global::System.Nullable<decimal> TransNumber, global::System.Nullable<global::System.DateTime> BeginCheckDate, global::System.Nullable<global::System.DateTime> EndCheckDate, string BeginEmployee, string EndEmployee, string Class1, global::System.Nullable<int> TrialFlag, string Sort) {
             this.Adapter.SelectCommand = this.CommandCollection[0];
             if ((TransNumber.HasValue == true)) {
                 this.Adapter.SelectCommand.Parameters[1].Value = ((decimal)(TransNumber.Value));
@@ -4979,6 +5022,12 @@ namespace PayrollRegister.SagePayroll_ARMDataSetTableAdapters {
             }
             else {
                 this.Adapter.SelectCommand.Parameters[7].Value = global::System.DBNull.Value;
+            }
+            if ((Sort == null)) {
+                this.Adapter.SelectCommand.Parameters[8].Value = global::System.DBNull.Value;
+            }
+            else {
+                this.Adapter.SelectCommand.Parameters[8].Value = ((string)(Sort));
             }
             if ((this.ClearBeforeFill == true)) {
                 dataTable.Clear();
@@ -4991,7 +5040,7 @@ namespace PayrollRegister.SagePayroll_ARMDataSetTableAdapters {
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
         [global::System.ComponentModel.DataObjectMethodAttribute(global::System.ComponentModel.DataObjectMethodType.Select, true)]
-        public virtual SagePayroll_ARMDataSet.ftsp_CheckListDataTable GetData(global::System.Nullable<decimal> TransNumber, global::System.Nullable<global::System.DateTime> BeginCheckDate, global::System.Nullable<global::System.DateTime> EndCheckDate, string BeginEmployee, string EndEmployee, string Class1, global::System.Nullable<int> TrialFlag) {
+        public virtual SagePayroll_ARMDataSet.ftsp_CheckListDataTable GetData(global::System.Nullable<decimal> TransNumber, global::System.Nullable<global::System.DateTime> BeginCheckDate, global::System.Nullable<global::System.DateTime> EndCheckDate, string BeginEmployee, string EndEmployee, string Class1, global::System.Nullable<int> TrialFlag, string Sort) {
             this.Adapter.SelectCommand = this.CommandCollection[0];
             if ((TransNumber.HasValue == true)) {
                 this.Adapter.SelectCommand.Parameters[1].Value = ((decimal)(TransNumber.Value));
@@ -5034,6 +5083,12 @@ namespace PayrollRegister.SagePayroll_ARMDataSetTableAdapters {
             }
             else {
                 this.Adapter.SelectCommand.Parameters[7].Value = global::System.DBNull.Value;
+            }
+            if ((Sort == null)) {
+                this.Adapter.SelectCommand.Parameters[8].Value = global::System.DBNull.Value;
+            }
+            else {
+                this.Adapter.SelectCommand.Parameters[8].Value = ((string)(Sort));
             }
             SagePayroll_ARMDataSet.ftsp_CheckListDataTable dataTable = new SagePayroll_ARMDataSet.ftsp_CheckListDataTable();
             this.Adapter.Fill(dataTable);

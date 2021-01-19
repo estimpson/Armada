@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
   <AutoRefresh>0</AutoRefresh>
-	<DataSources>
-		<DataSource Name="SagePayroll_ARMDataSet">
-			<ConnectionProperties>
-				<DataProvider>System.Data.DataSet</DataProvider>
-				<ConnectString>/* Local Connection */</ConnectString>
-			</ConnectionProperties>
-			<rd:DataSourceID>4f0a57bf-131a-4099-a721-3e4aba4e925a</rd:DataSourceID>
-		</DataSource>
-	</DataSources>
+  <DataSources>
+    <DataSource Name="SagePayroll_ARMDataSet">
+      <ConnectionProperties>
+        <DataProvider>System.Data.DataSet</DataProvider>
+        <ConnectString>/* Local Connection */</ConnectString>
+      </ConnectionProperties>
+      <rd:DataSourceID>4f0a57bf-131a-4099-a721-3e4aba4e925a</rd:DataSourceID>
+    </DataSource>
+  </DataSources>
   <DataSets>
     <DataSet Name="checkSummaryDataSet">
-	    <Query>
-		    <DataSourceName>SagePayroll_ARMDataSet</DataSourceName>
+      <Query>
+        <DataSourceName>SagePayroll_ARMDataSet</DataSourceName>
         <QueryParameters>
           <QueryParameter Name="@CheckHeader">
             <Value>=Parameters!CheckHeader.Value</Value>
@@ -37,17 +37,9 @@
             <Value>=Parameters!TrialFlag.Value</Value>
           </QueryParameter>
         </QueryParameters>
-		    <CommandText>/* Local Query */</CommandText>
-	    </Query>
+        <CommandText>/* Local Query */</CommandText>
+      </Query>
       <Fields>
-        <Field Name="GrossHours">
-          <DataField>GrossHours</DataField>
-          <rd:TypeName>System.Decimal</rd:TypeName>
-        </Field>
-        <Field Name="GrossEarned">
-          <DataField>GrossEarned</DataField>
-          <rd:TypeName>System.Decimal</rd:TypeName>
-        </Field>
         <Field Name="EMPLOYEE">
           <DataField>EMPLOYEE</DataField>
           <rd:TypeName>System.String</rd:TypeName>
@@ -55,14 +47,6 @@
         <Field Name="FULLNAME">
           <DataField>FULLNAME</DataField>
           <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="TaxesWithHeld">
-          <DataField>TaxesWithHeld</DataField>
-          <rd:TypeName>System.Decimal</rd:TypeName>
-        </Field>
-        <Field Name="Deductions">
-          <DataField>Deductions</DataField>
-          <rd:TypeName>System.Decimal</rd:TypeName>
         </Field>
         <Field Name="SSN">
           <DataField>SSN</DataField>
@@ -72,15 +56,35 @@
           <DataField>TRANSDATE</DataField>
           <rd:TypeName>System.DateTime</rd:TypeName>
         </Field>
+        <Field Name="TRANSNUM">
+          <DataField>TRANSNUM</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="GrossHours">
+          <DataField>GrossHours</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="GrossEarned">
+          <DataField>GrossEarned</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="TaxesWithHeld">
+          <DataField>TaxesWithHeld</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="Deductions">
+          <DataField>Deductions</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
       </Fields>
-	    <rd:DataSetInfo>
-		    <rd:DataSetName>SagePayroll_ARMDataSet</rd:DataSetName>
-		    <rd:SchemaPath>C:\GitHub\Armada\Reporting\PayrollRegister\SagePayroll_ARMDataSet.xsd</rd:SchemaPath>
-		    <rd:TableName>ftsp_CheckSummary</rd:TableName>
-		    <rd:TableAdapterFillMethod>Fill</rd:TableAdapterFillMethod>
-		    <rd:TableAdapterGetDataMethod>GetData</rd:TableAdapterGetDataMethod>
-		    <rd:TableAdapterName>ftsp_CheckSummaryTableAdapter</rd:TableAdapterName>
-	    </rd:DataSetInfo>
+      <rd:DataSetInfo>
+        <rd:DataSetName>SagePayroll_ARMDataSet</rd:DataSetName>
+        <rd:SchemaPath>C:\GitHub\Armada\Reporting\PayrollRegister\SagePayroll_ARMDataSet.xsd</rd:SchemaPath>
+        <rd:TableName>ftsp_CheckSummary</rd:TableName>
+        <rd:TableAdapterFillMethod>Fill</rd:TableAdapterFillMethod>
+        <rd:TableAdapterGetDataMethod>GetData</rd:TableAdapterGetDataMethod>
+        <rd:TableAdapterName>ftsp_CheckSummaryTableAdapter</rd:TableAdapterName>
+      </rd:DataSetInfo>
     </DataSet>
   </DataSets>
   <ReportSections>
@@ -494,7 +498,7 @@
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>=First(Trim(Fields!FULLNAME.Value) &amp; " - " &amp; Trim(Fields!EMPLOYEE.Value) &amp; "  SSN is " &amp; Fields!SSN.Value, "checkSummaryDataSet")</Value>
+                    <Value>=First(Trim(Fields!FULLNAME.Value) &amp; " - " &amp; Trim(Fields!EMPLOYEE.Value) &amp; "  SSN is " &amp; Fields!SSN.Value &amp; IIf(Len(Fields!TRANSNUM.Value)&gt;0, "  #" &amp; Fields!TRANSNUM.Value, ""), "checkSummaryDataSet")</Value>
                     <Style>
                       <FontSize>12pt</FontSize>
                     </Style>
@@ -504,8 +508,9 @@
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>FULLNAME</rd:DefaultName>
+            <Left>0in</Left>
             <Height>0.225in</Height>
-            <Width>5.2in</Width>
+            <Width>6.09583in</Width>
             <ZIndex>15</ZIndex>
             <Style>
               <Border>
@@ -534,9 +539,10 @@
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>TRANSDATE</rd:DefaultName>
-            <Left>5.65083in</Left>
+            <Top>0.01111in</Top>
+            <Left>6.38in</Left>
             <Height>0.225in</Height>
-            <Width>2.34917in</Width>
+            <Width>1.62in</Width>
             <ZIndex>16</ZIndex>
             <Style>
               <Border>
