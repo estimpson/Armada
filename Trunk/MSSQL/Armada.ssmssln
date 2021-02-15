@@ -13,6 +13,16 @@ Project("{4F2E2C19-372F-40D8-9FA7-9D2138C6997A}") = "EDI.NOVEM", "EDI.NOVEM\EDI.
 EndProject
 Project("{4F2E2C19-372F-40D8-9FA7-9D2138C6997A}") = "SagePayroll.Register", "SagePayroll.Register\SagePayroll.Register.ssmssqlproj", "{5FFA19E6-60B1-4959-BF4E-DE1A14175924}"
 EndProject
+Project("{4F2E2C19-372F-40D8-9FA7-9D2138C6997A}") = "EDI.RIVIAN", "EDI.RIVIAN\EDI.RIVIAN.ssmssqlproj", "{F45A082B-D818-4F54-B544-39DF5CE2B66B}"
+EndProject
+Project("{4F2E2C19-372F-40D8-9FA7-9D2138C6997A}") = "FxArmada.FXSYS", "FxArmada.FXSYS\FxArmada.FXSYS.ssmssqlproj", "{D0EC3F72-6CD2-4292-9804-4FA71C46044C}"
+EndProject
+Project("{4F2E2C19-372F-40D8-9FA7-9D2138C6997A}") = "FxArmada.support", "FxArmada.support\FxArmada.support.ssmssqlproj", "{4D25913C-5F53-49C3-B18D-73F3526C675A}"
+EndProject
+Project("{4F2E2C19-372F-40D8-9FA7-9D2138C6997A}") = "FxSYS.dbo", "FxSYS.dbo\FxSYS.dbo.ssmssqlproj", "{EC3A8AD0-016E-49E3-8FE6-523BC12F7F05}"
+EndProject
+Project("{4F2E2C19-372F-40D8-9FA7-9D2138C6997A}") = "LoadTables", "LoadTables\LoadTables.ssmssqlproj", "{42818906-089B-449D-8C6B-924201984370}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Default|Default = Default|Default
@@ -22,8 +32,12 @@ Global
 		{353D2783-7078-4A5B-B1D5-4A5C3BA7139C}.Default|Default.ActiveCfg = Default
 		{5893E204-76B1-4C63-9620-6709B0D654FB}.Default|Default.ActiveCfg = Default
 		{5EE50FAD-9D3E-482D-8A78-D22C217E3D0F}.Default|Default.ActiveCfg = Default
-		{55231481-C43C-472E-9557-034719677490}.Default|Default.ActiveCfg = Default
 		{5FFA19E6-60B1-4959-BF4E-DE1A14175924}.Default|Default.ActiveCfg = Default
+		{F45A082B-D818-4F54-B544-39DF5CE2B66B}.Default|Default.ActiveCfg = Default
+		{D0EC3F72-6CD2-4292-9804-4FA71C46044C}.Default|Default.ActiveCfg = Default
+		{4D25913C-5F53-49C3-B18D-73F3526C675A}.Default|Default.ActiveCfg = Default
+		{EC3A8AD0-016E-49E3-8FE6-523BC12F7F05}.Default|Default.ActiveCfg = Default
+		{42818906-089B-449D-8C6B-924201984370}.Default|Default.ActiveCfg = Default
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
