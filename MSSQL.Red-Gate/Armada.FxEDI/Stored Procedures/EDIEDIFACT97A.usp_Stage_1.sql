@@ -230,8 +230,6 @@ begin
 
 /*			- prepare Ship Schedules Supplemental.*/
 
---Begin Transaction
-
 declare
 		@ShipScheduleSupplemental table
 	(	RawDocumentGUID uniqueidentifier
@@ -642,8 +640,8 @@ declare
 	,	ShipFromCode =  coalesce(	ed.fulldata.value('(/TRN-DELJIT/LOOP-NAD/SEG-NAD [DE[.="SF"][@code="3035"]]/CE/DE[@code="3039"])[1]', 'varchar(15)'),''	)								
 	,	SupplierCode =  coalesce(	ed.fulldata.value('(/TRN-DELJIT/LOOP-NAD/SEG-NAD [DE[.="SU"][@code="3035"]]/CE/DE[@code="3039"])[1]', 'varchar(15)'),''	)
 	, HeaderDeliveryDate = ed.fulldata.value('(/TRN-DELJIT/SEG-DTM/CE/DE[@code="2380"])[2]', 'varchar(15)')
-	,	SEQData = EDIData.Releases.query('../../../LOOP-SEQ')		
-	,	LINData = EDIData.Releases.query('../../LOOP-LIN')
+	,	SEQData = EDIData.Releases.query('../..')		
+	,	LINData = EDIData.Releases.query('..')
 	,	Data = EDIData.Releases.query('.')
 	from
 		EDI.EDIDocuments ed
@@ -1924,7 +1922,7 @@ if	exists
 	from
 		@ShipScheduleQuantities
 	where
-		QuantityQualifier in ('1')
+		QuantityQualifier in ('1','21')
 
 	select
 		@Error = @@Error,
