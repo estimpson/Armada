@@ -2,11 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
-
-
-
-
 CREATE procedure [EDI2002].[usp_Process]
 	@TranDT datetime = null out
 ,	@Result integer = null out
@@ -622,14 +617,18 @@ Union all
 select
 	ReleaseType = 2
 ,	OrderNo = bo.BlanketOrderNo
-,	Type = (	case 
-					when bo.PlanningFlag = 'P' then 2
-					when bo.PlanningFlag = 'F' then 1
-					when bo.planningFlag = 'A' and fr.ScheduleType not in ('C', 'A', 'Z') then 2
-					else 1
-					end
-			  )
-,	ReleaseDT = dateadd(dd, ReleaseDueDTOffsetDays, fr.ReleaseDT)
+,	Type = 
+		case
+			when bo.PlanningFlag = 'P' then
+				2
+			when bo.PlanningFlag = 'A'
+				and fr.ScheduleType not in
+				( 'C', 'A', 'Z' ) then
+				2
+			else
+				1
+		end
+,	ReleaseDT = dateadd(dd, bo.ReleaseDueDTOffsetDays, fr.ReleaseDT)
 ,	BlanketPart = bo.PartCode
 ,	CustomerPart = bo.CustomerPart
 ,	ShipToID = bo.ShipToCode
@@ -637,30 +636,70 @@ select
 ,	ModelYear = bo.ModelYear
 ,	OrderUnit = bo.OrderUnit
 ,	ReleaseNo = fr.ReleaseNo
-,	QtyRelease = fr.ReleaseQty
-,	StdQtyRelease = fr.ReleaseQty
-,	ReferenceAccum = case bo.ReferenceAccum 
-												When 'N' 
-												then coalesce(convert(int,bo.AccumShipped),0)
-												When 'C' 
-												then coalesce(convert(int,fa.LastAccumQty),0)
-												else coalesce(convert(int,bo.AccumShipped),0)
-												end
-,	CustomerAccum = case bo.AdjustmentAccum 
-												When 'N' 
-												then coalesce(convert(int,bo.AccumShipped),0)
-												When 'P' 
-												then coalesce(convert(int,faa.PriorCUM),0)
-												else coalesce(convert(int,fa.LastAccumQty),0)
-												end
+,	QtyRelease =
+		case
+			when
+				bo.ShipToCode like 'GRA%' then
+					fr.ReleaseQty - coalesce
+						(	lag(fr.ReleaseQty, 1) over (partition by fr.ShipToCode, fr.CustomerPart order by fr.ReleaseDT, fr.ReleaseQty)
+						,	case bo.AdjustmentAccum
+								when 'N' then
+									coalesce(convert(int, bo.AccumShipped), 0)
+								when 'P' then
+									coalesce(convert(int, faa.PriorCUM), 0)
+								else
+									coalesce(convert(int, fa.LastAccumQty), 0)
+							end
+						)
+			else
+				fr.ReleaseQty
+		end
+,	StdQtyRelease = 
+		case
+			when
+				bo.ShipToCode like 'GRA%' then
+					fr.ReleaseQty - coalesce
+						(	lag(fr.ReleaseQty, 1) over (partition by fr.ShipToCode, fr.CustomerPart order by fr.ReleaseDT, fr.ReleaseQty)
+						,	case bo.AdjustmentAccum
+								when 'N' then
+									coalesce(convert(int, bo.AccumShipped), 0)
+								when 'P' then
+									coalesce(convert(int, faa.PriorCUM), 0)
+								else
+									coalesce(convert(int, fa.LastAccumQty), 0)
+							end
+						)
+			else
+				fr.ReleaseQty
+		end
+,	ReferenceAccum =
+		case bo.ReferenceAccum
+			when 'N' then
+				coalesce(convert(int, bo.AccumShipped), 0)
+			when 'C' then
+				coalesce(convert(int, fa.LastAccumQty), 0)
+			else
+				coalesce(convert(int, bo.AccumShipped), 0)
+		end
+,	CustomerAccum =
+		case bo.AdjustmentAccum
+			when 'N' then
+				coalesce(convert(int, bo.AccumShipped), 0)
+			when 'P' then
+				coalesce(convert(int, faa.PriorCUM), 0)
+			else
+				coalesce(convert(int, fa.LastAccumQty), 0)
+		end
 ,	NewDocument =
-		(	select
-				min(c.NewDocument)
-			from
-				@Current830s c
-			where
-				c.RawDocumentGUID = fh.RawDocumentGUID
-		)
+	(
+		select
+			min(c.NewDocument)
+		from
+			@Current830s c
+		where
+			c.RawDocumentGUID = fh.RawDocumentGUID
+	)
+--,	fh.RawDocumentGUID
 from
 	EDI2002.PlanningHeaders fh
 	join EDI2002.PlanningReleases fr
@@ -668,44 +707,55 @@ from
 	left join EDI2002.PlanningAccums fa
 		on fa.RawDocumentGUID = fh.RawDocumentGUID
 		and fa.CustomerPart = fr.CustomerPart
-		and	fa.ShipToCode = fr.ShipToCode
-		and	coalesce(fa.CustomerPO,'') = coalesce(fr.CustomerPO,'')
-		and	coalesce(fa.CustomerModelYear,'') = coalesce(fr.CustomerModelYear,'')
+		and fa.ShipToCode = fr.ShipToCode
+		and coalesce(fa.CustomerPO, '') = coalesce(fr.CustomerPO, '')
+		and coalesce(fa.CustomerModelYear, '') = coalesce(fr.CustomerModelYear, '')
 	left join EDI2002.PlanningAuthAccums faa
 		on faa.RawDocumentGUID = fh.RawDocumentGUID
 		and faa.CustomerPart = fr.CustomerPart
-		and	faa.ShipToCode = fr.ShipToCode
-		and	coalesce(faa.CustomerPO,'') = coalesce(fr.CustomerPO,'')
-		and	coalesce(faa.CustomerModelYear,'') = coalesce(fr.CustomerModelYear,'')
+		and faa.ShipToCode = fr.ShipToCode
+		and coalesce(faa.CustomerPO, '') = coalesce(fr.CustomerPO, '')
+		and coalesce(faa.CustomerModelYear, '') = coalesce(fr.CustomerModelYear, '')
 	join EDI2002.BlanketOrders bo
 		on bo.EDIShipToCode = fr.ShipToCode
 		and bo.CustomerPart = fr.CustomerPart
 		and
-		(	bo.CheckCustomerPOPlanning = 0
+		(
+			bo.CheckCustomerPOPlanning = 0
 			or bo.CustomerPO = fr.CustomerPO
 		)
 		and
-		(	bo.CheckModelYearPlanning = 0
+		(
+			bo.CheckModelYearPlanning = 0
 			or bo.ModelYear830 = fr.CustomerModelYear
 		)
-		join
-				(Select * From @Current830s) c 
-			on
-				c.CustomerPart = bo.customerpart and
-				c.ShipToCode = bo.EDIShipToCode and
-				(	bo.CheckCustomerPOShipSchedule = 0
-							or bo.CustomerPO = c.CustomerPO
-				)
-					and	(	bo.CheckModelYearShipSchedule = 0
-							or bo.ModelYear862 = c.CustomerModelYear
-				)
-where		c.RawDocumentGUID = fr.RawDocumentGUID
-	and		fh.Status = 1 --(select dbo.udf_StatusValue('EDI2002.PlanningHeaders', 'Status', 'Active'))
-	and		fr.Status = 1 --(select dbo.udf_StatusValue('EDI2002.PlanningReleases', 'Status', 'Active'))
+	join
+		(	select
+				*
+			from
+				@Current830s
+		) c
+		on c.CustomerPart = bo.CustomerPart
+		and c.ShipToCode = bo.EDIShipToCode
+		and
+		(
+			bo.CheckCustomerPOShipSchedule = 0
+			or bo.CustomerPO = c.CustomerPO
+		)
+		and
+		(
+			bo.CheckModelYearShipSchedule = 0
+			or bo.ModelYear862 = c.CustomerModelYear
+		)
+where
+	c.RawDocumentGUID = fr.RawDocumentGUID
+	and fh.Status = 1 --(select dbo.udf_StatusValue('EDI2002.PlanningHeaders', 'Status', 'Active'))
+	and fr.Status = 1	--(select dbo.udf_StatusValue('EDI2002.PlanningReleases', 'Status', 'Active'))
 	--and coalesce(nullif(fr.Scheduletype,''),'4') in ('4')
-	
 order by
-	2,1,4
+	2
+,	1
+,	4
 
 /*		Calculate orders to update. */
 update
@@ -1918,9 +1968,6 @@ set	@Error = @@error
 
 select
 	@Error, @ProcReturn, @TranDT, @ProcResult
-go
-
-
 go
 
 commit transaction
