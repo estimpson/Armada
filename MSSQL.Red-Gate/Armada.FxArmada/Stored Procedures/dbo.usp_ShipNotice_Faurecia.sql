@@ -2,13 +2,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
-
-
-
-
-
-CREATE PROCEDURE [dbo].[usp_ShipNotice_Faurecia]  (@shipper INT)
+CREATE procedure [dbo].[usp_ShipNotice_Faurecia]  (@shipper INT)
 AS
 BEGIN
 
@@ -218,7 +212,7 @@ DECLARE
 		@NADMaterialIssuerID = coalesce(es.material_issuer,''),
 		@BuyerName = 'Armada Rubber',
 		@TDTProNumber = s.Pro_number,
-		@REFMAValue = ( Select top 1 release_no from shipper_detail where shipper = @shipper and nullif(release_no,'') is Not NULL )
+		@REFMAValue = ( Select top 1 customer_po + release_no from shipper_detail where shipper = @shipper and nullif(release_no,'') is Not NULL )
 	from
 		Shipper s
 	join
