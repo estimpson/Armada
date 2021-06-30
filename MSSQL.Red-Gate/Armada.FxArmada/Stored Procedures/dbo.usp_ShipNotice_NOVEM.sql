@@ -3,7 +3,7 @@ GO
 SET ANSI_NULLS ON
 GO
 
-create procedure [dbo].[usp_ShipNotice_NOVEM]
+CREATE procedure [dbo].[usp_ShipNotice_NOVEM]
 	@ShipperID int
 ,	@TranDT datetime = null out
 ,	@Result integer = null out
@@ -87,8 +87,12 @@ insert
 select
 	'01'
 		-- 001-002: LineNo
+	+	'351'
+		-- 003-005: BGM0101
 	+	convert(char(35), s.id)
-		-- 003-037: BGM0201
+		-- 006-041: BGM0201
+	+	convert(char(3), '9')
+		-- 041-043: BGM03
 from
 	dbo.shipper s
 where
@@ -102,9 +106,21 @@ insert
 select
 	'02'
 		-- 001-002: LineNo
+	+	convert(char(3), '132') -- ShipDate
+		-- 003-005: DTM0101
+	+	convert(char(35), convert(char(8), getdate() + 2, 112) + left(replace(convert(char, s.date_shipped, 108), ':', ''),4)) + '203' -- DateTime
+		-- 006-040: DTM0102
+from
+	dbo.shipper s
+where
+	s.id = @ShipperID
+union all
+select
+	'02'
+		-- 001-002: LineNo
 	+	convert(char(3), '137') -- CurrentDate
 		-- 003-005: DTM0101
-	+	convert(char(15), convert(char(8), getdate(), 112) + left(replace(convert(char, getdate(), 108), ':', ''),4) + '203') -- DateTime
+	+	convert(char(35), convert(char(8), getdate(), 112) + left(replace(convert(char, getdate(), 108), ':', ''),4)) + '203' -- DateTime
 		-- 006-020: DTM0102
 from
 	dbo.shipper s
@@ -116,19 +132,7 @@ select
 		-- 001-002: LineNo
 	+	convert(char(3), '11') -- DeliveryDate
 		-- 003-005: DTM0101
-	+	convert(char(35), convert(char(8), getdate(), 112) + left(replace(convert(char, getdate(), 108), ':', ''),4) + '203') -- DateTime
-		-- 006-040: DTM0102
-from
-	dbo.shipper s
-where
-	s.id = @ShipperID
-union all
-select
-	'02'
-		-- 001-002: LineNo
-	+	convert(char(3), '132') -- ShipDate
-		-- 003-005: DTM0101
-	+	convert(char(35), convert(char(8), getdate() + 2, 112) + left(replace(convert(char, s.date_shipped, 108), ':', ''),4) + '203') -- DateTime
+	+	convert(char(35), convert(char(8), getdate(), 112) + left(replace(convert(char, getdate(), 108), ':', ''),4)) + '203' -- DateTime
 		-- 006-040: DTM0102
 from
 	dbo.shipper s
@@ -143,12 +147,12 @@ insert
 select
 	'03'
 		-- 001-002: LineNo
-	+	convert(char(3), 'G')
+	+	convert(char(3), 'N')
 		-- 003-005: Measure MEA0201
 	+	convert(char(3), 'LB')
 		-- 006-008: Measure MEA0301
-	+	convert(char(18), convert(int, s.gross_weight))
-		-- 009-026: Measure MEA0302
+	+	convert(char(18), convert(int, s.net_weight))
+		-- 009-026: Measure MEA0301
 from
 	dbo.shipper s
 where
@@ -157,12 +161,12 @@ union all
 select
 	'03'
 		-- 001-002: LineNo
-	+	convert(char(3), 'N')
+	+	convert(char(3), 'G')
 		-- 003-005: Measure MEA0201
 	+	convert(char(3), 'LB')
 		-- 006-008: Measure MEA0301
-	+	convert(char(18), convert(int, s.net_weight))
-		-- 009-026: Measure MEA0301
+	+	convert(char(18), convert(int, s.gross_weight))
+		-- 009-026: Measure MEA0302
 from
 	dbo.shipper s
 where
@@ -197,8 +201,10 @@ insert
 select
 	'04'
 		-- 001-002: LineNo
+	+	convert(char(3), 'MB')
+		-- 003-005: RFF0101
 	+	convert(char(35), coalesce(s.bill_of_lading_number, s.id))
-		-- 003-037: RFF0102
+		-- 006-040: RFF0102
 from
 	dbo.shipper s
 where
@@ -251,22 +257,45 @@ from
 where
 	s.id = @ShipperID
 
---	Line 08 -- Dock Code
+--	Line 09 -- Dock Code
 insert
 	#ASNFlatFile
 (	LineData
 )
 select
-	'08'
+	'09'
 		-- 001-002: LineNo
+	+	convert(char(3), '11')
+		-- 003-005: LOC01
 	+	convert(char(25), coalesce(s.shipping_dock, ''))
-		-- 003-027: LOC0201
+		-- 006-029: LOC0201
 from
 	dbo.shipper s
 where
 	s.id = @ShipperID
 
---	Line 11 -- Carrier
+--	Line 10 -- Carrier
+insert
+	#ASNFlatFile
+(	LineData
+)
+select
+	'10'
+		-- 001-002: LineNo
+	+	convert(char(3), '25') -- Transport Stage Type
+		-- 003-005: TDT01
+	+	convert(char(3), '30') -- Mode of Transport
+		-- 006-008: TDT0301
+	+	convert(char(17), s.ship_via) -- Carrier Id
+		-- 009-025: TDT0501
+	+	convert(char(3), '') -- Carrier Type
+		-- 026-028: TDT0503
+from
+	dbo.shipper s
+where
+	s.id = @ShipperID
+
+--	Line 11 -- Trailer
 insert
 	#ASNFlatFile
 (	LineData
@@ -274,27 +303,10 @@ insert
 select
 	'11'
 		-- 001-002: LineNo
-	+	convert(char(17), '') -- Delivery Reference No (not used)
-		-- 003-019: TDT02
-	+	convert(char(17), '') -- Delivery Trans Mode (not used)
-		-- 020-036: TDT0302
-	+	convert(char(17), s.ship_via) -- Delivery Carrier
-		-- 037-053: TDT00501
-from
-	dbo.shipper s
-where
-	s.id = @ShipperID
-
---	Line 12 -- Trailer
-insert
-	#ASNFlatFile
-(	LineData
-)
-select
-	'12'
-		-- 001-002: LineNo
+	+	convert(char(3), 'TE') -- Equipment Type
+		-- 003-005: TDT01
 	+	convert(char(17), s.truck_number) -- Trailer Number
-		-- 003-019: EQD0201
+		-- 006-022: EQD0201
 from
 	dbo.shipper s
 where
@@ -360,6 +372,16 @@ while
 
 	if	@@FETCH_STATUS != 0 break
 
+	-- Line 12
+	insert
+		#ASNFlatFile
+	(	LineData
+	)
+	select
+		'12'
+		+	convert(char(3), '4')  -- Package Level Code
+			-- 027-029: 1CPS03
+
 	-- Line 13
 	insert
 		#ASNFlatFile
@@ -368,27 +390,29 @@ while
 	select
 		'13'
 			-- 001-002: LineNo
-		+	convert(char(12), @cpsCounter)
-			-- 003-014: 1CPS01
-		+	convert(char(12), '')
-			-- 015-026: 1CPS02
-		+	convert(char(3), '1')
-			-- 027-029: 1CPS03
+		+	convert(char(10), @packCount)
+			-- 003-012: 1PAC01
+		+	convert(char(3), '')
+			-- 013-015: 1PAC0201
+		+	convert(char(3), '')
+			-- 016-018: 1PAC0202
+		+	convert(char(17), @packageCodeEDI)
+			-- 019-035: 1PAC0301
+		+	convert(char(3), '92')
+			-- 036-038: 1PAC00303
 
-	-- Line 14
+	-- Line 15
 	insert
 		#ASNFlatFile
 	(	LineData
 	)
 	select
-		'14'
+		'15'
 			-- 001-002: LineNo
-		+	convert(char(10), @packCount)
-			-- 003-012: 1PAC01
-		+	convert(char(3), '')
-			-- 013-015: 1PAC0202
-		+	convert(char(17), @packageCodeEDI)
-			-- 016-032: 1PAC0301
+		+	convert(char(17), @quantity)
+			-- 003-019: 1QTY0102
+		+	convert(char(17), 'PCE')
+			-- 020-022: 1QTY0103
 
 	-- Line 16
 	insert
@@ -440,40 +464,47 @@ while
 		select
 			'17'
 				-- 001-002: LineNo
-			+	convert(char(9), @serial)
+			+	convert(char(35), @serial)
 				-- 003-011: 1GIN0201
 
 	end
 
-	-- Line 18
+	-- Line 22
 	insert
 		#ASNFlatFile
 	(	LineData
 	)
 	select
-		'18'
+		'22'
 			-- 001-002: LineNo
 		+	convert(char(35), @customerPart)
 			-- 003-037: 1LIN0301
-		+	convert(char(3), '')
-			-- 038-040: 1LIN06
-		+	convert(char(35), @part)
-			-- 041-075: 1PIA0201
-		+	convert(char(3), 'SA')
-			-- 076-079: 1PIA0202
 
-	-- Line 20
+	-- Line 23
 	insert
 		#ASNFlatFile
 	(	LineData
 	)
 	select
-		'20'
+		'23'
 			-- 001-002: LineNo
-		+	convert(char(17), @quantity)
-			-- 003-019: 1QTY0102
-		+	convert(char(17), 'PCE')
-			-- 020-022: 1QTY0103
+		+	convert(char(35), @part)
+			-- 003-037: 1PIA0201
+
+	-- Line 24
+	insert
+		#ASNFlatFile
+	(	LineData
+	)
+	select
+		'24'
+			-- 001-002: LineNo
+		+	convert(char(3), '12') -- Quantity Type (Despatch)
+			-- 003-005: 1QTY0101
+		+	convert(char(17), @quantity) -- Quantity
+			-- 006-022: 1QTY0102
+		+	convert(char(3), 'PCE') -- UoM
+			-- 023-025: 1QTY0103
 
 	-- Line 21
 	insert
@@ -481,7 +512,7 @@ while
 	(	LineData
 	)
 	select
-		'21'
+		'25'
 			-- 001-002: LineNo
 		+	convert(char(17), 'USA')
 			-- 003-005: 1ALI01
@@ -492,10 +523,12 @@ while
 	(	LineData
 	)
 	select
-		'28'
+		'26'
 			-- 001-002: LineNo
+		+	convert(char(3), 'ON') -- Reference Type (Order Number)
+			-- 003-005: 1RFF0101
 		+	convert(char(35), @customerPO)
-			-- 003-037: 1RFF0102
+			-- 006-040: 1RFF0102
 
 	set	@cpsCounter += 1
 
@@ -516,12 +549,12 @@ insert
 (	LineData
 )
 select
-	'29'
+	'27'
 		-- 001-002: LineNo
-	+	convert(char(3), '171') -- CurrentDate
-		-- 003-005: DTM0101
-	+	convert(char(15), convert(char(8), getdate(), 112) + left(replace(convert(char, getdate(), 108), ':', ''),4) + '203') -- DateTime
-		-- 006-020: DTM0102
+	+	convert(char(35), convert(char(8), getdate(), 112) + left(replace(convert(char, getdate(), 108), ':', ''),4)) -- DateTime
+		-- 003-037: DTM0102
+	+	convert(char(3), '203') -- CurrentDate
+		-- 038-040: DTM0101
 --- </Body>
 
 ---	<CloseTran AutoCommit=Yes>
