@@ -15,6 +15,8 @@ CREATE PROCEDURE [dbo].[ARStatements] @as_begbillcustomer VARCHAR(25),
 AS
 BEGIN
 
+-- 17-Nov-2020 Kay has a custom version.
+
 -- 08-Feb-2010 Check number is now varchar.
 
 -- 02-Jun-2008 Added IsNulls around ar_customers.customer_class.

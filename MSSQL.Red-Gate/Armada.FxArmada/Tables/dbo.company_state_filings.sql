@@ -15,7 +15,10 @@ CREATE TABLE [dbo].[company_state_filings]
 [rate_id] [varchar] (25) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [rate_event] [varchar] (25) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [reimbursable_employer] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[contact_email] [varchar] (250) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+[contact_email] [varchar] (250) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[fli_rate_id] [varchar] (25) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[fli_rate_event_e] [varchar] (25) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[fli_rate_event_r] [varchar] (25) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[company_state_filings] ADD CONSTRAINT [pk_company_state_filings] PRIMARY KEY CLUSTERED  ([company], [state_id]) ON [PRIMARY]

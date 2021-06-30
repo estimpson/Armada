@@ -23,7 +23,13 @@ CREATE TABLE [dbo].[employee_tax_types]
 [cost_account_code] [varchar] (25) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [employee_tax_percent] [decimal] (18, 6) NULL,
 [employee_md_status] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[employee_md_local_tax_pct] [decimal] (18, 6) NULL
+[employee_md_local_tax_pct] [decimal] (18, 6) NULL,
+[w4_form] [varchar] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[w4_higher_rate] [varchar] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[annual_tax_credits] [decimal] (18, 6) NULL,
+[annual_other_income] [decimal] (18, 6) NULL,
+[annual_deductions] [decimal] (18, 6) NULL,
+[exemption_amount] [decimal] (18, 6) NULL
 ) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[employee_tax_types] ADD CONSTRAINT [pk_employee_tax_types] PRIMARY KEY CLUSTERED  ([employee], [tax_type]) ON [PRIMARY]

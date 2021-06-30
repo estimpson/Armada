@@ -27,7 +27,9 @@ CREATE TABLE [dbo].[pay_types]
 [t4a] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [workstudy] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [time_of_day] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[pay_periods_taxed] [smallint] NULL
+[pay_periods_taxed] [smallint] NULL,
+[qualified_sick_leave] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[qualified_family_leave] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[pay_types] ADD CONSTRAINT [pk_pay_types] PRIMARY KEY CLUSTERED  ([pay_type]) ON [PRIMARY]

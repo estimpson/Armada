@@ -35,7 +35,9 @@ CREATE TABLE [dbo].[payroll_vouchers]
 [document_source] [varchar] (25) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [dd_foreign] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [dd_foreign_bank] [varchar] (25) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[check_type_before_void] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+[check_type_before_void] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[qualified_sick_leave_ssr] [decimal] (18, 6) NULL,
+[qualified_family_leave_ssr] [decimal] (18, 6) NULL
 ) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[payroll_vouchers] ADD CONSTRAINT [pk_payroll_vouchers] PRIMARY KEY CLUSTERED  ([payroll_calculation_id], [voucher], [voucher_sequence], [check_void]) ON [PRIMARY]

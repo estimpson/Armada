@@ -12,10 +12,13 @@ BEGIN
 -- Procedure to update journal entry lines and ledger balances
 -- with GL cost transactions for a specific period.
 
--- 23-May-2014 Modified to use gl_cost_transactions rather than ledger_balances to update
---             the current year profit loss account.  Otherwise, we run into problems
---             when an account is defined as a posting account at more than one
---             organizational level.
+-- 26-Nov-2019	Modified to replace NULL with 0 when creating/updating the current year
+--		profit/loss account balances.
+
+-- 23-May-2014	Modified to use gl_cost_transactions rather than ledger_balances to update
+--		the current year profit loss account.  Otherwise, we run into problems
+--		when an account is defined as a posting account at more than one
+-- 		organizational level.
 
   DECLARE @s_profitlossaccount varchar(50),
           @s_fiscalyear VARCHAR(25),
@@ -165,7 +168,7 @@ BEGIN
                          @s_profitlossaccount,
                          'ACTUAL',
                          @ai_period,
-                         ROUND(SUM(gl_cost_transactions.amount),2),
+                         ISNULL(ROUND(SUM(gl_cost_transactions.amount),2), 0),
                          GetDate(),
                          'DBA'
                     FROM gl_cost_transactions, journal_entries, ledger_accounts, chart_of_accounts
@@ -189,7 +192,7 @@ BEGIN
                 -- The current year P/L account is already in ledger_balances
                 UPDATE ledger_balances
                    SET period_amount = period_amount +
-                  (SELECT ROUND(SUM(gl_cost_transactions.amount),2)
+                  ISNULL((SELECT ROUND(SUM(gl_cost_transactions.amount),2)
                      FROM gl_cost_transactions, journal_entries, ledger_accounts, chart_of_accounts
                     WHERE gl_cost_transactions.fiscal_year = @s_fiscalyear AND
                           gl_cost_transactions.ledger = @s_ledger AND
@@ -206,7 +209,7 @@ BEGIN
                           chart_of_accounts.fiscal_year = ledger_accounts.fiscal_year AND
                           chart_of_accounts.coa = ledger_accounts.coa AND
                           chart_of_accounts.account = ledger_accounts.account AND
-                          chart_of_accounts.debit_credit_stat <> 'S'),
+                          chart_of_accounts.debit_credit_stat <> 'S'), 0),
                           changed_date = GetDate(),
                           changed_user_id = 'DBA'
                     WHERE fiscal_year = @s_fiscalyear AND
@@ -238,7 +241,7 @@ BEGIN
                        END,
                        'ACTUAL',
                        @ai_period,
-                       ROUND(SUM(gl_cost_transactions.amount),2),
+                       ISNULL(ROUND(SUM(gl_cost_transactions.amount),2), 0),
                        CONVERT(datetime,GETDATE()),
                        'DBA'
                   FROM gl_cost_transactions, journal_entries, ledger_accounts, chart_of_accounts
