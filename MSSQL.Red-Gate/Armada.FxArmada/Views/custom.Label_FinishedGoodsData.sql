@@ -54,7 +54,7 @@ from
 		,	MfgDateMMM = upper(replace(convert(varchar, o.last_time, 106), ' ', ''))
 		,	MfgDateMMMDashes = upper(replace(convert(varchar, o.last_time, 106), ' ', '-'))
 		,	GrossWeight = convert(numeric(10,2), round(o.weight + o.tare_weight, 2))
-		,	GrossWeightKilograms = convert(numeric(10,0),((o.weight + o.tare_weight) / 2.2))
+		,	GrossWeightKilograms = coalesce(nullif(convert(numeric(10,0),((o.weight + o.tare_weight) / 2.2)), 0), 1)
 		,	NetWeightKilograms = convert(numeric(10,0),((o.weight) / 2.2))
 		,	NetWeight = convert(numeric(10,2), round(o.weight,2))
 		,	TareWeight = convert(numeric(10,2), round(o.tare_weight,2))
@@ -150,15 +150,4 @@ from
 				rl.name = coalesce(oh.box_label, pi.label_format)
 			cross join dbo.parameters param
 	) rawLabelData
-
-
-	
-
-
-
-
-
-
-
-
 GO
