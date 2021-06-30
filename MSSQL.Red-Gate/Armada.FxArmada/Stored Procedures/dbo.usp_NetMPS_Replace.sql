@@ -2,8 +2,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
-create procedure [dbo].[usp_NetMPS_Replace]
+CREATE procedure [dbo].[usp_NetMPS_Replace]
 	@TranDT datetime = null out
 ,	@Result integer = null out
 as
@@ -49,24 +48,24 @@ if	objectproperty(object_id('dbo.NetMPS_New'), 'IsTable') is not null begin
 end
 
 create table dbo.NetMPS_New
-(	Status int not null default(0)
-,	Type int not null default(0)
-,	OrderNo int default (-1) not null
+(	Status int not null constraint df_NetMPS_Status default(0)
+,	Type int not null constraint df_NetMPS_Type default(0)
+,	OrderNo int not null constraint df_NetMPS_OrderNo default (-1)
 ,	LineID int not null
 ,	Part varchar(25) not null
 ,	RequiredDT datetime not null
 ,	GrossDemand numeric(30,12) not null
 ,	Balance numeric(30,12) not null
-,	OnHandQty numeric(30,12) default (0) not null
-,	InTransitQty numeric(30,12) default (0) not null
-,	WIPQty numeric(30,12) default (0) not null
+,	OnHandQty numeric(30,12) constraint df_NetMPS_OnHandQty default (0) not null
+,	InTransitQty numeric(30,12) constraint df_NetMPS_InTransitQty default (0) not null
+,	WIPQty numeric(30,12) constraint df_NetMPS_WIPQty default (0) not null
 ,	LowLevel int not null
 ,	Sequence int not null
-,	RowID int identity(1,1) primary key clustered
-,	RowCreateDT datetime default(getdate())
-,	RowCreateUser sysname default(suser_name())
-,	RowModifiedDT datetime default(getdate())
-,	RowModifiedUser sysname default(suser_name())
+,	RowID int identity(1,1) constraint pk_NetMPS primary key clustered
+,	RowCreateDT datetime constraint df_NetMPS_RowCreateDT default(getdate())
+,	RowCreateUser sysname constraint df_NetMPS_RowCreateUser default(suser_name())
+,	RowModifiedDT datetime constraint df_NetMPS_RowModifiedDT default(getdate())
+,	RowModifiedUser sysname constraint df_NetMPS_RowModifiedUser default(suser_name())
 )
 
 insert
