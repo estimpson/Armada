@@ -89,7 +89,7 @@ DECLARE
 	@REFMAQual CHAR(3) = 'MA',
 	@REFADEQual CHAR(3) = 'ADE',
 	@REFCRNQual CHAR(3) = 'CRN', --TrailerNumber
-	@REFMAValue CHAR(35),
+	@REFMAValue CHAR(10),
 	@REFADEValue CHAR(35),
 	@REFCRNValue CHAR(35),
 	@FOB CHAR(2),	
@@ -212,7 +212,7 @@ DECLARE
 		@NADMaterialIssuerID = coalesce(es.material_issuer,''),
 		@BuyerName = 'Armada Rubber',
 		@TDTProNumber = s.Pro_number,
-		@REFMAValue = ( Select top 1 customer_po + release_no from shipper_detail where shipper = @shipper and nullif(release_no,'') is Not NULL )
+		@REFMAValue = ( Select top 1 right('0000000000' + customer_po + release_no, 10) from shipper_detail where shipper = @shipper and nullif(release_no,'') is Not NULL )
 	from
 		Shipper s
 	join
