@@ -5,6 +5,7 @@ CREATE TABLE [EDI5050].[ShipScheduleAccums]
 [RawDocumentGUID] [uniqueidentifier] NULL,
 [ReleaseNo] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ShipToCode] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[AuxShipToCode] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ConsigneeCode] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ShipFromCode] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SupplierCode] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
