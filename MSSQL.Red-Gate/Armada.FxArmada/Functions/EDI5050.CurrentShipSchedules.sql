@@ -3,117 +3,122 @@ GO
 SET ANSI_NULLS ON
 GO
 
-
-
-
-
-
-CREATE FUNCTION [EDI5050].[CurrentShipSchedules]
+CREATE function [EDI5050].[CurrentShipSchedules]
 ()
-RETURNS @CurrentSS TABLE
-(	RawDocumentGUID UNIQUEIDENTIFIER
-,	ReleaseNo VARCHAR(50)
-,	ShipToCode VARCHAR(50)
-,	ShipFromCode VARCHAR(50)
-,	ConsigneeCode VARCHAR(50)
-,	CustomerPart VARCHAR(50)
-,	CustomerPO VARCHAR(50)
-,	CustomerModelYear VARCHAR(50)
-,	NewDocument INT
+returns @CurrentSS table
+(	RawDocumentGUID uniqueidentifier
+,	ReleaseNo varchar(50)
+,	ShipToCode varchar(50)
+,	AuxShipToCode varchar(50)
+,	ShipFromCode varchar(50)
+,	ConsigneeCode varchar(50)
+,	CustomerPart varchar(50)
+,	CustomerPO varchar(50)
+,	CustomerModelYear varchar(50)
+,	NewDocument int
+,	BlanketOrderNo numeric(8,0)
 )
-AS
-BEGIN
---- <Body>
-	INSERT
+as
+begin
+	--- <Body>
+	insert
 		@CurrentSS
-	SELECT DISTINCT
-		RawDocumentGUID = ssh.RawDocumentGUID
-	,	ReleaseNo =  COALESCE(ss.ReleaseNo,'')
-	,	ShipToCode = ss.ShipToCode
-	,	ShipFromCode = COALESCE(ss.ShipFromCode,'')
-	,	ConsigneeCode = COALESCE(ss.ConsigneeCode,'')
-	,	CustomerPart = ss.CustomerPart
-	,	CustomerPO = COALESCE(ss.CustomerPO,'')
-	,	CustomerModelYear = COALESCE(ss.CustomerModelYear,'')
-	,	NewDocument =
-			CASE
-				WHEN ssh.Status = 0 --(select dbo.udf_StatusValue('EDI5050.ShipScheduleHeaders', 'Status', 'New'))
-					THEN 1
-				ELSE 0
-			END
-	FROM
-		(	SELECT
-				ShipToCode = ss.ShipToCode
-			,	ShipFromCode = COALESCE(ss.ShipFromCode,'')
-			,	ConsigneeCode = ''
-			,	CustomerPart = ss.CustomerPart
-			,	CustomerPO = ''
-			,	CustomerModelYear = COALESCE(ss.CustomerModelYear,'')
-			,	CheckLast = MAX
-				(	  CONVERT(CHAR(20), ssh.DocumentImportDT, 120)
-					+ CONVERT(CHAR(20), ssh.DocumentDT, 120)
-					+ CONVERT(CHAR(10), ssh.DocNumber)
-					+ CONVERT(CHAR(10), ssh.ControlNumber)
-					
-				)
-			FROM
-				EDI5050.ShipScheduleHeaders ssh
-				JOIN EDI5050.ShipSchedules ss
-					ON ss.RawDocumentGUID = ssh.RawDocumentGUID
-			WHERE
-				ssh.Status IN
-				(	0 --(select dbo.udf_StatusValue('EDI5050.ShipScheduleHeaders', 'Status', 'New'))
-				,	1 --(select dbo.udf_StatusValue('EDI5050.ShipScheduleHeaders', 'Status', 'Active'))
-				)
-			GROUP BY
-				ss.ShipToCode
-			,	COALESCE(ss.ShipFromCode,'')
+	(	RawDocumentGUID
+	,	ReleaseNo
+	,	ShipToCode
+	,	AuxShipToCode
+	,	ShipFromCode
+	,	ConsigneeCode
+	,	CustomerPart
+	,	CustomerPO
+	,	CustomerModelYear
+	,	NewDocument
+	,	BlanketOrderNo
+	)
+	select
+		curr.RawDocumentGUID
+	,	curr.ReleaseNo
+	,	curr.ShipToCode
+	,	curr.AuxShipToCode
+	,	curr.ShipFromCode
+	,	curr.ConsigneeCode
+	,	curr.CustomerPart
+	,	curr.CustomerPO
+	,	curr.CustomerModelYear
+	,	curr.NewDocument
+	,	bo.BlanketOrderNo
+	from
+		(	select
+				ssh.RawDocumentGUID
+			,	ss.ReleaseNo
+			,	ss.ShipToCode
+			,	ss.AuxShipToCode
+			,	ss.ShipFromCode
+			,	ss.ConsigneeCode
 			,	ss.CustomerPart
-			,	COALESCE(ss.CustomerModelYear,'')
-		) cl
-		JOIN EDI5050.ShipScheduleHeaders ssh
-			JOIN EDI5050.ShipSchedules ss
-			ON ss.RawDocumentGUID = ssh.RawDocumentGUID
-			ON ss.ShipToCode = cl.ShipToCode
-			AND COALESCE(ss.ShipFromCode, '') = cl.ShipFromCode
-			AND ss.CustomerPart = cl.CustomerPart
-			AND COALESCE(ss.CustomerModelYear,'') = cl.CustomerModelYear
-			AND	(	CONVERT(CHAR(20), ssh.DocumentImportDT, 120)
-					+ CONVERT(CHAR(20), ssh.DocumentDT, 120)
-					+ CONVERT(CHAR(10), ssh.DocNumber)
-					+ CONVERT(CHAR(10), ssh.ControlNumber)
-					
-				) = cl.CheckLast
-			LEFT JOIN
-				EDI5050.BlanketOrders bo ON bo.EDIShipToCode = ss.ShipToCode
-			WHERE ss.RowCreateDT>= DATEADD(dd, COALESCE(bo.ShipScheduleHorizonDaysBack,-30), GETDATE())
-			AND COALESCE(bo.ProcessShipSchedule,1) = 1
---- </Body>
+			,	ss.CustomerPO
+			,	ss.CustomerModelYear
+			,	NewDocument = case when ssh.Status = 0 then 1 else 0 end
+			,	RowNumber = row_number() over
+					(	partition by
+							ss.ShipToCode
+						,	ss.AuxShipToCode
+						,	ss.ShipFromCode
+						,	ss.ConsigneeCode
+						,	ss.CustomerPart
+						,	ss.CustomerPO
+						,	ss.CustomerModelYear
+						order by
+							ssh.DocumentImportDT
+						,	ssh.DocumentDT
+						,	ssh.DocNumber
+						,	ssh.ControlNumber
+					)
+			from
+				EDI5050.ShipScheduleHeaders ssh
+				cross apply
+					(	select
+							ReleaseNo = coalesce(ss.ReleaseNo, '')
+						,	ss.ShipToCode
+						,	AuxShipToCode = coalesce(ss.AuxShipToCode, '')
+						,	ShipFromCode = coalesce(ss.ShipFromCode, '')
+						,	ConsigneeCode = coalesce(ss.ConsigneeCode, '')
+						,	ss.CustomerPart
+						,	CustomerPO = coalesce(ss.CustomerPO, '')
+						,	CustomerModelYear = coalesce(ss.CustomerModelYear, '')
+						from
+							EDI5050.ShipSchedules ss
+						where
+							ss.RawDocumentGUID = ssh.RawDocumentGUID
+						group by
+							coalesce(ss.ReleaseNo, '')
+						,	ss.ShipToCode
+						,	coalesce(ss.AuxShipToCode, '')
+						,	coalesce(ss.ShipFromCode, '')
+						,	coalesce(ss.ConsigneeCode, '')
+						,	ss.CustomerPart
+						,	coalesce(ss.CustomerPO, '')
+						,	coalesce(ss.CustomerModelYear, '')
+					) ss
+			where
+				ssh.Status in
+					(	0	--(select dbo.udf_StatusValue('EDI5050.ShipScheduleHeaders', 'Status', 'New'))
+					,	1	--(select dbo.udf_StatusValue('EDI5050.ShipScheduleHeaders', 'Status', 'Active'))
+					)
+		) curr
+	left join EDI5050.BlanketOrders bo
+		on bo.ShipToCode = curr.ShipToCode
+		and bo.AuxShipToCode = coalesce(curr.AuxShipToCode, '')
+		and bo.CustomerPart = curr.CustomerPart
+		and (bo.CheckCustomerPOShipSchedule = 0 or bo.CustomerPO = curr.CustomerPO)
+		and (bo.CheckModelYearShipSchedule = 0 or bo.ModelYear830 = curr.CustomerModelYear)
+		and bo.ActiveOrder = 1
+	where
+		curr.RowNumber = 1
 
----	<Return>
-	RETURN
-END
+	--- </Body>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	---	<Return>
+	return
+end
 GO

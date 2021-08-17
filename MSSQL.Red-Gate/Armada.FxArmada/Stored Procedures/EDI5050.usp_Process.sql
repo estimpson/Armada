@@ -70,27 +70,43 @@ declare
 	@Current862s table
 (	RawDocumentGUID uniqueidentifier
 ,	ReleaseNo varchar(50)
-,	ShipToCode varchar(15)
-,	ShipFromCode varchar(15)
-,	ConsigneeCode varchar(15)
+,	ShipToCode varchar(50)
+,	AuxShipToCode varchar(50)
+,	ShipFromCode varchar(50)
+,	ConsigneeCode varchar(50)
 ,	CustomerPart varchar(35)
 ,	CustomerPO varchar(35)
 ,	CustomerModelYear varchar(35)
 ,	NewDocument int
+,	BlanketOrderNo numeric(8,0)
 )
 
 insert
 	@Current862s
-select distinct
+(	RawDocumentGUID
+,	ReleaseNo
+,	ShipToCode
+,	AuxShipToCode
+,	ShipFromCode
+,	ConsigneeCode
+,	CustomerPart
+,	CustomerPO
+,	CustomerModelYear
+,	NewDocument
+,	BlanketOrderNo
+)
+select
 	RawDocumentGUID
 ,	ReleaseNo
 ,   ShipToCode
+,	AuxShipToCode
 ,   ShipFromCode
 ,   ConsigneeCode
 ,   CustomerPart
 ,   CustomerPO
 ,	CustomerModelYear
 ,   NewDocument
+,	BlanketOrderNo
 from
 	EDI5050.CurrentShipSchedules ()
 
@@ -107,26 +123,42 @@ declare
 (	RawDocumentGUID uniqueidentifier
 ,	ReleaseNo varchar(50)
 ,	ShipToCode varchar(50)
+,	AuxShipToCode varchar(50)
 ,	ShipFromCode varchar(50)
 ,	ConsigneeCode varchar(50)
 ,	CustomerPart varchar(35)
 ,	CustomerPO varchar(35)
 ,	CustomerModelYear varchar(35)
 ,	NewDocument int
+,	BlanketOrderNo numeric(8,0)
 )
 
 insert
 	@Current830s
-select distinct
+(	RawDocumentGUID
+,	ReleaseNo
+,	ShipToCode
+,	AuxShipToCode
+,	ShipFromCode
+,	ConsigneeCode
+,	CustomerPart
+,	CustomerPO
+,	CustomerModelYear
+,	NewDocument
+,	BlanketOrderNo
+)
+select
 	RawDocumentGUID
 ,	ReleaseNo
 ,   ShipToCode
+,	AuxShipToCode
 ,   ShipFromCode
 ,   ConsigneeCode
 ,   CustomerPart
 ,   CustomerPO
 ,	CustomerModelYear
 ,   NewDocument
+,	BlanketOrderNo
 from
 	EDI5050.CurrentPlanningReleases ()
 
@@ -437,101 +469,97 @@ Select
 ,	ReleaseNo = 'Accum Demand'
 ,	QtyRelease = 0
 ,	StdQtyRelease = 0
-,	ReferenceAccum = case bo.ReferenceAccum 
-												When 'N' 
-												then min(coalesce(convert(int,bo.AccumShipped),0))
-												When 'C' 
-												then min(coalesce(convert(int,fa.LastAccumQty),0))
-												else min(coalesce(convert(int,bo.AccumShipped),0))
-												end
-,	CustomerAccum = case bo.AdjustmentAccum 
-												When 'N' 
-												then min(coalesce(convert(int,bo.AccumShipped),0))
-												When 'P' 
-												then min(coalesce(convert(int,faa.PriorCUM),0))
-												else min(coalesce(convert(int,fa.LastAccumQty),0))
-												end
-	,	(	select
-				min(c.NewDocument)
-			from
-				@Current862s c
-			where
-				c.RawDocumentGUID = fh.RawDocumentGUID
+,	ReferenceAccum = max
+		(	case
+				bo.ReferenceAccum 
+				when 'N'
+					then coalesce(convert(int,bo.AccumShipped),0)
+				when 'C' 
+					then coalesce(convert(int,fa.LastAccumQty),0)
+				else
+					coalesce(convert(int,bo.AccumShipped),0)
+			end
 		)
+,	CustomerAccum = max
+		(	case
+				bo.AdjustmentAccum 
+				when 'N' 
+					then coalesce(convert(int,bo.AccumShipped),0)
+				when 'P' 
+					then coalesce(convert(int,faa.PriorCUM),0)
+				else
+					coalesce(convert(int,fa.LastAccumQty),0)
+			end
+		)
+,	NewDocument = c.NewDocument
 from
-	EDI5050.ShipScheduleHeaders fh
+	@Current862s c
+	join EDI5050.ShipScheduleHeaders fh
+		on fh.RawDocumentGUID = c.RawDocumentGUID
 	join EDI5050.ShipSchedules fr
-		on fr.RawDocumentGUID = fh.RawDocumentGUID
+		on fr.RawDocumentGUID = c.RawDocumentGUID
+		and fr.ShipToCode = c.ShipToCode
+		and coalesce(fr.AuxShipToCode, '') = c.AuxShipToCode
+		and coalesce(fr.ShipFromCode, '') = c.ShipFromCode
+		and coalesce(fr.CustomerPO, '') = c.CustomerPO
+		and coalesce(fr.CustomerModelYear, '') = c.CustomerModelYear
 	left join EDI5050.ShipScheduleAccums fa
-		on fa.RawDocumentGUID = fh.RawDocumentGUID
-		and fa.CustomerPart = fr.CustomerPart
-		and	fa.ShipToCode = fr.ShipToCode
-		and	coalesce(fa.CustomerPO,'') = coalesce(fr.CustomerPO,'')
-		and	coalesce(fa.CustomerModelYear,'') = coalesce(fr.CustomerModelYear,'')
+		on fa.RawDocumentGUID = c.RawDocumentGUID
+		and fa.ShipToCode = c.ShipToCode
+		and coalesce(fa.AuxShipToCode, '') = c.AuxShipToCode
+		and coalesce(fa.ShipFromCode, '') = c.ShipFromCode
+		and coalesce(fa.CustomerPO, '') = c.CustomerPO
+		and coalesce(fa.CustomerModelYear, '') = c.CustomerModelYear
 	left join EDI5050.ShipScheduleAuthAccums faa
-		on faa.RawDocumentGUID = fh.RawDocumentGUID
-		and faa.CustomerPart = fr.CustomerPart
-		and	faa.ShipToCode = fr.ShipToCode
-		and	coalesce(faa.CustomerPO,'') = coalesce(fr.CustomerPO,'')
-		and	coalesce(faa.CustomerModelYear,'') = coalesce(fr.CustomerModelYear,'')
+		on faa.RawDocumentGUID = c.RawDocumentGUID
+		and faa.ShipToCode = c.ShipToCode
+		and coalesce(faa.AuxShipToCode, '') = c.AuxShipToCode
+		and coalesce(faa.ShipFromCode, '') = c.ShipFromCode
+		and coalesce(faa.CustomerPO, '') = c.CustomerPO
+		and coalesce(faa.CustomerModelYear, '') = c.CustomerModelYear
 	join EDI5050.BlanketOrders bo
-		on bo.EDIShipToCode = fr.ShipToCode
-		and bo.CustomerPart = fr.CustomerPart
-		and
-		(	bo.CheckCustomerPOShipSchedule = 0
-			or bo.CustomerPO = fr.CustomerPO
-		)
-		and
-		(	bo.CheckModelYearShipSchedule = 0
-			or bo.ModelYear862 = fr.CustomerModelYear
-		)
-		join
-				(Select * From @Current862s) c 
-			on
-				c.CustomerPart = bo.customerpart and
-				c.ShipToCode = bo.EDIShipToCode and
-				(	bo.CheckCustomerPOShipSchedule = 0
-							or bo.CustomerPO = c.CustomerPO
-				)
-					and	(	bo.CheckModelYearShipSchedule = 0
-							or bo.ModelYear862 = c.CustomerModelYear
-				)
+		on bo.BlanketOrderNo = c.BlanketOrderNo
 where
-		not exists
-		(	select
-				*
-			from
-				EDI5050.ShipSchedules ss
-			where
-				ss.status = 1 and
-				ss.RawDocumentGUID = c.RawDocumentGUID and
-				ss.RawDocumentGUID = fr.RawDocumentGUID
-				and ss.CustomerPart = fr.CustomerPart
-				and ss.ShipToCode = fr.ShipToCode
-				and	ss.ReleaseDT = ft.fn_TruncDate('dd', getdate())
-		)
+	not exists
+	(	select
+			*
+		from
+			EDI5050.ShipSchedules ss
+		where
+			ss.status = 1 and
+			ss.RawDocumentGUID = c.RawDocumentGUID and
+			ss.RawDocumentGUID = fr.RawDocumentGUID
+			and ss.CustomerPart = fr.CustomerPart
+			and ss.ShipToCode = fr.ShipToCode
+			and	ss.ReleaseDT = ft.fn_TruncDate('dd', getdate())
+	)
 	and fh.Status = 1 --(select dbo.udf_StatusValue('EDI5050.ShipScheduleHeaders', 'Status', 'Active'))
-	and		c.RawDocumentGUID = fr.RawDocumentGUID
+	and	c.RawDocumentGUID = fr.RawDocumentGUID
 group by
 	bo.BlanketOrderNo
 ,	fh.RawDocumentGUID
-, bo.ReferenceAccum
-, bo.AdjustmentAccum 
+,	bo.ReferenceAccum
+,	bo.AdjustmentAccum
+,	c.NewDocument
 having
-					case bo.AdjustmentAccum 
-												When 'N' 
-												then  min(coalesce(convert(int,bo.AccumShipped),0))
-												When 'P' 
-												then min(coalesce(convert(int,faa.PriorCUM),0))
-												else min(coalesce(convert(int,fa.LastAccumQty),0))
-												end > 
-												case bo.ReferenceAccum 
-												When 'N' 
-												then min(coalesce(convert(int,bo.AccumShipped),0))
-												When 'C' 
-												then min(coalesce(convert(int,fa.LastAccumQty),0))
-												else min(coalesce(convert(int,bo.AccumShipped),0))
-												end
+	case
+		bo.AdjustmentAccum 
+		when 'N' 
+			then min(coalesce(convert(int,bo.AccumShipped),0))
+		when 'P' 
+			then min(coalesce(convert(int,faa.PriorCUM),0))
+		else
+			min(coalesce(convert(int,fa.LastAccumQty),0))
+	end >
+	case
+		bo.ReferenceAccum 
+		when 'N' 
+			then min(coalesce(convert(int,bo.AccumShipped),0))
+		when 'C' 
+			then min(coalesce(convert(int,fa.LastAccumQty),0))
+		else
+			min(coalesce(convert(int,bo.AccumShipped),0))
+	end
 
 /*		862s. */
 union all
@@ -539,167 +567,155 @@ select
 	ReleaseType = 1
 ,	OrderNo = bo.BlanketOrderNo
 ,	Type = 1
-,	ReleaseDT = dateadd(dd, ReleaseDueDTOffsetDays, fr.ReleaseDT)
+,	ReleaseDT = dateadd(dd, bo.ReleaseDueDTOffsetDays, fr.ReleaseDT)
 ,	BlanketPart = bo.PartCode
 ,	CustomerPart = bo.CustomerPart
 ,	ShipToID = bo.ShipToCode
 ,	CustomerPO = bo.CustomerPO
 ,	ModelYear = bo.ModelYear
 ,	OrderUnit = bo.OrderUnit
-,	ReleaseNo = case  WHEN fr.suppliercode =  'A055P' AND fr.Userdefined5 IS NOT NULL THEN fr.Userdefined5  ELSE fr.ReleaseNo end
+,	ReleaseNo = case when fr.SupplierCode = 'A055P' and fr.Userdefined5 is not null then fr.Userdefined5 else fr.ReleaseNo end
 ,	QtyRelease = fr.ReleaseQty
 ,	StdQtyRelease = fr.ReleaseQty
-,	ReferenceAccum = case bo.ReferenceAccum 
-												When 'N' 
-												then coalesce(convert(int,bo.AccumShipped),0)
-												When 'C' 
-												then coalesce(convert(int,fa.LastAccumQty),0)
-												else coalesce(convert(int,bo.AccumShipped),0)
-												end
-,	CustomerAccum = case bo.AdjustmentAccum 
-												When 'N' 
-												then coalesce(convert(int,bo.AccumShipped),0)
-												When 'P' 
-												then coalesce(convert(int,faa.PriorCUM),0)
-												else coalesce(convert(int,fa.LastAccumQty),0)
-												end
-,	NewDocument =
-		(	select
-				min(c.NewDocument)
-			from
-				@Current862s c
-			where
-				c.RawDocumentGUID = fh.RawDocumentGUID
-		)
+,	ReferenceAccum =
+		case
+			bo.ReferenceAccum 
+			when 'N'
+				then coalesce(convert(int,bo.AccumShipped),0)
+			when 'C' 
+				then coalesce(convert(int,fa.LastAccumQty),0)
+			else
+				coalesce(convert(int,bo.AccumShipped),0)
+		end
+,	CustomerAccum =
+		case
+			bo.AdjustmentAccum 
+			when 'N' 
+				then coalesce(convert(int,bo.AccumShipped),0)
+			when 'P' 
+				then coalesce(convert(int,faa.PriorCUM),0)
+			else
+				coalesce(convert(int,fa.LastAccumQty),0)
+		end
+,	NewDocument = c.NewDocument
 from
-	EDI5050.ShipScheduleHeaders fh
+	@Current862s c
+	join EDI5050.ShipScheduleHeaders fh
+		on fh.RawDocumentGUID = c.RawDocumentGUID
 	join EDI5050.ShipSchedules fr
-		on fr.RawDocumentGUID = fh.RawDocumentGUID
+		on fr.RawDocumentGUID = c.RawDocumentGUID
+		and fr.ShipToCode = c.ShipToCode
+		and coalesce(fr.AuxShipToCode, '') = c.AuxShipToCode
+		and coalesce(fr.ShipFromCode, '') = c.ShipFromCode
+		and coalesce(fr.CustomerPO, '') = c.CustomerPO
+		and coalesce(fr.CustomerModelYear, '') = c.CustomerModelYear
 	left join EDI5050.ShipScheduleAccums fa
-		on fa.RawDocumentGUID = fh.RawDocumentGUID
-		and fa.CustomerPart = fr.CustomerPart
-		and	fa.ShipToCode = fr.ShipToCode
-		and	coalesce(fa.CustomerPO,'') = coalesce(fr.CustomerPO,'')
-		and	coalesce(fa.CustomerModelYear,'') = coalesce(fr.CustomerModelYear,'')
+		on fa.RawDocumentGUID = c.RawDocumentGUID
+		and fa.ShipToCode = c.ShipToCode
+		and coalesce(fa.AuxShipToCode, '') = c.AuxShipToCode
+		and coalesce(fa.ShipFromCode, '') = c.ShipFromCode
+		and coalesce(fa.CustomerPO, '') = c.CustomerPO
+		and coalesce(fa.CustomerModelYear, '') = c.CustomerModelYear
 	left join EDI5050.ShipScheduleAuthAccums faa
-		on faa.RawDocumentGUID = fh.RawDocumentGUID
-		and faa.CustomerPart = fr.CustomerPart
-		and	faa.ShipToCode = fr.ShipToCode
-		and	coalesce(faa.CustomerPO,'') = coalesce(fr.CustomerPO,'')
-		and	coalesce(faa.CustomerModelYear,'') = coalesce(fr.CustomerModelYear,'')
+		on faa.RawDocumentGUID = c.RawDocumentGUID
+		and faa.ShipToCode = c.ShipToCode
+		and coalesce(faa.AuxShipToCode, '') = c.AuxShipToCode
+		and coalesce(faa.ShipFromCode, '') = c.ShipFromCode
+		and coalesce(faa.CustomerPO, '') = c.CustomerPO
+		and coalesce(faa.CustomerModelYear, '') = c.CustomerModelYear
 	join EDI5050.BlanketOrders bo
-		on bo.EDIShipToCode = fr.ShipToCode
-		and bo.CustomerPart = fr.CustomerPart
-		and
-		(	bo.CheckCustomerPOShipSchedule = 0
-			or bo.CustomerPO = fr.CustomerPO
-		)
-		and
-		(	bo.CheckModelYearShipSchedule = 0
-			or bo.ModelYear862 = fr.CustomerModelYear
-		)
-		join
-				(Select * From @Current862s) c 
-			on
-				c.CustomerPart = bo.customerpart and
-				c.ShipToCode = bo.EDIShipToCode and
-				(	bo.CheckCustomerPOShipSchedule = 0
-							or bo.CustomerPO = c.CustomerPO
-				)
-					and	(	bo.CheckModelYearShipSchedule = 0
-							or bo.ModelYear862 = c.CustomerModelYear
-				)
-where		c.RawDocumentGUID = fr.RawDocumentGUID
-and			fh.Status = 1 --(select dbo.udf_StatusValue('EDI5050.ShipScheduleHeaders', 'Status', 'Active'))
-		
+		on bo.BlanketOrderNo = c.BlanketOrderNo
+where
+	fh.Status = 1 --(select dbo.udf_StatusValue('EDI5050.ShipScheduleHeaders', 'Status', 'Active'))
 
 /*		830s. */
-Union all
+union all
 select
 	ReleaseType = 2
 ,	OrderNo = bo.BlanketOrderNo
-,	Type = (	case 
-					when bo.PlanningFlag = 'P' then 2
-					when bo.PlanningFlag = 'F' then 1
-					when bo.planningFlag = 'A' and fr.ScheduleType not in ('C', 'A', 'Z') then 2
-					else 1
-					end
-			  )
-,	ReleaseDT = dateadd(dd, ReleaseDueDTOffsetDays, fr.ReleaseDT)
+,	Type =
+		case 
+			when bo.PlanningFlag = 'P'
+				then 2
+			when bo.PlanningFlag = 'F'
+				then 1
+			when bo.planningFlag = 'A' and fr.ScheduleType not in ('C', 'A', 'Z')
+				then 2
+			else
+				1
+		end
+,	ReleaseDT = dateadd(dd, bo.ReleaseDueDTOffsetDays, fr.ReleaseDT)
 ,	BlanketPart = bo.PartCode
 ,	CustomerPart = bo.CustomerPart
 ,	ShipToID = bo.ShipToCode
 ,	CustomerPO = bo.CustomerPO
 ,	ModelYear = bo.ModelYear
 ,	OrderUnit = bo.OrderUnit
-,	ReleaseNo = case  WHEN fr.suppliercode =  'A0144' then fr.Userdefined5 WHEN fr.suppliercode IN ( 'ARM701', 'ARM101' ) AND fr.Userdefined5 IS NOT NULL THEN fr.UserDefined5 ELSE fr.ReleaseNo end
+,	ReleaseNo =
+		case
+			when fr.suppliercode = 'A0144'
+				then fr.Userdefined5
+			when
+				fr.suppliercode in ('ARM701', 'ARM101')
+				and fr.Userdefined5 is not null
+				then fr.UserDefined5
+			else
+				fr.ReleaseNo
+		end
 ,	QtyRelease = fr.ReleaseQty
 ,	StdQtyRelease = fr.ReleaseQty
-,	ReferenceAccum = case bo.ReferenceAccum 
-												When 'N' 
-												then coalesce(convert(int,bo.AccumShipped),0)
-												When 'C' 
-												then coalesce(convert(int,fa.LastAccumQty),0)
-												else coalesce(convert(int,bo.AccumShipped),0)
-												end
-,	CustomerAccum = case bo.AdjustmentAccum 
-												When 'N' 
-												then coalesce(convert(int,bo.AccumShipped),0)
-												When 'P' 
-												then coalesce(convert(int,faa.PriorCUM),0)
-												else coalesce(convert(int,fa.LastAccumQty),0)
-												end
-,	NewDocument =
-		(	select
-				min(c.NewDocument)
-			from
-				@Current830s c
-			where
-				c.RawDocumentGUID = fh.RawDocumentGUID
-		)
+,	ReferenceAccum =
+		case
+			bo.ReferenceAccum 
+			when 'N'
+				then coalesce(convert(int,bo.AccumShipped),0)
+			when 'C' 
+				then coalesce(convert(int,fa.LastAccumQty),0)
+			else
+				coalesce(convert(int,bo.AccumShipped),0)
+		end
+,	CustomerAccum =
+		case
+			bo.AdjustmentAccum 
+			when 'N' 
+				then coalesce(convert(int,bo.AccumShipped),0)
+			when 'P' 
+				then coalesce(convert(int,faa.PriorCUM),0)
+			else
+				coalesce(convert(int,fa.LastAccumQty),0)
+		end
+,	NewDocument = c.NewDocument
 from
-	EDI5050.PlanningHeaders fh
+	@Current830s c
+	join EDI5050.PlanningHeaders fh
+		on fh.RawDocumentGUID = c.RawDocumentGUID
 	join EDI5050.PlanningReleases fr
-		on fr.RawDocumentGUID = fh.RawDocumentGUID
+		on fr.RawDocumentGUID = c.RawDocumentGUID
+		and fr.ShipToCode = c.ShipToCode
+		and coalesce(fr.AuxShipToCode, '') = c.AuxShipToCode
+		and coalesce(fr.ShipFromCode, '') = c.ShipFromCode
+		and coalesce(fr.CustomerPO, '') = c.CustomerPO
+		and coalesce(fr.CustomerModelYear, '') = c.CustomerModelYear
 	left join EDI5050.PlanningAccums fa
-		on fa.RawDocumentGUID = fh.RawDocumentGUID
-		and fa.CustomerPart = fr.CustomerPart
-		and	fa.ShipToCode = fr.ShipToCode
-		and	coalesce(fa.CustomerPO,'') = coalesce(fr.CustomerPO,'')
-		and	coalesce(fa.CustomerModelYear,'') = coalesce(fr.CustomerModelYear,'')
+		on fa.RawDocumentGUID = c.RawDocumentGUID
+		and fa.ShipToCode = c.ShipToCode
+		and coalesce(fa.AuxShipToCode, '') = c.AuxShipToCode
+		and coalesce(fa.ShipFromCode, '') = c.ShipFromCode
+		and coalesce(fa.CustomerPO, '') = c.CustomerPO
+		and coalesce(fa.CustomerModelYear, '') = c.CustomerModelYear
 	left join EDI5050.PlanningAuthAccums faa
-		on faa.RawDocumentGUID = fh.RawDocumentGUID
-		and faa.CustomerPart = fr.CustomerPart
-		and	faa.ShipToCode = fr.ShipToCode
-		and	coalesce(faa.CustomerPO,'') = coalesce(fr.CustomerPO,'')
-		and	coalesce(faa.CustomerModelYear,'') = coalesce(fr.CustomerModelYear,'')
+		on faa.RawDocumentGUID = c.RawDocumentGUID
+		and faa.ShipToCode = c.ShipToCode
+		and coalesce(faa.AuxShipToCode, '') = c.AuxShipToCode
+		and coalesce(faa.ShipFromCode, '') = c.ShipFromCode
+		and coalesce(faa.CustomerPO, '') = c.CustomerPO
+		and coalesce(faa.CustomerModelYear, '') = c.CustomerModelYear
 	join EDI5050.BlanketOrders bo
-		on bo.EDIShipToCode = fr.ShipToCode
-		and bo.CustomerPart = fr.CustomerPart
-		and
-		(	bo.CheckCustomerPOPlanning = 0
-			or bo.CustomerPO = fr.CustomerPO
-		)
-		and
-		(	bo.CheckModelYearPlanning = 0
-			or bo.ModelYear830 = fr.CustomerModelYear
-		)
-		join
-				(Select * From @Current830s) c 
-			on
-				c.CustomerPart = bo.customerpart and
-				c.ShipToCode = bo.EDIShipToCode and
-				(	bo.CheckCustomerPOShipSchedule = 0
-							or bo.CustomerPO = c.CustomerPO
-				)
-					and	(	bo.CheckModelYearShipSchedule = 0
-							or bo.ModelYear862 = c.CustomerModelYear
-				)
-where		c.RawDocumentGUID = fr.RawDocumentGUID
-	and		fh.Status = 1 --(select dbo.udf_StatusValue('EDI5050.PlanningHeaders', 'Status', 'Active'))
-	and		fr.Status = 1 --(select dbo.udf_StatusValue('EDI5050.PlanningReleases', 'Status', 'Active'))
+		on bo.BlanketOrderNo = c.BlanketOrderNo
+where
+	fh.Status = 1 --(select dbo.udf_StatusValue('EDI5050.PlanningHeaders', 'Status', 'Active'))
+	and fr.Status = 1 --(select dbo.udf_StatusValue('EDI5050.PlanningReleases', 'Status', 'Active'))
 	--and coalesce(nullif(fr.Scheduletype,''),'4') in ('4')
-	
 order by
 	2,1,4
 
@@ -1350,78 +1366,63 @@ end
 --end
 /* Start E-Mail Alerts and Exceptions*/
 
-Declare @EDIOrdersAlert table (
-	TradingPartner varchar(30) NULL,
-	DocumentType varchar(30) NULL, --'PR - Planning Release; SS - ShipSchedule'
-	AlertType varchar(100) NULL,
-	ReleaseNo varchar(100) NULL,
-	ShipToCode varchar(100) NULL,
-	ConsigneeCode varchar(100) NULL,
-	ShipFromCode varchar(100) NULL,
-	CustomerPart varchar(100) NULL,
-	CustomerPO varchar(100) NULL,
-	CustomerModelYear varchar NULL,
-	Description varchar (max)
-	)
-		
-insert	
-	@EDIOrdersAlert
-(	TradingPartner,
-	DocumentType,
-	AlertType,
-	ReleaseNo ,
-	ShipToCode,
-	ConsigneeCode,
-	ShipFromCode,
-	CustomerPart,
-	CustomerPO,
-	CustomerModelYear,
-	Description 
+declare @EDIOrdersAlert table
+(	TradingPartner varchar(30) null
+,	DocumentType varchar(30) null	--'PR - Planning Release; SS - ShipSchedule'
+,	AlertType varchar(100) null
+,	ReleaseNo varchar(100) null
+,	ShipToCode varchar(100) null
+,	AuxShipToCode varchar(100) null
+,	ConsigneeCode varchar(100) null
+,	ShipFromCode varchar(100) null
+,	CustomerPart varchar(100) null
+,	CustomerPO varchar(100) null
+,	CustomerModelYear varchar null
+,	Description varchar(max)
 )
-
-Select
-	TradingPartner = Coalesce((Select max(TradingPartner) from fxEDI.EDI.EDIDocuments where GUID = a.RawDocumentGUID) ,'')
+		
+insert
+	@EDIOrdersAlert
+(
+	TradingPartner
+,	DocumentType
+,	AlertType
+,	ReleaseNo
+,	ShipToCode
+,	AuxShipToCode
+,	ConsigneeCode
+,	ShipFromCode
+,	CustomerPart
+,	CustomerPO
+,	CustomerModelYear
+,	Description
+)
+select
+	TradingPartner = coalesce((select max(TradingPartner) from FxEDI.EDI.EDIDocuments where GUID = a.RawDocumentGUID), '')
 ,	DocumentType = 'SS'
-,	AlertType =  ' Exception'
-,	ReleaseNo =  Coalesce(a.ReleaseNo,'')
+,	AlertType = ' Exception'
+,	ReleaseNo = coalesce(a.ReleaseNo, '')
 ,	ShipToCode = a.ShipToCode
-,	ConsigneeCode =  coalesce(a.ConsigneeCode,'')
-,	ShipFromCode = coalesce(a.ShipFromCode,'')
-,	CustomerPart = Coalesce(a.CustomerPart,'')
-,	CustomerPO = Coalesce(a.CustomerPO,'')
-,	CustomerModelYear = Coalesce(a.CustomerModelYear,'')
-,   Description = 'Please Add Blanket Order to Fx and Reprocess EDI'
+,	AuxShipToCode = a.AuxShipToCode
+,	ConsigneeCode = coalesce(a.ConsigneeCode, '')
+,	ShipFromCode = coalesce(a.ShipFromCode, '')
+,	CustomerPart = coalesce(a.CustomerPart, '')
+,	CustomerPO = coalesce(a.CustomerPO, '')
+,	CustomerModelYear = coalesce(a.CustomerModelYear, '')
+,	Description = 'Please Add Blanket Order to Fx and Reprocess EDI'
 from
 	@Current862s a
-Where
-		coalesce(a.newDocument,0) = 1
-and not exists
-( Select 1 from 
-		EDI5050.ShipSchedules b
- Join 
-	EDI5050.BlanketOrders bo on b.CustomerPart = bo.CustomerPart
-and
-	b.ShipToCode = bo.EDIShipToCode
-and
-(	bo.CheckCustomerPOShipSchedule = 0
-	or bo.CustomerPO = b.CustomerPO)
-and
-(	bo.CheckModelYearShipSchedule = 0
-	or bo.ModelYear862 = b.CustomerModelYear)
 where
-				a.RawDocumentGUID = b.RawDocumentGUID and
-				a.CustomerPart = b.CustomerPart and
-				a.ShipToCode = b.ShipToCode and
-				coalesce(a.customerPO,'') = coalesce(b.CustomerPO,'') and
-				coalesce(a.CustomerModelYear,'') = coalesce(b.CustomerModelYear,'')
-)
+	coalesce(a.newDocument,0) = 1
+	and a.BlanketOrderNo is null
 union
-Select
+select
 	TradingPartner = Coalesce((Select max(TradingPartner) from fxEDI.EDI.EDIDocuments where GUID = a.RawDocumentGUID) ,'')
 ,	DocumentType = 'PR'
 ,	AlertType =  ' Exception'
 ,	ReleaseNo =  Coalesce(a.ReleaseNo,'')
 ,	ShipToCode = a.ShipToCode
+,	AuxShipToCode = a.AuxShipToCode
 ,	ConsigneeCode =  coalesce(a.ConsigneeCode,'')
 ,	ShipFromCode = coalesce(a.ShipFromCode,'')
 ,	CustomerPart = Coalesce(a.CustomerPart,'')
@@ -1431,36 +1432,18 @@ Select
 from
 	@Current830s a
 Where
-		coalesce(a.newDocument,0) = 1
-and not exists
-( Select 1 from 
-		EDI5050.PlanningReleases b
- Join 
-	EDI5050.BlanketOrders bo on b.CustomerPart = bo.CustomerPart
-and
-	b.ShipToCode = bo.EDIShipToCode
-and
-(	bo.CheckCustomerPOPlanning = 0
-	or bo.CustomerPO = b.CustomerPO)
-and
-(	bo.CheckModelYearPlanning = 0
-	or bo.ModelYear830 = b.CustomerModelYear)
-where
-				a.RawDocumentGUID = b.RawDocumentGUID and
-				a.CustomerPart = b.CustomerPart and
-				a.ShipToCode = b.ShipToCode and
-				coalesce(a.customerPO,'') = coalesce(b.CustomerPO,'') and
-				coalesce(a.CustomerModelYear,'') = coalesce(b.CustomerModelYear,'')
-)
+	coalesce(a.newDocument,0) = 1
+	and a.BlanketOrderNo is null
 union
 
 --Orders Processed
-Select 
+select 
 	TradingPartner = Coalesce((Select max(TradingPartner) from fxEDI.EDI.EDIDocuments where GUID = a.RawDocumentGUID) ,'')
 ,	DocumentType = 'SS'
 ,	AlertType =  ' OrderProcessed'
 ,	ReleaseNo =  Coalesce(a.ReleaseNo,'')
 ,	ShipToCode = bo.ShipToCode
+,	AuxShipToCode = a.AuxShipToCode
 ,	ConsigneeCode =  coalesce(a.ConsigneeCode,'')
 ,	ShipFromCode = coalesce(a.ShipFromCode,'')
 ,	CustomerPart = Coalesce(a.CustomerPart,'')
@@ -1469,18 +1452,10 @@ Select
 ,   Description = 'EDI Processed for Fx Blanket Sales Order No: ' + convert(varchar(15), bo.BlanketOrderNo)
 from
 	@Current862s a
-	 Join 
-	EDI5050.BlanketOrders bo on a.CustomerPart = bo.CustomerPart
-and
-	a.ShipToCode = bo.EDIShipToCode
-and
-(	bo.CheckCustomerPOShipSchedule = 0
-	or bo.CustomerPO = a.CustomerPO)
-and
-(	bo.CheckModelYearShipSchedule = 0
-	or bo.ModelYear862 = a.CustomerModelYear)
-	Where
-		coalesce(a.newDocument,0) = 1
+	join EDI5050.BlanketOrders bo
+		on bo.BlanketOrderNo = a.BlanketOrderNo
+where
+	coalesce(a.newDocument,0) = 1
 
 union
 Select 
@@ -1489,6 +1464,7 @@ Select
 ,	AlertType =  ' OrderProcessed'
 ,	ReleaseNo =  Coalesce(a.ReleaseNo,'')
 ,	ShipToCode = bo.ShipToCode
+,	AuxShipToCode = a.AuxShipToCode
 ,	ConsigneeCode =  coalesce(a.ConsigneeCode,'')
 ,	ShipFromCode = coalesce(a.ShipFromCode,'')
 ,	CustomerPart = Coalesce(a.CustomerPart,'')
@@ -1497,18 +1473,8 @@ Select
 ,   Description = 'EDI Processed for Fx Blanket Sales Order No: ' + convert(varchar(15), bo.BlanketOrderNo)
 from
 	@Current830s a
-	 Join 
-	EDI5050.BlanketOrders bo on a.CustomerPart = bo.CustomerPart
-and
-	a.ShipToCode = bo.EDIShipToCode
-and
-(	bo.CheckCustomerPOPlanning = 0
-	or bo.CustomerPO = a.CustomerPO)
-and
-(	bo.CheckModelYearPlanning = 0
-	or bo.ModelYear830 = a.CustomerModelYear)
-	Where
-		coalesce(a.newDocument,0) = 1
+	join EDI5050.BlanketOrders bo
+		on bo.BlanketOrderNo = a.BlanketOrderNo
 
 --Accums Reporting
 union
@@ -1518,6 +1484,7 @@ Select
 ,	AlertType =  ' Accum Notice'
 ,	ReleaseNo =  Coalesce(a.ReleaseNo,'')
 ,	ShipToCode = bo.ShipToCode
+,	AuxShipToCode = a.AuxShipToCode
 ,	ConsigneeCode =  coalesce(a.ConsigneeCode,'')
 ,	ShipFromCode = coalesce(a.ShipFromCode,'')
 ,	CustomerPart = Coalesce(a.CustomerPart,'')
@@ -1537,16 +1504,8 @@ Select
 					+ convert(varchar(15), coalesce(ssaa.PriorCUM,0))
 from
 	@Current862s a
-	 Join 
-	EDI5050.BlanketOrders bo on a.CustomerPart = bo.CustomerPart
-and
-	a.ShipToCode = bo.EDIShipToCode
-and
-(	bo.CheckCustomerPOShipSchedule = 0
-	or bo.CustomerPO = a.CustomerPO)
-and
-(	bo.CheckModelYearShipSchedule = 0
-	or bo.ModelYear862 = a.CustomerModelYear)
+	join EDI5050.BlanketOrders bo
+		on bo.BlanketOrderNo = a.BlanketOrderNo
 	left join
 		EDI5050.ShipScheduleAccums ssa on 
 		ssa.RawDocumentGUID = a.RawDocumentGUID and
@@ -1561,19 +1520,19 @@ and
 		ssaa.CustomerPart = a.CustomerPart and
 		coalesce(ssaa.CustomerPO,'') = coalesce(a.customerPO,'') and
 		coalesce(ssaa.CustomerModelYear,'') = coalesce(a.customerModelYear,'')
-										
-	Where
-		coalesce(a.newDocument,0) = 1 and
-		coalesce(bo.AccumShipped,0) != coalesce(ssa.LastAccumQty,0)
+where
+	coalesce(a.newDocument,0) = 1
+	and coalesce(bo.AccumShipped,0) != coalesce(ssa.LastAccumQty,0)
 
 
 union
-Select 
+select
 	TradingPartner = Coalesce((Select max(TradingPartner) from fxEDI.EDI.EDIDocuments where GUID = a.RawDocumentGUID) ,'')
 ,	DocumentType = 'PR'
 ,	AlertType =  ' Accum Notice'
 ,	ReleaseNo =  Coalesce(a.ReleaseNo,'')
 ,	ShipToCode = bo.ShipToCode
+,	AuxShipToCode = a.AuxShipToCode
 ,	ConsigneeCode =  coalesce(a.ConsigneeCode,'')
 ,	ShipFromCode = coalesce(a.ShipFromCode,'')
 ,	CustomerPart = Coalesce(a.CustomerPart,'')
@@ -1593,16 +1552,8 @@ Select
 					+ convert(varchar(15), coalesce(praa.PriorCUM,0))
 from
 	@Current830s  a
-	 Join 
-	EDI5050.BlanketOrders bo on a.CustomerPart = bo.CustomerPart
-and
-	a.ShipToCode = bo.EDIShipToCode
-and
-(	bo.CheckCustomerPOPlanning = 0
-	or bo.CustomerPO = a.CustomerPO)
-and
-(	bo.CheckModelYearPlanning = 0
-	or bo.ModelYear830 = a.CustomerModelYear)
+	join EDI5050.BlanketOrders bo
+		on bo.BlanketOrderNo = a.BlanketOrderNo
 	left join
 		EDI5050.PlanningAccums pra on 
 		pra.RawDocumentGUID = a.RawDocumentGUID and
@@ -1617,101 +1568,84 @@ and
 		praa.CustomerPart = a.CustomerPart and
 		coalesce(praa.CustomerPO,'') = coalesce(a.customerPO,'') and
 		coalesce(praa.CustomerModelYear,'') = coalesce(a.customerModelYear,'')
-										
-	Where
-		coalesce(a.newDocument,0) = 1 and
-		coalesce(bo.AccumShipped,0) != coalesce(pra.LastAccumQty,0)
-
+where
+	coalesce(a.newDocument,0) = 1
+	and coalesce(bo.AccumShipped,0) != coalesce(pra.LastAccumQty,0)
 
 order by 1,2,5,4,7
 --Update Order Header with Customer's Accum Received ---Armada Only
 
-Update oh
-		set oh.raw_cum = coalesce(ssa.LastAccumQty,0)
+update
+	oh
+set
+	oh.raw_cum = coalesce(ssa.LastAccumQty, 0)
 from
 	@Current862s a
-	 Join 
-	EDI5050.BlanketOrders bo on a.CustomerPart = bo.CustomerPart
-and
-	a.ShipToCode = bo.EDIShipToCode
-and
-(	bo.CheckCustomerPOShipSchedule = 0
-	or bo.CustomerPO = a.CustomerPO)
-and
-(	bo.CheckModelYearShipSchedule = 0
-	or bo.ModelYear862 = a.CustomerModelYear)
-	left join
-		EDI5050.ShipScheduleAccums ssa on 
-		ssa.RawDocumentGUID = a.RawDocumentGUID and
-		ssa.ShipToCode = a.ShipToCode and
-		ssa.CustomerPart = a.CustomerPart and
-		coalesce(ssa.CustomerPO,'') = coalesce(a.customerPO,'') and
-		coalesce(ssa.CustomerModelYear,'') = coalesce(a.customerModelYear,'')
- 	left join
-		EDI5050.ShipScheduleAuthAccums ssaa on 
-		ssaa.RawDocumentGUID = a.RawDocumentGUID and
-		ssaa.ShipToCode = a.ShipToCode and
-		ssaa.CustomerPart = a.CustomerPart and
-		coalesce(ssaa.CustomerPO,'') = coalesce(a.customerPO,'') and
-		coalesce(ssaa.CustomerModelYear,'') = coalesce(a.customerModelYear,'')
-join
-		order_header oh on oh.order_no = bo.BlanketOrderNo
-										
-	Where
-		coalesce(a.newDocument,0) = 1
+	join EDI5050.BlanketOrders bo
+		on bo.BlanketOrderNo = a.BlanketOrderNo
+	left join EDI5050.ShipScheduleAccums ssa
+		on ssa.RawDocumentGUID = a.RawDocumentGUID
+		and ssa.ShipToCode = a.ShipToCode
+		and ssa.CustomerPart = a.CustomerPart
+		and coalesce(ssa.CustomerPO, '') = coalesce(a.CustomerPO, '')
+		and coalesce(ssa.CustomerModelYear, '') = coalesce(a.CustomerModelYear, '')
+	left join EDI5050.ShipScheduleAuthAccums ssaa
+		on ssaa.RawDocumentGUID = a.RawDocumentGUID
+		and ssaa.ShipToCode = a.ShipToCode
+		and ssaa.CustomerPart = a.CustomerPart
+		and coalesce(ssaa.CustomerPO, '') = coalesce(a.CustomerPO, '')
+		and coalesce(ssaa.CustomerModelYear, '') = coalesce(a.CustomerModelYear, '')
+	join dbo.order_header oh
+		on oh.order_no = bo.BlanketOrderNo
+where
+	coalesce(a.NewDocument, 0) = 1
 
-Update oh
-		set oh.fab_cum = coalesce(pra.LastAccumQty,0)
+update
+	oh
+set
+	oh.fab_cum = coalesce(pra.LastAccumQty, 0)
 from
-	@Current830s  a
-	 Join 
-	EDI5050.BlanketOrders bo on a.CustomerPart = bo.CustomerPart
-and
-	a.ShipToCode = bo.EDIShipToCode
-and
-(	bo.CheckCustomerPOPlanning = 0
-	or bo.CustomerPO = a.CustomerPO)
-and
-(	bo.CheckModelYearPlanning = 0
-	or bo.ModelYear830 = a.CustomerModelYear)
-	left join
-		EDI5050.PlanningAccums pra on 
-		pra.RawDocumentGUID = a.RawDocumentGUID and
-		pra.ShipToCode = a.ShipToCode and
-		pra.CustomerPart = a.CustomerPart and
-		coalesce(pra.CustomerPO,'') = coalesce(a.customerPO,'') and
-		coalesce(pra.CustomerModelYear,'') = coalesce(a.customerModelYear,'')
- 	left join
-		EDI5050.PlanningAuthAccums praa on 
-		praa.RawDocumentGUID = a.RawDocumentGUID and
-		praa.ShipToCode = a.ShipToCode and
-		praa.CustomerPart = a.CustomerPart and
-		coalesce(praa.CustomerPO,'') = coalesce(a.customerPO,'') and
-		coalesce(praa.CustomerModelYear,'') = coalesce(a.customerModelYear,'')
-join
-		order_header oh on oh.order_no = bo.BlanketOrderNo
-										
-	Where
-		coalesce(a.newDocument,0) = 1
+	@Current830s a
+	join EDI5050.BlanketOrders bo
+		on bo.BlanketOrderNo = a.BlanketOrderNo
+	left join EDI5050.PlanningAccums pra
+		on pra.RawDocumentGUID = a.RawDocumentGUID
+		and pra.ShipToCode = a.ShipToCode
+		and pra.CustomerPart = a.CustomerPart
+		and coalesce(pra.CustomerPO, '') = coalesce(a.CustomerPO, '')
+		and coalesce(pra.CustomerModelYear, '') = coalesce(a.CustomerModelYear, '')
+	left join EDI5050.PlanningAuthAccums praa
+		on praa.RawDocumentGUID = a.RawDocumentGUID
+		and praa.ShipToCode = a.ShipToCode
+		and praa.CustomerPart = a.CustomerPart
+		and coalesce(praa.CustomerPO, '') = coalesce(a.CustomerPO, '')
+		and coalesce(praa.CustomerModelYear, '') = coalesce(a.CustomerModelYear, '')
+	join dbo.order_header oh
+		on oh.order_no = bo.BlanketOrderNo
+where
+	coalesce(a.NewDocument, 0) = 1
 
+select
+	*
+into
+	#EDIAlerts
+from
+	@EDIOrdersAlert
 
-
-Select	*
-into	#EDIAlerts
-From	@EDIOrdersAlert
-
-Select	TradingPartner ,
-				DocumentType , --'PR - Planning Release; SS - ShipSchedule'
-				AlertType ,
-				ReleaseNo ,
-				ShipToCode,
-				ConsigneeCode ,				
-				CustomerPart ,
-				CustomerPO ,
-				Description 
-				
-into	#EDIAlertsEmail
-From	@EDIOrdersAlert
+select
+	TradingPartner
+,	DocumentType	--'PR - Planning Release; SS - ShipSchedule'
+,	AlertType
+,	ReleaseNo
+,	ShipToCode
+,	ConsigneeCode
+,	CustomerPart
+,	CustomerPO
+,	Description
+into
+	#EDIAlertsEmail
+from
+	@EDIOrdersAlert
 
 
 If Exists (Select 1 From #EDIAlerts)
@@ -1912,9 +1846,6 @@ set	@Error = @@error
 
 select
 	@Error, @ProcReturn, @TranDT, @ProcResult
-go
-
-
 go
 
 commit transaction
