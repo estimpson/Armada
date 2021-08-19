@@ -2,7 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 CREATE procedure [EDI5050].[usp_Process]
 	@TranDT datetime = null out
 ,	@Result integer = null out
@@ -362,21 +361,73 @@ end
 --</Debug>
 
 if	@Testing > 1 begin
-	select
-		'ShipScheduleHeaders'
-
-	select
-		*
-	from
-		EDI5050.ShipScheduleHeaders fh
-
-	select
-		'PlanningHeaders'
+	if	not exists
+		(	select
+				*
+			from
+				EDI5050.ShipScheduleHeaders fh
+			where
+				fh.Status in (0, 1)
+		)
+		select
+			'ShipScheduleHeaders - empty'
+	else
+		select
+			'ShipScheduleHeaders'
+		,	*
+		from
+			EDI5050.ShipScheduleHeaders fh
+		where
+			fh.Status in (0, 1)
 		
-	select
-		*
-	from
-		EDI5050.PlanningHeaders fh
+	if	not exists
+		(	select
+				*
+			from
+				EDI5050.PlanningHeaders fh
+			where
+				fh.Status in (0, 1)
+		)
+		select
+			'PlanningHeaders - empty'
+	else
+		select
+			'PlanningHeaders'
+		,	*
+		from
+			EDI5050.PlanningHeaders fh
+		where
+			fh.Status in (0, 1)
+
+	if	not exists
+		(	select
+				*
+			from
+				@Current862s c
+		)
+		select
+			'@Current862s - empty'
+	else
+		select
+			'@Current862s'
+		,	*
+		from
+			@Current862s c
+
+	if	not exists
+		(	select
+				*
+			from
+				@Current830s c
+		)
+		select
+			'@Current830s - empty'
+	else
+		select
+			'@Current830s'
+		,	*
+		from
+			@Current830s c
 end
 
 --<Debug>
@@ -454,8 +505,7 @@ insert
 ,	NewDocument
 )
 /*		Add releases due today when behind and no release for today exists. */
-
-Select
+select
 	ReleaseType = 1
 ,	OrderNo = bo.BlanketOrderNo
 ,	Type = 1
@@ -719,6 +769,24 @@ where
 order by
 	2,1,4
 
+if	@Testing > 1 begin
+
+	if	not exists
+		(	select
+				*
+			from
+				@RawReleases rr
+		)
+		select
+			'@RawReleases-Init - empty'
+	else
+		select
+			'@RawReleases-Init'
+		,	*
+		from
+			@RawReleases rr
+end
+
 /*		Calculate orders to update. */
 update
 	rr
@@ -743,47 +811,6 @@ if	@Testing = 0 begin
 		rr.NewDocument = 0
 end
 
-/*		Update accums for Orders where Accum Difference has been inserted for immediate delivery */
---update
---	@RawReleases
---set
---	RelPost = CustomerAccum + coalesce (
---	(	select
---			sum (StdQtyRelease)
---		from
---			@RawReleases
---		where
---			OrderNo = rr.OrderNo
---			and Type = rr.Type
---			and	RowID <= rr.RowID), 0)
---from
---	@RawReleases rr
-
-	
---/*		Calculate orders to update. */
---update
---	rr
---set
---	NewDocument =
---	(	select
---			max(NewDocument)
---		from
---			@RawReleases rr2
---		where
---			rr2.OrderNo = rr.OrderNo
---	)
---from
---	@RawReleases rr
-
---if	@Testing = 0 begin
---	delete
---		rr
---	from
---		@RawReleases rr
---	where
---		rr.NewDocument = 0
---end
-
 update
 	@RawReleases
 set
@@ -799,33 +826,7 @@ set
 from
 	@RawReleases rr
 
-	
---/*		Calculate orders to update. */
---update
---	rr
---set
---	NewDocument =
---	(	select
---			max(NewDocument)
---		from
---			@RawReleases rr2
---		where
---			rr2.OrderNo = rr.OrderNo
---	)
---from
---	@RawReleases rr
-
---delete
---	rr
---from
---	@RawReleases rr
---where
---	rr.NewDocument = 0
-
-
 /*		Calculate running cumulatives. */
-
-
 update
 	rr
 set
@@ -849,16 +850,14 @@ from
 	@RawReleases rr
 
 	--For Armada Only..Update Release Number with Accum Increase if customer's accum causes the qty to be increased
-	update
+update
 	rr
 set
-		releaseNo = 'Accum Increase'
+	releaseNo = 'Accum Increase'
 from
 	@RawReleases rr
 where
 		RelPost-RelPrior > QtyRelease
-
-
 
 update
 	rr
@@ -877,7 +876,6 @@ from
 where
 	QtyRelease <= 0
 
-
 /* Move Planning Release dates beyond last Ship Schedule Date that has a quantity due*/
 update
 	rr
@@ -888,6 +886,7 @@ from
 where
 	rr.ReleaseType = 2
 	and rr.ReleaseDT <= (select max(ReleaseDT) from @RawReleases where OrderNo = rr.OrderNo and ReleaseType = 1 and Status>-1)
+
 /*	Calculate order line numbers and committed quantity. */
 update
 	rr
@@ -935,14 +934,22 @@ if @Debug & 1 = 1 begin
 end
 --</Debug>
 
-if	@Testing = 2 begin
-	select
-		'@RawReleases'
-	
-	select
-		*
-	from
-		@RawReleases rr
+if	@Testing > 1 begin
+
+	if	not exists
+		(	select
+				*
+			from
+				@RawReleases rr
+		)
+		select
+			'@RawReleases-Final - empty'
+	else
+		select
+			'@RawReleases-Final'
+		,	*
+		from
+			@RawReleases rr
 end
 
 /*		Replace order detail. */
@@ -1052,293 +1059,225 @@ if	@Testing = 0 begin
 	end
 	--- </Insert>
 	
-	/*	Set dock code, line feed code, and reserve line feed code. */
-	/*if  exists
-		(	select
-				*
-			from
-				dbo.order_header oh
-				join EDI5050.PlanningHeaders fh
-					join EDI5050.PlanningSupplemental ps
-						on ps.RawDocumentGUID = fh.RawDocumentGUID
-					join EDI5050.BlanketOrders bo
-						on bo.EDIShipToCode = coalesce (ps.ConsigneeCode, ps.ShipToCode)
-						and bo.CustomerPart = ps.CustomerPart
-					on bo.BlanketOrderNo = oh.order_no
-				join @Current830s c
-					on ps.RawDocumentGUID = c.RawDocumentGUID
-					and ps.ShipToCode = c.ShipToCode
-					and coalesce(ps.ShipFromCode,'') = coalesce(c.ShipFromCode,'')
-					and coalesce(ps.ConsigneeCode, '') = coalesce(c.ConsigneeCode, '')
-					and ps.CustomerPart = c.CustomerPart
-			where 
-				coalesce(oh.dock_code,'') != coalesce(ps.UserDefined1, '')
-				or coalesce(oh.line_feed_code,'') != coalesce(ps.UserDefined2,'')
-				or coalesce(oh.zone_code,'') != coalesce(ps.UserDefined3,'')
-		) or
-		exists
-		(	select
-				*
-			from
-				dbo.order_header oh
-				join EDI5050.ShipScheduleHeaders fh
-					join EDI5050.ShipScheduleSupplemental sss
-						on sss.RawDocumentGUID = fh.RawDocumentGUID
-					join EDI5050.BlanketOrders bo
-						on bo.EDIShipToCode = sss.ShipToCode
-						and bo.CustomerPart = sss.CustomerPart
-					on bo.BlanketOrderNo = oh.order_no
-				join @Current862s c
-					on sss.RawDocumentGUID = c.RawDocumentGUID
-					and sss.ShipToCode = c.ShipToCode
-					and sss.CustomerPart = c.CustomerPart
-			where 
-				coalesce(oh.dock_code,'') != coalesce(sss.UserDefined1, '')
-				or coalesce(oh.line_feed_code,'') != coalesce(sss.UserDefined2,'')
-				or coalesce(oh.zone_code,'') != coalesce(sss.UserDefined3,'')
-		) begin
-		*/
-		/*
-		insert
-			EDI5050.LabelInfoHeader
-		(	SystemDT
-		)
-		select
-			@TranDT
+	--- <Update rows="*">
+	set	@TableName = 'dbo.order_header'
 		
-		insert 	
-			EDI5050.LabelInfoHeader
-		(	HeaderTimeStamp
-		,	OrderNo
-		,	NewDockCode
-		,	OldDockCode
-		,	NewLineFeed
-		,	OldLineFeed
-		,	NewReserveLineFeed
-		,	OldReserveLineFeed
-		)
-		select
-			HeaderTimeStamp
-		,	rr.OrderNo
-		,	rr.DockCode
-		,	oh.dock_code
-		,	rr.LineFeedCode
-		,	oh.line_feed_code
-		,	rr.ReserveLineFeedCode
-		,	oh.zone_code
-		from
-			dbo.order_header oh
-			join @RawReleases rr
-				on rr.OrderNo = oh.order_no
-				   and rr.RowID =
-				   (	select
-							min(rr2.RowID)
-						from
-							@RawReleases rr2
-						where
-							rr2.OrderNo = oh.order_no
-							and rr2.Type = 1
-					)
-			cross join
-			(	select
-					convert(int,@@DBTS) as HeaderTimeStamp
-			) HeaderTimeStamp
-		where
-			coalesce(oh.dock_code,'') != coalesce(rr.DockCode,'')
-			or coalesce(oh.line_feed_code,'') != coalesce(rr.LineFeedCode,'')
-			or coalesce(oh.zone_code,'') != coalesce(rr.ReserveLineFeedCode,'')
-		*/
-		
-		--- <Update rows="*">
-				--- <Update rows="*">
-		set	@TableName = 'dbo.order_header'
-		
-		update
-			oh
-		set
-			custom01 = rtrim(prs.UserDefined1)
-		,	dock_code = rtrim(prs.UserDefined1)
-		,	line_feed_code = rtrim(prs.UserDefined2)
-		,	zone_code = rtrim(prs.UserDefined3)
+	update
+		oh
+	set
+		custom01 = rtrim(prs.UserDefined1)
+	,	dock_code = rtrim(prs.UserDefined1)
+	,	line_feed_code = rtrim(prs.UserDefined2)
+	,	zone_code = rtrim(prs.UserDefined3)
 
-		from
-			dbo.order_header oh
-		join
-				EDI5050.blanketOrders bo
+	from
+		dbo.order_header oh
+	join
+			EDI5050.blanketOrders bo
+	on
+			bo.BlanketOrderNo = oh.order_no
+	join
+			(Select * From @Current830s) cpr 
 		on
-				bo.BlanketOrderNo = oh.order_no
+			cpr.CustomerPart = bo.customerpart and
+			cpr.ShipToCode = bo.EDIShipToCode and
+			(	bo.CheckCustomerPOPlanning = 0
+						or bo.CustomerPO = cpr.CustomerPO
+			)
+				and	(	bo.CheckModelYearPlanning= 0
+						or bo.ModelYear830 = cpr.CustomerModelYear
+			)
 		join
-				(Select * From @Current830s) cpr 
-			on
-				cpr.CustomerPart = bo.customerpart and
-				cpr.ShipToCode = bo.EDIShipToCode and
-				(	bo.CheckCustomerPOPlanning = 0
-							or bo.CustomerPO = cpr.CustomerPO
-				)
-					and	(	bo.CheckModelYearPlanning= 0
-							or bo.ModelYear830 = cpr.CustomerModelYear
-				)
-		  join
-				EDI5050.PlanningSupplemental prs
-		on
-				prs.RawDocumentGUID = cpr.RawDocumentGUID and
-				prs.CustomerPart = cpr.CustomerPart and
-				coalesce(prs.CustomerPO,'') = cpr.CustomerPO and
-				prs.CustomerModelYear = cpr.CustomerModelYear  and
-				prs.ShipToCode = cpr.ShipToCode
+			EDI5050.PlanningSupplemental prs
+	on
+			prs.RawDocumentGUID = cpr.RawDocumentGUID and
+			prs.CustomerPart = cpr.CustomerPart and
+			coalesce(prs.CustomerPO,'') = cpr.CustomerPO and
+			prs.CustomerModelYear = cpr.CustomerModelYear  and
+			prs.ShipToCode = cpr.ShipToCode
 		
-		select
-			@Error = @@Error,
-			@RowCount = @@Rowcount
+	select
+		@Error = @@Error,
+		@RowCount = @@Rowcount
 		
-		if	@Error != 0 begin
-			set	@Result = 999999
-			RAISERROR ('Error updating table %s in procedure %s.  Error: %d', 16, 1, @TableName, @ProcName, @Error)
-			rollback tran @ProcName
-			return
-		end
-		
-		--- <Update rows="*">
-		set	@TableName = 'dbo.order_header'
-		
-		update
-			oh
-		set
-			custom01 = rtrim(sss.UserDefined1)
-		,	dock_code = rtrim(sss.UserDefined1)
-		,	line_feed_code = rtrim(sss.UserDefined2)
-		,	zone_code = rtrim(sss.UserDefined3)
-		,	line11 = rtrim(sss.UserDefined11)
-		,	line12 = rtrim(sss.UserDefined12)
-		,	line13 = rtrim(sss.UserDefined13)
-		,	line14 = rtrim(sss.UserDefined14)
-		,	line15 = rtrim(sss.UserDefined15)
-		,	line16 = rtrim(sss.UserDefined16)
-		,	line17 = rtrim(sss.UserDefined17)
-		from
-			dbo.order_header oh
-		join
-				EDI5050.blanketOrders bo
-		on
-				bo.BlanketOrderNo = oh.order_no
-		join
-				(Select * From @Current862s) css 
-			on
-				css.CustomerPart = bo.customerpart and
-				css.ShipToCode = bo.EDIShipToCode and
-				(	bo.CheckCustomerPOShipSchedule = 0
-							or bo.CustomerPO = css.CustomerPO
-				)
-					and	(	bo.CheckModelYearShipSchedule = 0
-							or bo.ModelYear862 = css.CustomerModelYear
-				)
-		  join
-				EDI5050.ShipScheduleSupplemental sss
-		on
-				sss.RawDocumentGUID = css.RawDocumentGUID and
-				sss.CustomerPart = css.CustomerPart and
-				coalesce(sss.CustomerPO,'') = css.CustomerPO and
-				sss.CustomerModelYear = css.CustomerModelYear  and
-				sss.ShipToCode = css.ShipToCode
-		
-		select
-			@Error = @@Error,
-			@RowCount = @@Rowcount
-		
-		if	@Error != 0 begin
-			set	@Result = 999999
-			RAISERROR ('Error updating table %s in procedure %s.  Error: %d', 16, 1, @TableName, @ProcName, @Error)
-			rollback tran @ProcName
-			return
-		end
+	if	@Error != 0 begin
+		set	@Result = 999999
+		RAISERROR ('Error updating table %s in procedure %s.  Error: %d', 16, 1, @TableName, @ProcName, @Error)
+		rollback tran @ProcName
+		return
 	end
 	--- </Update>
+		
+	--- <Update rows="*">
+	set	@TableName = 'dbo.order_header'
+		
+	update
+		oh
+	set
+		custom01 = rtrim(sss.UserDefined1)
+	,	dock_code = rtrim(sss.UserDefined1)
+	,	line_feed_code = rtrim(sss.UserDefined2)
+	,	zone_code = rtrim(sss.UserDefined3)
+	,	line11 = rtrim(sss.UserDefined11)
+	,	line12 = rtrim(sss.UserDefined12)
+	,	line13 = rtrim(sss.UserDefined13)
+	,	line14 = rtrim(sss.UserDefined14)
+	,	line15 = rtrim(sss.UserDefined15)
+	,	line16 = rtrim(sss.UserDefined16)
+	,	line17 = rtrim(sss.UserDefined17)
+	from
+		dbo.order_header oh
+	join
+			EDI5050.blanketOrders bo
+	on
+			bo.BlanketOrderNo = oh.order_no
+	join
+			(Select * From @Current862s) css 
+		on
+			css.CustomerPart = bo.customerpart and
+			css.ShipToCode = bo.EDIShipToCode and
+			(	bo.CheckCustomerPOShipSchedule = 0
+						or bo.CustomerPO = css.CustomerPO
+			)
+				and	(	bo.CheckModelYearShipSchedule = 0
+						or bo.ModelYear862 = css.CustomerModelYear
+			)
+		join
+			EDI5050.ShipScheduleSupplemental sss
+	on
+			sss.RawDocumentGUID = css.RawDocumentGUID and
+			sss.CustomerPart = css.CustomerPart and
+			coalesce(sss.CustomerPO,'') = css.CustomerPO and
+			sss.CustomerModelYear = css.CustomerModelYear  and
+			sss.ShipToCode = css.ShipToCode
+		
+	select
+		@Error = @@Error,
+		@RowCount = @@Rowcount
+		
+	if	@Error != 0 begin
+		set	@Result = 999999
+		RAISERROR ('Error updating table %s in procedure %s.  Error: %d', 16, 1, @TableName, @ProcName, @Error)
+		rollback tran @ProcName
+		return
+	end
+	--- </Update>
+end
 --end
 else begin
 	if	@Testing > 1 begin
-		select 'raw releases'
+		if	not exists
+			(	select
+					*
+				from
+					@RawReleases
+			)
+			select
+				'raw releases - empty'
+		else
+			select
+				'raw releases'
+			,	Type
+			,	OrderNo
+			,	BlanketPart
+			,	CustomerPart
+			,	ShipToID
+			,	CustomerPO
+			,	ModelYear
+			,	OrderUnit
+			,	QtyShipper
+			,	Line
+			,	ReleaseNo
+			,	QtyRelease
+			,	StdQtyRelease
+			,	ReferenceAccum
+			,	RelPrior
+			,	RelPost
+			,	ReleaseDT
+			from
+				@RawReleases
+			order by
+				OrderNo
+			,	RowID
 		
-		select
-			Type
-		,	OrderNo
-		,	BlanketPart
-		,	CustomerPart
-		,	ShipToID
-		,	CustomerPO
-		,	ModelYear
-		,	OrderUnit
-		,	QtyShipper
-		,	Line
-		,	ReleaseNo
-		,	QtyRelease
-		,	StdQtyRelease
-		,	ReferenceAccum
-		,	RelPrior
-		,	RelPost
-		,	ReleaseDT
-		from
-			@RawReleases
-		order by
-			OrderNo
-		,	RowID
-		
-		select 'to be deleted'
 
-		select
-			od.*
-		from
-			dbo.order_detail od
-		where
-			od.order_no in (select OrderNo from @RawReleases)
-		order by
-			order_no
-		,	due_date
-		
-		/*	to be inserted*/
-		
-		select 'to be inserted'
+		if	not exists
+			(	select
+					*
+				from
+					dbo.order_detail od
+				where
+					od.order_no in (select OrderNo from @RawReleases)
+			)
+			select
+				'to be deleted - empty'
+		else
+			select
+				'to be deleted'
+			,	od.*
+			from
+				dbo.order_detail od
+			where
+				od.order_no in (select OrderNo from @RawReleases)
+			order by
+				order_no
+			,	due_date
 	end
 		
-	select
-		order_no = rr.OrderNo
-	,	sequence = rr.Line
-	,	part_number = rr.BlanketPart
-	,	product_name = (select name from dbo.part where part = rr.BlanketPart)
-	,	type = case rr.Type when 1 then 'F' when 2 then 'P' end
-	,	quantity = rr.RelPost - rr.relPrior
-	,	status = ''
-	,	notes = 'Processed Date : '+ convert(varchar, getdate(), 120) + ' ~ ' + case rr.Type when 1 then 'EDI Processed Release' when 2 then 'EDI Processed Release' end
-	,	unit = (select unit from order_header where order_no = rr.OrderNo)
-	,	due_date = rr.ReleaseDT
-	,	release_no = rr.ReleaseNo
-	,	destination = rr.ShipToID
-	,	customer_part = rr.CustomerPart
-	,	row_id = rr.Line
-	,	flag = 1
-	,	ship_type = 'N'
-	,	packline_qty = 0
-	,	packaging_type = bo.PackageType
-	,	weight = (rr.RelPost - rr.relPrior) * bo.UnitWeight
-	,	plant = (select plant from order_header where order_no = rr.OrderNo)
-	,	week_no = datediff(wk, (select fiscal_year_begin from parameters), rr.ReleaseDT) + 1
-	,	std_qty = rr.RelPost - rr.relPrior
-	,	our_cum = rr.RelPrior
-	,	the_cum = rr.RelPost
-	,	price = (select price from order_header where order_no = rr.OrderNo)
-	,	alternate_price = (select alternate_price from order_header where order_no = rr.OrderNo)
-	,	committed_qty = coalesce
-		(	case
-				when rr.QtyShipper > rr.RelPost - bo.AccumShipped then rr.RelPost - rr.relPrior
-				when rr.QtyShipper > rr.RelPrior - bo.AccumShipped then rr.QtyShipper - (rr.RelPrior - bo.AccumShipped)
-			end
-		,	0
+		
+	/*	to be inserted*/
+	if	not exists
+		(	select
+				*
+			from
+				@RawReleases rr
+				join EDI5050.BlanketOrders bo
+					on bo.BlanketOrderNo = rr.OrderNo
 		)
-	from
-		@RawReleases rr
-		join EDI5050.BlanketOrders bo
-			on bo.BlanketOrderNo = rr.OrderNo
-	order by
-		1, 2
+		select
+			'to be inserted - empty'
+	else
+		select
+			'to be inserted'
+		,	order_no = rr.OrderNo
+		,	sequence = rr.Line
+		,	part_number = rr.BlanketPart
+		,	product_name = (select name from dbo.part where part = rr.BlanketPart)
+		,	type = case rr.Type when 1 then 'F' when 2 then 'P' end
+		,	quantity = rr.RelPost - rr.relPrior
+		,	status = ''
+		,	notes = 'Processed Date : '+ convert(varchar, getdate(), 120) + ' ~ ' + case rr.Type when 1 then 'EDI Processed Release' when 2 then 'EDI Processed Release' end
+		,	unit = (select unit from order_header where order_no = rr.OrderNo)
+		,	due_date = rr.ReleaseDT
+		,	release_no = rr.ReleaseNo
+		,	destination = rr.ShipToID
+		,	customer_part = rr.CustomerPart
+		,	row_id = rr.Line
+		,	flag = 1
+		,	ship_type = 'N'
+		,	packline_qty = 0
+		,	packaging_type = bo.PackageType
+		,	weight = (rr.RelPost - rr.relPrior) * bo.UnitWeight
+		,	plant = (select plant from order_header where order_no = rr.OrderNo)
+		,	week_no = datediff(wk, (select fiscal_year_begin from parameters), rr.ReleaseDT) + 1
+		,	std_qty = rr.RelPost - rr.relPrior
+		,	our_cum = rr.RelPrior
+		,	the_cum = rr.RelPost
+		,	price = (select price from order_header where order_no = rr.OrderNo)
+		,	alternate_price = (select alternate_price from order_header where order_no = rr.OrderNo)
+		,	committed_qty = coalesce
+			(	case
+					when rr.QtyShipper > rr.RelPost - bo.AccumShipped then rr.RelPost - rr.relPrior
+					when rr.QtyShipper > rr.RelPrior - bo.AccumShipped then rr.QtyShipper - (rr.RelPrior - bo.AccumShipped)
+				end
+			,	0
+			)
+		from
+			@RawReleases rr
+			join EDI5050.BlanketOrders bo
+				on bo.BlanketOrderNo = rr.OrderNo
+		order by
+			1, 2
 end
 --<Debug>
 if @Debug & 1 = 1 begin
@@ -1359,14 +1298,9 @@ if	@TranCount = 0 begin
 end
 --- </Closetran>
 
----	<Return>
---if	@Testing != 0
---	and @@trancount > 0 begin
---	rollback tran @ProcName
---end
 /* Start E-Mail Alerts and Exceptions*/
-
-declare @EDIOrdersAlert table
+declare
+	@EDIOrdersAlert table
 (	TradingPartner varchar(30) null
 ,	DocumentType varchar(30) null	--'PR - Planning Release; SS - ShipSchedule'
 ,	AlertType varchar(100) null
@@ -1383,8 +1317,7 @@ declare @EDIOrdersAlert table
 		
 insert
 	@EDIOrdersAlert
-(
-	TradingPartner
+(	TradingPartner
 ,	DocumentType
 ,	AlertType
 ,	ReleaseNo
@@ -1397,6 +1330,8 @@ insert
 ,	CustomerModelYear
 ,	Description
 )
+
+--Missing blanket orders
 select
 	TradingPartner = coalesce((select max(TradingPartner) from FxEDI.EDI.EDIDocuments where GUID = a.RawDocumentGUID), '')
 ,	DocumentType = 'SS'
@@ -1413,7 +1348,9 @@ select
 from
 	@Current862s a
 where
-	coalesce(a.newDocument,0) = 1
+	(	@Testing > 0
+		or coalesce(a.newDocument,0) = 1
+	)
 	and a.BlanketOrderNo is null
 union
 select
@@ -1432,7 +1369,9 @@ select
 from
 	@Current830s a
 Where
-	coalesce(a.newDocument,0) = 1
+	(	@Testing > 0
+		or coalesce(a.newDocument,0) = 1
+	)
 	and a.BlanketOrderNo is null
 union
 
@@ -1455,8 +1394,9 @@ from
 	join EDI5050.BlanketOrders bo
 		on bo.BlanketOrderNo = a.BlanketOrderNo
 where
-	coalesce(a.newDocument,0) = 1
-
+	(	@Testing > 0
+		or coalesce(a.newDocument,0) = 1
+	)
 union
 Select 
 	TradingPartner = Coalesce((Select max(TradingPartner) from fxEDI.EDI.EDIDocuments where GUID = a.RawDocumentGUID) ,'')
@@ -1521,10 +1461,10 @@ from
 		coalesce(ssaa.CustomerPO,'') = coalesce(a.customerPO,'') and
 		coalesce(ssaa.CustomerModelYear,'') = coalesce(a.customerModelYear,'')
 where
-	coalesce(a.newDocument,0) = 1
+	(	@Testing > 0
+		or coalesce(a.newDocument,0) = 1
+	)
 	and coalesce(bo.AccumShipped,0) != coalesce(ssa.LastAccumQty,0)
-
-
 union
 select
 	TradingPartner = Coalesce((Select max(TradingPartner) from fxEDI.EDI.EDIDocuments where GUID = a.RawDocumentGUID) ,'')
@@ -1569,12 +1509,32 @@ from
 		coalesce(praa.CustomerPO,'') = coalesce(a.customerPO,'') and
 		coalesce(praa.CustomerModelYear,'') = coalesce(a.customerModelYear,'')
 where
-	coalesce(a.newDocument,0) = 1
+	(	@Testing > 0
+		or coalesce(a.newDocument,0) = 1
+	)
 	and coalesce(bo.AccumShipped,0) != coalesce(pra.LastAccumQty,0)
 
 order by 1,2,5,4,7
---Update Order Header with Customer's Accum Received ---Armada Only
 
+if	@Testing > 1 begin
+
+	if	not exists
+		(	select
+				*
+			from
+				@EDIOrdersAlert eoa
+		)
+		select
+			'@EDIOrdersAlert - empty'
+	else
+		select
+			'@EDIOrdersAlert'
+		,	*
+		from
+			@EDIOrdersAlert eoa
+end
+
+--Update Order Header with Customer's Accum Received ---Armada Only
 update
 	oh
 set
@@ -1626,7 +1586,18 @@ where
 	coalesce(a.NewDocument, 0) = 1
 
 select
-	*
+	TradingPartner
+,	DocumentType
+,	AlertType
+,	ReleaseNo
+,	ShipToCode
+,	AuxShipToCode
+,	ConsigneeCode
+,	ShipFromCode
+,	CustomerPart
+,	CustomerPO
+,	CustomerModelYear
+,	Description
 into
 	#EDIAlerts
 from
@@ -1638,6 +1609,7 @@ select
 ,	AlertType
 ,	ReleaseNo
 ,	ShipToCode
+,	AuxShipToCode
 ,	ConsigneeCode
 ,	CustomerPart
 ,	CustomerPO
@@ -1647,168 +1619,178 @@ into
 from
 	@EDIOrdersAlert
 
+if	@Testing > 1 begin
 
-If Exists (Select 1 From #EDIAlerts)
+	if	not exists
+		(	select
+				*
+			from
+				#EDIAlerts ea
+		)
+		select
+			'#EDIAlerts - empty'
+	else
+		select
+			'#EDIAlerts'
+		,	*
+		from
+			#EDIAlerts ea
 
-Begin
-		
+	if	not exists
+		(	select
+				*
+			from
+				#EDIAlertsEmail eae
+		)
+		select
+			'#EDIAlertsEmail - empty'
+	else
+		select
+			'#EDIAlertsEmail'
+		,	*
+		from
+			#EDIAlertsEmail eae
+end
 
-		declare
-			@html nvarchar(max),
-			@EmailTableName sysname  = N'#EDIAlertsEmail'
-		
-		exec [FT].[usp_TableToHTML]
-				@tableName = @Emailtablename
-			,	@orderBy = N'AlertType'
-			,	@html = @html OUTPUT
-			,	@includeRowNumber = 0
-			,	@camelCaseHeaders = 1
-		
-		DECLARE
-			@EmailBody NVARCHAR(MAX)
-		,	@EmailHeader NVARCHAR(MAX) = 'EDI Processing for EDI5050' 
+if exists (select * from #EDIAlerts)
+begin
+	declare
+		@html	nvarchar(max)
+	,	@EmailTableName sysname = N'#EDIAlertsEmail'
 
-		SELECT
-			@EmailBody =
-				N'<H1>' + @EmailHeader + N'</H1>' +
-				@html
+	exec FT.usp_TableToHTML
+		@tableName = @EmailTableName
+	,	@orderBy = N'AlertType'
+	,	@html = @html output
+	,	@includeRowNumber = 0
+	,	@camelCaseHeaders = 1
+
+	declare
+		@EmailBody	nvarchar(max)
+	,	@EmailHeader nvarchar(max) = N'EDI Processing for EDI5050'
+
+	select
+		@EmailBody	= N'<H1>' + @EmailHeader + N'</H1>' + @html
 
 	--print @emailBody
 
-	EXEC msdb.dbo.sp_send_dbmail
-			@profile_name = 'FxArmadaMail1'-- sysname
-	,		@recipients = 'czurawski@armadarubber.com' -- varchar(max)
-	,		@copy_recipients = 'aboulanger@fore-thought.com' -- varchar(max)
-	, 	@subject = @EmailHeader
-	,  	@body = @EmailBody
-	,  	@body_format = 'HTML'
-	,		@importance = 'High' 
-					
+	exec msdb.dbo.sp_send_dbmail
+		@profile_name = 'FxArmadaMail1'					-- sysname
+	,	@recipients = 'czurawski@armadarubber.com'		-- varchar(max)
+	,	@copy_recipients = 'estimpson@fore-thought.com' -- varchar(max)
+	,	@subject = @EmailHeader
+	,	@body = @EmailBody
+	,	@body_format = 'HTML'
+	,	@importance = 'High'
 
-INSERT [EDIAlerts].[ProcessedReleases]
-
-(	 EDIGroup
-	,TradingPartner
-	,DocumentType --'PR - Planning Release; SS - ShipSchedule'
-	,AlertType 
-	,ReleaseNo
-	,ShipToCode
-	,ConsigneeCode 
-	,ShipFromCode 
-	,CustomerPart
-	,CustomerPO
-	,CustomerModelYear
-	,Description
-)
-
-
-SELECT 
-	'EDI5050'
-	,*
-FROM
-	#EDIAlerts
-UNION
-SELECT
-	'EDI5050'
-	,TradingPartner = COALESCE((SELECT MAX(TradingPartner) FROM fxEDI.EDI.EDIDocuments WHERE GUID = a.RawDocumentGUID) ,'')
-,	DocumentType = 'SS'
-,	AlertType =  'Exception Quantity Due'
-,	ReleaseNo =  COALESCE(a.ReleaseNo,'')
-,	ShipToCode = a.ShipToCode
-,	ConsigneeCode =  COALESCE(a.ConsigneeCode,'')
-,	ShipFromCode = COALESCE(a.ShipFromCode,'')
-,	CustomerPart = COALESCE(a.CustomerPart,'')
-,	CustomerPO = COALESCE(a.CustomerPO,'')
-,	CustomerModelYear = COALESCE(a.CustomerModelYear,'')
-, Description = 'Qty Due : ' + CONVERT(VARCHAR(MAX), c.ReleaseQty) + ' on - ' + CONVERT(VARCHAR(MAX), c.ReleaseDT)
-FROM
-	@Current862s a
-JOIN
-		EDI5050.ShipSchedules c
-ON			c.RawDocumentGUID = a.RawDocumentGUID AND
-				a.CustomerPart = c.CustomerPart AND
-				a.ShipToCode =c.ShipToCode AND
-				COALESCE(a.customerPO,'') = COALESCE(c.CustomerPO,'') AND
-				COALESCE(a.CustomerModelYear,'') = COALESCE(c.CustomerModelYear,'')
-WHERE
-		COALESCE(a.newDocument,0) = 1
-AND NOT EXISTS
-( SELECT 1 FROM 
-		EDI5050.ShipSchedules b
- JOIN 
-	EDI5050.BlanketOrders bo ON b.CustomerPart = bo.CustomerPart
-AND
-	b.ShipToCode = bo.EDIShipToCode
-AND
-(	bo.CheckCustomerPOShipSchedule = 0
-	OR bo.CustomerPO = b.CustomerPO)
-AND
-(	bo.CheckModelYearShipSchedule = 0
-	OR bo.ModelYear862 = b.CustomerModelYear)
-WHERE
-				a.RawDocumentGUID = b.RawDocumentGUID AND
-				a.CustomerPart = b.CustomerPart AND
-				a.ShipToCode = b.ShipToCode AND
-				COALESCE(a.customerPO,'') = COALESCE(b.CustomerPO,'') AND
-				COALESCE(a.CustomerModelYear,'') = COALESCE(b.CustomerModelYear,''))
-
-UNION
-SELECT
-	'EDI5050'
-	,TradingPartner = COALESCE((SELECT MAX(TradingPartner) FROM fxEDI.EDI.EDIDocuments WHERE GUID = a.RawDocumentGUID) ,'')
-,	DocumentType = 'PR'
-,	AlertType =  'Exception Quantity Due'
-,	ReleaseNo =  COALESCE(a.ReleaseNo,'')
-,	ShipToCode = a.ShipToCode
-,	ConsigneeCode =  COALESCE(a.ConsigneeCode,'')
-,	ShipFromCode = COALESCE(a.ShipFromCode,'')
-,	CustomerPart = COALESCE(a.CustomerPart,'')
-,	CustomerPO = COALESCE(a.CustomerPO,'')
-,	CustomerModelYear = COALESCE(a.CustomerModelYear,'')
-,  Description = 'Qty Due : ' + CONVERT(VARCHAR(MAX), c.ReleaseQty) + ' on - ' + CONVERT(VARCHAR(MAX), c.ReleaseDT)
-FROM
-	@Current830s a
-JOIN
-		EDI5050.PlanningReleases c
-ON			c.RawDocumentGUID = a.RawDocumentGUID AND
-				a.CustomerPart = c.CustomerPart AND
-				a.ShipToCode =c.ShipToCode AND
-				COALESCE(a.customerPO,'') = COALESCE(c.CustomerPO,'') AND
-				COALESCE(a.CustomerModelYear,'') = COALESCE(c.CustomerModelYear,'')
-WHERE
-		COALESCE(a.newDocument,0) = 1
-AND  NOT EXISTS
-( SELECT 1 FROM 
-		EDI5050.PlanningReleases b
- JOIN 
-	EDI5050.BlanketOrders bo ON b.CustomerPart = bo.CustomerPart
-AND
-	b.ShipToCode = bo.EDIShipToCode
-AND
-(	bo.CheckCustomerPOPlanning = 0
-	OR bo.CustomerPO = b.CustomerPO)
-AND
-(	bo.CheckModelYearPlanning = 0
-	OR bo.ModelYear830 = b.CustomerModelYear)
-WHERE
-				a.RawDocumentGUID = b.RawDocumentGUID AND
-				a.CustomerPart = b.CustomerPart AND
-				a.ShipToCode = b.ShipToCode AND
-				COALESCE(a.customerPO,'') = COALESCE(b.CustomerPO,'') AND
-				COALESCE(a.CustomerModelYear,'') = COALESCE(b.CustomerModelYear,''))
-
-
-END
-
-
-
-
+	insert
+		EDIAlerts.ProcessedReleases
+	(	EDIGroup
+	,	TradingPartner
+	,	DocumentType	--'PR - Planning Release; SS - ShipSchedule'
+	,	AlertType
+	,	ReleaseNo
+	,	ShipToCode
+	,	ConsigneeCode
+	,	ShipFromCode
+	,	CustomerPart
+	,	CustomerPO
+	,	CustomerModelYear
+	,	Description
+	)
+	select
+		'EDI5050'
+	,	TradingPartner
+	,	DocumentType
+	,	AlertType
+	,	ReleaseNo
+	,	ShipToCode + coalesce(' | ' + nullif(nullif(AuxShipToCode, ShipToCode), ''), '')
+	,	ConsigneeCode
+	,	ShipFromCode
+	,	CustomerPart
+	,	CustomerPO
+	,	CustomerModelYear
+	,	Description
+	from
+		#EDIAlerts
+	union
+	select
+		'EDI5050'
+	,	TradingPartner = coalesce((
+								select
+										max(TradingPartner)
+									from
+										FxEDI.EDI.EDIDocuments
+									where
+										GUID = a.RawDocumentGUID
+								)
+								, ''
+								)
+	,	DocumentType = 'SS'
+	,	AlertType = 'Exception Quantity Due'
+	,	ReleaseNo = coalesce(a.ReleaseNo, '')
+	,	ShipToCode = a.ShipToCode + coalesce(' | ' + nullif(nullif(a.AuxShipToCode, a.ShipToCode), ''), '')
+	,	ConsigneeCode = coalesce(a.ConsigneeCode, '')
+	,	ShipFromCode = coalesce(a.ShipFromCode, '')
+	,	CustomerPart = coalesce(a.CustomerPart, '')
+	,	CustomerPO = coalesce(a.CustomerPO, '')
+	,	CustomerModelYear = coalesce(a.CustomerModelYear, '')
+	,	Description = 'Qty Due : ' + convert(varchar(max), c.ReleaseQty) + ' on - '
+					+ convert(varchar(max), c.ReleaseDT)
+	from
+		@Current862s a
+		join EDI5050.ShipSchedules c
+			on c.RawDocumentGUID = a.RawDocumentGUID
+			and a.CustomerPart = c.CustomerPart
+			and a.ShipToCode = c.ShipToCode
+			and a.AuxShipToCode = coalesce(c.AuxShipToCode, '')
+			and coalesce(a.CustomerPO, '') = coalesce(c.CustomerPO, '')
+			and coalesce(a.CustomerModelYear, '') = coalesce(c.CustomerModelYear, '')
+	where
+		coalesce(a.NewDocument, 0) = 1
+		and a.BlanketOrderNo is null
+union
+	select
+		'EDI5050'
+	,	TradingPartner = coalesce((
+								select
+										max(TradingPartner)
+									from
+										FxEDI.EDI.EDIDocuments
+									where
+										GUID = a.RawDocumentGUID
+								)
+								, ''
+								)
+	,	DocumentType = 'PR'
+	,	AlertType = 'Exception Quantity Due'
+	,	ReleaseNo = coalesce(a.ReleaseNo, '')
+	,	ShipToCode = a.ShipToCode + coalesce(' | ' + nullif(nullif(a.AuxShipToCode, a.ShipToCode), ''), '')
+	,	ConsigneeCode = coalesce(a.ConsigneeCode, '')
+	,	ShipFromCode = coalesce(a.ShipFromCode, '')
+	,	CustomerPart = coalesce(a.CustomerPart, '')
+	,	CustomerPO = coalesce(a.CustomerPO, '')
+	,	CustomerModelYear = coalesce(a.CustomerModelYear, '')
+	,	Description = 'Qty Due : ' + convert(varchar(max), c.ReleaseQty) + ' on - '
+					+ convert(varchar(max), c.ReleaseDT)
+	from
+		@Current830s a
+		join EDI5050.PlanningReleases c
+			on c.RawDocumentGUID = a.RawDocumentGUID
+			and a.CustomerPart = c.CustomerPart
+			and a.ShipToCode = c.ShipToCode
+			and coalesce(a.CustomerPO, '') = coalesce(c.CustomerPO, '')
+			and coalesce(a.CustomerModelYear, '') = coalesce(c.CustomerModelYear, '')
+	where
+		coalesce(a.NewDocument, 0) = 1
+		and a.BlanketOrderNo is null
+end
 /* End E-Mail and Exceptions */
 
-
 ---	<Return>
-SET	@Result = 0
-RETURN
+set
+	@Result = 0
+return
 	@Result
 --- </Return>
 
@@ -1862,62 +1844,4 @@ go
 Results {
 }
 */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 GO

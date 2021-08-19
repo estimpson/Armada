@@ -69,10 +69,10 @@ begin
 						,	ss.CustomerPO
 						,	ss.CustomerModelYear
 						order by
-							ssh.DocumentImportDT
-						,	ssh.DocumentDT
-						,	ssh.DocNumber
-						,	ssh.ControlNumber
+							ssh.DocumentImportDT desc
+						,	ssh.DocumentDT desc
+						,	ssh.DocNumber desc
+						,	ssh.ControlNumber desc
 					)
 			from
 				EDI5050.ShipScheduleHeaders ssh

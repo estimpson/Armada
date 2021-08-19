@@ -69,10 +69,10 @@ begin
 						,	pr.CustomerPO
 						,	pr.CustomerModelYear
 						order by
-							ph.DocumentImportDT
-						,	ph.DocumentDT
-						,	ph.DocNumber
-						,	ph.ControlNumber
+							ph.DocumentImportDT desc
+						,	ph.DocumentDT desc
+						,	ph.DocNumber desc
+						,	ph.ControlNumber desc
 					)
 			from
 				EDI5050.PlanningHeaders ph
