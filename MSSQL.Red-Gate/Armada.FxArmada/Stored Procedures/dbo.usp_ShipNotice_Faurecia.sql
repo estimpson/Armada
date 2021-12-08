@@ -689,13 +689,15 @@ WHILE
 			
 	IF	@@FETCH_STATUS != 0 BEGIN
 		BREAK
-	END		
+	end
+    
+	declare @counter int = 0
+	set @counter += 1
 																					
 					INSERT	#ASNFlatFile (LineData)
 					SELECT  '12'
-							+ @LineItemID 
-							+ SPACE(3)
-							+ @CPS03	
+							+ convert(char(24), @LineItemID)
+							+ @CPS03
 							
 				
 																		
