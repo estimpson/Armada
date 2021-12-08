@@ -22,3 +22,5 @@ CREATE TABLE [dbo].[journal_entry_headers]
 [gl_date] [datetime] NULL
 ) ON [PRIMARY]
 GO
+ALTER TABLE [dbo].[journal_entry_headers] ADD CONSTRAINT [pk_journal_entry_headers] PRIMARY KEY NONCLUSTERED  ([fiscal_year], [ledger], [gl_entry]) ON [PRIMARY]
+GO

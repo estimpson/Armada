@@ -8,8 +8,7 @@ CREATE TABLE [dbo].[crews]
 [unit] [varchar] (25) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [changed_date] [datetime] NULL,
 [changed_user_id] [varchar] (25) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[schedule_start_day] [varchar] (25) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[signature_list] [varchar] (25) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+[schedule_start_day] [varchar] (25) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[crews] ADD CONSTRAINT [pk_crews] PRIMARY KEY CLUSTERED  ([crew]) ON [PRIMARY]

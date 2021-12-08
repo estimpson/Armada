@@ -18,7 +18,6 @@ CREATE TABLE [dbo].[req_headers]
 [tax_amount] [numeric] (18, 6) NULL,
 [freight_amount] [numeric] (18, 6) NULL,
 [document_comments] [text] COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[print_comments_on_po] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [entered_datetime] [datetime] NULL,
 [changed_date] [datetime] NULL,
 [changed_user_id] [varchar] (25) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
