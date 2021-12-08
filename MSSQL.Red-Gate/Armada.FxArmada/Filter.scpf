@@ -83,8 +83,8 @@
         <Expression>TRUE</Expression>
       </Rule>
       <Schema version="1">
-        <Include>True</Include>
-        <Expression>TRUE</Expression>
+        <Include>False</Include>
+        <Expression>(@NAME LIKE 'db_owner%')</Expression>
       </Schema>
       <SearchPropertyList version="1">
         <Include>True</Include>

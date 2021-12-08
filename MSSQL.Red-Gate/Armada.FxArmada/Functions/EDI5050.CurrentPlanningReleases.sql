@@ -107,7 +107,7 @@ begin
 					)
 		) curr
 	left join EDI5050.BlanketOrders bo
-		on bo.ShipToCode = curr.ShipToCode
+		on bo.EDIShipToCode = curr.ShipToCode
 		and bo.AuxShipToCode = coalesce(curr.AuxShipToCode, '')
 		and bo.CustomerPart = curr.CustomerPart
 		and (bo.CheckCustomerPOPlanning = 0 or bo.CustomerPO = curr.CustomerPO)
