@@ -1146,7 +1146,7 @@ if	@Testing = 0 begin
 			oh
 		set
 			custom01 = rtrim(prs.UserDefined1)
-		,	dock_code = rtrim(prs.UserDefined1)
+		,	dock_code = convert(varchar(10), rtrim(prs.UserDefined1))
 		,	line_feed_code = rtrim(prs.UserDefined2)
 		,	zone_code = rtrim(prs.UserDefined3)
 
@@ -1919,9 +1919,6 @@ set	@Error = @@error
 
 select
 	@Error, @ProcReturn, @TranDT, @ProcResult
-go
-
-
 go
 
 commit transaction
