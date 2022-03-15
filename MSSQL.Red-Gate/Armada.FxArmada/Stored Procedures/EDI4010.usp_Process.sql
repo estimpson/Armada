@@ -2,8 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
-
 CREATE procedure [EDI4010].[usp_Process]
 	@TranDT datetime = null out
 ,	@Result integer = null out
@@ -634,8 +632,42 @@ select
 ,	ModelYear = bo.ModelYear
 ,	OrderUnit = bo.OrderUnit
 ,	ReleaseNo = case  WHEN fr.suppliercode =  'A0144' then fr.Userdefined5 WHEN fr.suppliercode IN ( 'ARM701', 'ARM101' ) AND fr.Userdefined5 IS NOT NULL THEN fr.UserDefined5 ELSE fr.ReleaseNo end
-,	QtyRelease = fr.ReleaseQty
-,	StdQtyRelease = fr.ReleaseQty
+,	QtyRelease =
+		case
+			when
+				bo.ShipToCode like 'TOWCLI%' then
+					fr.ReleaseQty - coalesce
+						(	lag(fr.ReleaseQty, 1) over (partition by fr.ShipToCode, fr.CustomerPart order by fr.ReleaseDT, fr.ReleaseQty)
+						,	case bo.AdjustmentAccum
+								when 'N' then
+									coalesce(convert(int, bo.AccumShipped), 0)
+								when 'P' then
+									coalesce(convert(int, faa.PriorCUM), 0)
+								else
+									coalesce(convert(int, fa.LastAccumQty), 0)
+							end
+						)
+			else
+				fr.ReleaseQty
+		end
+,	StdQtyRelease =
+		case
+			when
+				bo.ShipToCode like 'TOWCLI%' then
+					fr.ReleaseQty - coalesce
+						(	lag(fr.ReleaseQty, 1) over (partition by fr.ShipToCode, fr.CustomerPart order by fr.ReleaseDT, fr.ReleaseQty)
+						,	case bo.AdjustmentAccum
+								when 'N' then
+									coalesce(convert(int, bo.AccumShipped), 0)
+								when 'P' then
+									coalesce(convert(int, faa.PriorCUM), 0)
+								else
+									coalesce(convert(int, fa.LastAccumQty), 0)
+							end
+						)
+			else
+				fr.ReleaseQty
+		end
 ,	ReferenceAccum = case bo.ReferenceAccum 
 												When 'N' 
 												then coalesce(convert(int,bo.AccumShipped),0)
@@ -1913,9 +1945,6 @@ set	@Error = @@error
 
 select
 	@Error, @ProcReturn, @TranDT, @ProcResult
-go
-
-
 go
 
 commit transaction
