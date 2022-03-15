@@ -15,7 +15,8 @@ CREATE TABLE [dbo].[part_packaging]
 [inactivity_amount] [numeric] (20, 6) NULL,
 [threshold_upper_type] [varchar] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [threshold_lower_type] [varchar] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[serial_type] [varchar] (25) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+[serial_type] [varchar] (25) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SpecialInstructions] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[part_packaging] ADD CONSTRAINT [PK__part_packaging__7CA54796] PRIMARY KEY CLUSTERED  ([part], [code]) ON [PRIMARY]
