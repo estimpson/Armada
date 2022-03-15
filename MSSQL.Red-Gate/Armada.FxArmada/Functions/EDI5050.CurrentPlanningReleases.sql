@@ -2,7 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 CREATE function [EDI5050].[CurrentPlanningReleases]
 ()
 returns @CurrentPlanningReleases table
@@ -14,6 +13,7 @@ returns @CurrentPlanningReleases table
 ,	ConsigneeCode varchar(50)
 ,	CustomerPart varchar(50)
 ,	CustomerPO varchar(50)
+,	CustomerPOLine varchar(30)
 ,	CustomerModelYear varchar(50)
 ,	NewDocument int
 ,	BlanketOrderNo numeric(8,0)
@@ -31,6 +31,7 @@ begin
 	,	ConsigneeCode
 	,	CustomerPart
 	,	CustomerPO
+	,	CustomerPOLine
 	,	CustomerModelYear
 	,	NewDocument
 	,	BlanketOrderNo
@@ -44,6 +45,7 @@ begin
 	,	curr.ConsigneeCode
 	,	curr.CustomerPart
 	,	curr.CustomerPO
+	,	curr.CustomerPOLine
 	,	curr.CustomerModelYear
 	,	curr.NewDocument
 	,	bo.BlanketOrderNo
@@ -57,6 +59,7 @@ begin
 			,	pr.ConsigneeCode
 			,	pr.CustomerPart
 			,	pr.CustomerPO
+			,	pr.CustomerPOLine
 			,	pr.CustomerModelYear
 			,	NewDocument = case when ph.Status = 0 then 1 else 0 end
 			,	RowNumber = row_number() over
@@ -85,6 +88,7 @@ begin
 						,	ConsigneeCode = coalesce(pr.ConsigneeCode, '')
 						,	pr.CustomerPart
 						,	CustomerPO = coalesce(pr.CustomerPO, '')
+						,	CustomerPOLine = coalesce(pr.CustomerPOLine, '')
 						,	CustomerModelYear = coalesce(pr.CustomerModelYear, '')
 						from
 							EDI5050.PlanningReleases pr
@@ -98,6 +102,7 @@ begin
 						,	coalesce(pr.ConsigneeCode, '')
 						,	pr.CustomerPart
 						,	coalesce(pr.CustomerPO, '')
+						,	coalesce(pr.CustomerPOLine, '')
 						,	coalesce(pr.CustomerModelYear, '')
 					) pr
 			where

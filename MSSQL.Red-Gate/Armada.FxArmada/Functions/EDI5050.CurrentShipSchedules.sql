@@ -2,7 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 CREATE function [EDI5050].[CurrentShipSchedules]
 ()
 returns @CurrentSS table
@@ -14,6 +13,7 @@ returns @CurrentSS table
 ,	ConsigneeCode varchar(50)
 ,	CustomerPart varchar(50)
 ,	CustomerPO varchar(50)
+,	CustomerPOLine varchar(30)
 ,	CustomerModelYear varchar(50)
 ,	NewDocument int
 ,	BlanketOrderNo numeric(8,0)
@@ -31,6 +31,7 @@ begin
 	,	ConsigneeCode
 	,	CustomerPart
 	,	CustomerPO
+	,	CustomerPOLine
 	,	CustomerModelYear
 	,	NewDocument
 	,	BlanketOrderNo
@@ -44,6 +45,7 @@ begin
 	,	curr.ConsigneeCode
 	,	curr.CustomerPart
 	,	curr.CustomerPO
+	,	curr.CustomerPOLine
 	,	curr.CustomerModelYear
 	,	curr.NewDocument
 	,	bo.BlanketOrderNo
@@ -57,6 +59,7 @@ begin
 			,	ss.ConsigneeCode
 			,	ss.CustomerPart
 			,	ss.CustomerPO
+			,	ss.CustomerPOLine
 			,	ss.CustomerModelYear
 			,	NewDocument = case when ssh.Status = 0 then 1 else 0 end
 			,	RowNumber = row_number() over
@@ -85,6 +88,7 @@ begin
 						,	ConsigneeCode = coalesce(ss.ConsigneeCode, '')
 						,	ss.CustomerPart
 						,	CustomerPO = coalesce(ss.CustomerPO, '')
+						,	CustomerPOLine = coalesce(ss.CustomerPOLine, '')
 						,	CustomerModelYear = coalesce(ss.CustomerModelYear, '')
 						from
 							EDI5050.ShipSchedules ss
@@ -98,6 +102,7 @@ begin
 						,	coalesce(ss.ConsigneeCode, '')
 						,	ss.CustomerPart
 						,	coalesce(ss.CustomerPO, '')
+						,	coalesce(ss.CustomerPOLine, '')
 						,	coalesce(ss.CustomerModelYear, '')
 					) ss
 			where
@@ -115,7 +120,6 @@ begin
 		and bo.ActiveOrder = 1
 	where
 		curr.RowNumber = 1
-
 	--- </Body>
 
 	---	<Return>
