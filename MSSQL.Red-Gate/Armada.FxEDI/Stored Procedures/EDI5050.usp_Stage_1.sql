@@ -299,7 +299,7 @@ begin
 	,	SupplierCode = ed.FullData.value('(/TRN-862/LOOP-N1/SEG-N1 [DE[.="SU"][@code="0098"]]/DE[@code="0067"])[1]', 'varchar(50)')
 	,	CustomerPart = EDIData.Data.value('(for $a in SEG-LIN/DE[@code="0235"] where $a="BP" return $a/../DE[. >> $a][@code="0234"][1])[1]', 'varchar(30)')
 	,	CustomerPO = EDIData.Data.value('(for $a in SEG-LIN/DE[@code="0235"] where $a="PO" return $a/../DE[. >> $a][@code="0234"][1])[1]', 'varchar(30)')
-	,	CustomerPOLine = EDIData.Data.value('(for $a in SEG-LIN/DE[@code="0235"] where $a="PL" return $a/../DE[. >> $a][@code="0234"][1])[1]', 'varchar(30)')
+	,	CustomerPOLine = coalesce(EDIData.Data.value('(for $a in SEG-LIN/DE[@code="0235"] where $a="PL" return $a/../DE[. >> $a][@code="0234"][1])[1]', 'varchar(30)'),EDIData.Data.value('(SEG-LIN/DE[@code="0350"])[1]','char(30)'))
 	,	CustomerModelYear = ''
 	,	CustomerECL = ''
 	from
@@ -843,7 +843,7 @@ begin
 	,	SupplierCode = ed.FullData.value('(/TRN-830/LOOP-N1/SEG-N1 [DE[.="SU"][@code="0098"]]/DE[@code="0067"])[1]', 'varchar(50)')
 	,	CustomerPart = EDIData.Data.value('(for $a in SEG-LIN/DE[@code="0235"] where $a="BP" return $a/../DE[. >> $a][@code="0234"][1])[1]', 'varchar(30)')
 	,	CustomerPO = EDIData.Data.value('(for $a in SEG-LIN/DE[@code="0235"] where $a="PO" return $a/../DE[. >> $a][@code="0234"][1])[1]', 'varchar(30)')
-	,	CustomerPOLine = EDIData.Data.value('(for $a in SEG-LIN/DE[@code="0235"] where $a="PL" return $a/../DE[. >> $a][@code="0234"][1])[1]', 'varchar(30)')
+	,	CustomerPOLine = coalesce(EDIData.Data.value('(for $a in SEG-LIN/DE[@code="0235"] where $a="PL" return $a/../DE[. >> $a][@code="0234"][1])[1]', 'varchar(30)'),EDIData.Data.value('(SEG-LIN/DE[@code="0350"])[1]','char(30)'))
 	,	CustomerModelYear = ''
 	,	CustomerECL = ''
 	from
@@ -1109,7 +1109,8 @@ begin
 	from
 		@PlanningOrders po
 		outer apply po.LINData.nodes('(/LOOP-LIN/LOOP-SHP/SEG-SHP [DE [@code="0374"][.="011" or .="035" or .="050"]])[1]') as Shipped(Data)
-		outer apply po.LINData.nodes('(/LOOP-LIN/LOOP-SHP/SEG-SHP [DE [@code="0374"][.="051" or .="004"]])[1]') as Accum(Data)
+		outer apply po.LINData.nodes('(/LOOP-LIN/LOOP-SHP/SEG-SHP [DE [@code="0374"][.="035"]] [DE [@code="0673"][.="02"]])[1]') as Accum(Data)
+		--outer apply po.LINData.nodes('(/LOOP-LIN/LOOP-SHP/SEG-SHP [DE [@code="0374"][.="051" or .="004"]])[1]') as Accum(Data)
 end
 
 --select
@@ -2025,7 +2026,7 @@ if	exists
 	--- <Insert rows="*">
 	set	@TableName = 'FxArmada.EDI5050.StagingPlanningReleases'
 
-		insert
+	insert
 		FxArmada.EDI5050.StagingPlanningReleases
 	(
 		RawDocumentGUID
