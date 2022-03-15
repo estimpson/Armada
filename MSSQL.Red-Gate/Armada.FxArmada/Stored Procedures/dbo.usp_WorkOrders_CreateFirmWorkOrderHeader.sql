@@ -4,7 +4,7 @@ SET ANSI_NULLS ON
 GO
 
 
-create procedure [dbo].[usp_WorkOrders_CreateFirmWorkOrderHeader]
+CREATE procedure [dbo].[usp_WorkOrders_CreateFirmWorkOrderHeader]
 	@WorkOrderNumber varchar(50) out
 ,	@Operator varchar(5)
 ,	@MachineCode varchar(15)
@@ -53,8 +53,7 @@ set	@TableName = 'dbo.WorkOrderHeaders'
 
 insert
 	dbo.WorkOrderHeaders
-(
-	WorkOrderNumber
+(	WorkOrderNumber
 ,	Status
 ,	Type
 ,	MachineCode
@@ -62,7 +61,7 @@ insert
 ,	Sequence
 )
 select
-	WorkOrderNumber = coalesce(@WorkOrderNumber, 0)
+	WorkOrderNumber = coalesce(@WorkOrderNumber, '0')
 ,	Status = dbo.udf_StatusValue('dbo.WorkOrderHeaders', 'New')
 ,	Type = dbo.udf_TypeValue('dbo.WorkOrderHeaders', 'Firm')
 ,	MachineCode = @MachineCode
