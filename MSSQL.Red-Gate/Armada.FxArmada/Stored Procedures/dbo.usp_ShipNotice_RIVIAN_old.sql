@@ -2,7 +2,8 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE procedure [dbo].[usp_ShipNotice_RIVIAN]
+
+create procedure [dbo].[usp_ShipNotice_RIVIAN_old]
 	@ShipperID int
 ,	@TranDT datetime = null out
 ,	@Result integer = null out
@@ -130,13 +131,13 @@ from
 where
 	s.id = @ShipperID
 
---	Line 03 -- Net Weight
+--	Line 04 -- Net Weight
 insert
 	#ASNFlatFile
 (	LineData
 )
 select
-	'03'
+	'04'
 		-- 001-002: LineNo
 	+	'WT'
 		-- 003-004: MEA01 - Measurement Code
@@ -151,13 +152,13 @@ from
 where
 	s.id = @ShipperID
 
---	Line 04 -- Lading Quantity
+--	Line 05 -- Lading Quantity
 insert
 	#ASNFlatFile
 (	LineData
 )
 select
-	'04'
+	'05'
 		-- 001-002: LineNo
 	+	convert(char(5), case when pm.returnable = 'Y' then 'AAA' else 'PLT' end)
 		-- 003-007: TD101 - Package Code
@@ -175,7 +176,7 @@ group by
 	pm.returnable
 union all
 select
-	'04'
+	'05'
 		-- 001-002: LineNo
 	+	convert(char(5), case when pm.returnable = 'Y' then 'CNT' else 'CTN' end)
 		-- 003-007: TD101 - Package Code
@@ -192,23 +193,7 @@ where
 group by
 	pm.returnable
 
---	Line 05-06 -- Carrier
-insert
-	#ASNFlatFile
-(	LineData
-)
-select
-	'05'
-		-- 001-002: LineNo
-	+	convert(char(4), s.ship_via)
-		-- 003-006: TD503 - Scac
-from
-	dbo.shipper s
-	left join dbo.carrier c
-		on c.scac = s.ship_via
-where
-	s.id = @ShipperID
-
+--	Line 06-07 -- Carrier
 insert
 	#ASNFlatFile
 (	LineData
@@ -216,10 +201,12 @@ insert
 select
 	'06'
 		-- 001-002: LineNo
+	+	convert(char(4), s.ship_via)
+		-- 003-006: TD503 - Scac
 	+	convert(char(2), 'H')
-		-- 003-004: TD504 - Transportation Type
+		-- 007-008: TD504 - Transportation Type
 	+	convert(char(15), c.name)
-		-- 005-019: TD505
+		-- 009-043: TD505
 from
 	dbo.shipper s
 	left join dbo.carrier c
@@ -227,7 +214,7 @@ from
 where
 	s.id = @ShipperID
 
---	Line 07 -- Truck
+--	Line 08 -- Truck
 insert
 	#ASNFlatFile
 (	LineData
@@ -244,7 +231,7 @@ from
 where
 	s.id = @ShipperID
 
---	Line 08 -- Tracking (BOL)
+--	Line 09 -- Tracking (BOL)
 insert
 	#ASNFlatFile
 (	LineData
@@ -286,23 +273,6 @@ select
 ,	PackDetails.PackCount
 ,	PackDetails.PackQuantity
 ,	dock_code = oh.dock_code
-,	CustomerPOLine = coalesce
-		(	(	select
-		 			min(css.CustomerPOLine)
-		 		from
-		 			EDI5050.CurrentShipSchedules() css
-				where
-					css.BlanketOrderNo = sd.order_no
-		 	)
-		,	(	select
-		 			min(cpr.CustomerPOLine)
-		 		from
-		 			EDI5050.CurrentPlanningReleases() cpr
-				where
-					cpr.BlanketOrderNo = sd.order_no
-		 	)
-		,	'00010'
-		)
 from
 	dbo.shipper_detail sd
 		join dbo.order_header oh
@@ -348,6 +318,9 @@ where
 
 open ShipperLines
 
+declare
+	@lineNo int = 1
+
 while
 	1 = 1 begin
 
@@ -373,7 +346,6 @@ while
 	,	@packCount int
 	,	@quantity int
 	,	@dockCode char(50)
-	,	@lineNo char(30)
 
 	fetch
 		ShipperLines
@@ -399,11 +371,10 @@ while
 	,	@packCount
 	,	@quantity
 	,	@dockCode
-	,	@lineNo
 
 	if	@@FETCH_STATUS != 0 break
 
-	-- Line 09-13 -- Part / Pack / Qty
+	-- Line 09-12 -- Part / Pack / Qty
 	insert
 		#ASNFlatFile
 	(	LineData
@@ -417,14 +388,16 @@ while
 			-- 023-024: LIN02 - Product Id Type (Buyer's Part)
 		+	convert(char(48), @customerPart)
 			-- 025-072: LIN03 - Product Id (Buyer's Part)
-		+	'CH'
+		+	convert(char(2), '')
+		--+	'CH'
 			-- 073-074: LIN04 - Product Id Type (Country of Origin)
 	union all
 	select
 		'10'
 			-- 001-002: LineNo
-		+	convert(char(48), 'US')
-			-- 003-050: LIN05 - Product Id (Country of Origin)
+		--+	convert(char(48), 'USA')
+		+	convert(char(48), '')
+			-- 003-050: LIN05 - Product Id (Counrry of Origin)
 		+	convert(char(2), case when @returnableBox = 'Y' then 'RC' else '' end)
 			-- 051-052: LIN06 - Product Id (Returnable Box)
 	union all
@@ -441,17 +414,38 @@ while
 			-- 001-002: LineNo
 		+	convert(char(48), case when @returnablePallet = 'Y' then @palletCodeEDI else '' end)
 			-- 003-050: LIN09 - Product Id Type (Returnable Pallet)
-	union all
-	select
-		'13'
-		+	convert(char(48), '')
-			-- 003-050: LIN09 - Product Id Type (Returnable Pallet)
 		+	convert(char(12), @quantity * @packCount)
 			-- 051-062: SN102 - # of Units Shipped
 		+	'EA'
 			-- 063-064: SN103 - UOM
 
-	-- Line 17 - DockCode
+	-- Line 15 - DockCode
+	insert
+		#ASNFlatFile
+	(	LineData
+	)
+	select
+		'15'
+			-- 001-002: LineNo
+		+	convert(char(3), case when @dockCode > '' then 'DK' else '' end)
+			-- 003-005: REF01 - Reference Id Type (Dock Code)
+		+	convert(char(50), coalesce(@dockCode, ''))
+			-- 006-054: REF02 - Reference Id (Dock Code)
+
+	-- Line 16 - PO / Release
+	insert
+		#ASNFlatFile
+	(	LineData
+	)
+	select
+		'16'
+			-- 001-002: LineNo
+		+	convert(char(22), @customerPO)
+			-- 003-024: PRF01 - PO #
+		+	convert(char(30), coalesce(@releaseNo, ''))
+			-- 025-054: PRF02 - Release #
+
+	-- Line 17 - Ship From
 	insert
 		#ASNFlatFile
 	(	LineData
@@ -459,25 +453,25 @@ while
 	select
 		'17'
 			-- 001-002: LineNo
-		+	convert(char(3), case when @dockCode > '' then 'DK' else '' end)
-			-- 003-005: REF01 - Reference Id Type (Dock Code)
-		+	convert(char(50), coalesce(@dockCode, ''))
-			-- 006-054: REF02 - Reference Id (Dock Code)
+		+	convert(char(3), 'SF')
+			-- 003-005: N101 - Entity Id Code (Ship From)
+		+	convert(char(5), coalesce(nullif(@supplierCode, ''), 'SUPPLIER'))
+			-- 006-010: N104 - Id Code (Ship From)
+		+	convert(char(60), 'ARMADA RUBBER MANUFACTURING CO')
+			-- 011-070: N102 - Name (Ship From)
 
-	-- Line 19 - PO / Release
+	-- Line 18 - Ship From
 	insert
 		#ASNFlatFile
 	(	LineData
 	)
 	select
-		'19'
+		'18'
 			-- 001-002: LineNo
-		+	convert(char(22), @customerPO)
-			-- 003-024: 2PRF01 - PO #
-		+	convert(char(30), coalesce(@releaseNo, ''))
-			-- 025-054: 2PRF02 - Release #
+		+	convert(char(60), 'ARMADA RUBBER MANUFACTURING CO')
+			-- 003-062: N201 - Name (Ship From)
 
-	-- Line 20-27 - Ship From
+	-- Line 20 - Ship From
 	insert
 		#ASNFlatFile
 	(	LineData
@@ -485,52 +479,86 @@ while
 	select
 		'20'
 			-- 001-002: LineNo
-		+	convert(char(3), 'SF')
-			-- 003-005: 2N101 - Entity Id Code (Ship From)
-	union all
+		+	convert(char(55), '24586 ARMADA RIDGE ROAD')
+			-- 003-057: N301 - Address (Ship From)
+
+	-- Line 21 - Ship From
+	insert
+		#ASNFlatFile
+	(	LineData
+	)
 	select
 		'21'
 			-- 001-002: LineNo
-		+	convert(char(5), coalesce(nullif(@supplierCode, ''), 'SUPPLIER'))
-			-- 003-007: 2N104 - Id Code (Ship From)
-	union all
+		+	convert(char(55), 'PO BOX 579')
+			-- 003-057: N302 - Address Information (Ship From)
+
+	-- Line 22 - Ship From
+	insert
+		#ASNFlatFile
+	(	LineData
+	)
 	select
 		'22'
 			-- 001-002: LineNo
-		+	convert(char(60), 'ARMADA RUBBER MANUFACTURING CO')
-			-- 003-062: 2N102 - Name (Ship From)
-	union all
-	select
-		'23'
-			-- 001-002: LineNo
-		+	convert(char(60), 'ARMADA RUBBER MANUFACTURING CO')
-			-- 003-062: 2N201 - Name (Ship From)
-	union all
-	select
-		'25'
-			-- 001-002: LineNo
-		+	convert(char(55), '24586 ARMADA RIDGE ROAD')
-			-- 003-057: 2N301 - Address (Ship From)
-	union all
-	select
-		'26'
-			-- 001-002: LineNo
-		+	convert(char(55), 'PO BOX 579')
-			-- 003-057: 2N302 - Address Information (Ship From)
-	union all
-	select
-		'27'
-			-- 001-002: LineNo
 		+	convert(char(30), 'ARMADA')
-			-- 003-032: 2N401 - City (Ship From)
+			-- 003-032: N401 - City (Ship From)
 		+	convert(char(2), 'MI')
-			-- 033-034: 2N402 - State (Ship From)
+			-- 033-034: N402 - State (Ship From)
 		+	convert(char(15), '48005')
-			-- 035-049: 2N403 - Zip (Ship From)
+			-- 035-049: N102 - Zip (Ship From)
 		+	convert(char(3), 'USA')
-			-- 050-052: 2N404 - Country (Ship From)
+			-- 050-052: N402 - Country (Ship From)
 
-	-- Line 20-28 - Ship To
+	-- Line 17 - Ship To
+	insert
+		#ASNFlatFile
+	(	LineData
+	)
+	select
+		'17'
+			-- 001-002: LineNo
+		+	convert(char(3), 'ST')
+			-- 003-005: N101 - Entity Id Code (Ship From)
+		+	convert(char(5), coalesce(nullif(@materialIssuer, ''), '3100'))
+			-- 006-010: N104 - Id Code (Ship From)
+		+	convert(char(60), coalesce(nullif(@shipToAddress5, ''), 'RIVIAN AUTOMOTIVE LLC'))
+			-- 011-070: N102 - Name (Ship From)
+
+	-- Line 18 - Ship To
+	insert
+		#ASNFlatFile
+	(	LineData
+	)
+	select
+		'18'
+			-- 001-002: LineNo
+		+	convert(char(60), @shipToName)
+			-- 003-062: N201 - Name (Ship To)
+
+	-- Line 20 - Ship To
+	insert
+		#ASNFlatFile
+	(	LineData
+	)
+	select
+		'20'
+			-- 001-002: LineNo
+		+	convert(char(55), @shipToAddress1)
+			-- 003-057: N301 - Address (Ship To)
+
+	-- Line 21 - Ship To
+	insert
+		#ASNFlatFile
+	(	LineData
+	)
+	select
+		'21'
+			-- 001-002: LineNo
+		+	convert(char(55), @shipToAddress2)
+			-- 003-057: N302 - Address Information (Ship From)
+
+	-- Line 22 - Ship To
 	declare
 		@shipToCity varchar(30)
 	,	@shipToState varchar(2)
@@ -631,58 +659,20 @@ while
 	(	LineData
 	)
 	select
-		'20'
-			-- 001-002: LineNo
-		+	convert(char(3), 'ST')
-			-- 003-005: 2N101 - Entity Id Code (Ship To)
-	union all
-	select
-		'21'
-			-- 001-002: LineNo
-		+	convert(char(5), coalesce(nullif(@materialIssuer, ''), '3100'))
-			-- 003-007: 2N104 - Id Code (Ship To)
-	union all
-	select
 		'22'
 			-- 001-002: LineNo
-		+	convert(char(60), coalesce(nullif(@shipToAddress5, ''), 'RIVIAN AUTOMOTIVE LLC'))
-			-- 003-062: 2N102 - Name (Ship To)
-	union all
-	select
-		'23'
-			-- 001-002: LineNo
-		+	convert(char(60), @shipToName)
-			-- 003-062: 2N201 - Name (Ship To)
-	union all
-	select
-		'25'
-			-- 001-002: LineNo
-		+	convert(char(55), @shipToAddress1)
-			-- 003-057: 2N301 - Address (Ship To)
-	union all
-	select
-		'26'
-			-- 001-002: LineNo
-		+	convert(char(55), @shipToAddress2)
-			-- 003-057: 2N302 - Address Information (Ship From)
-	union all
-	select
-		'27'
-			-- 001-002: LineNo
 		+	convert(char(30), @shipToCity)
-			-- 003-032: 2N401 - City (Ship To)
+			-- 003-032: N401 - City (Ship To)
 		+	convert(char(2), @shipToState)
-			-- 033-034: 2N402 - State (Ship To)
+			-- 033-034: N402 - State (Ship To)
 		+	convert(char(15), @ShipToZip)
-			-- 035-049: 2N403 - Zip (Ship To)
+			-- 035-049: N102 - Zip (Ship To)
 		+	convert(char(3), @shipToCountry)
-			-- 050-052: 2N404 - Country (Ship To)
-	union all
-	select
-		'28'
-			-- 001-002: LineNo
-		+	convert(char(30), @shipToLocationIdentifier)
-			-- 003-032: 2N406 - Location Identifier (Ship To)
+			-- 050-052: N402 - Country (Ship To)
+		+	convert(char(3), @shipToLocationQualifier)
+			-- 053-055: N402 - Location Qualifier (Ship To)
+		+	convert(char(15), @shipToLocationIdentifier)
+			-- 056-070: N402 - Location Identifier (Ship To)
 
 	declare
 		Objects cursor local read_only
@@ -690,16 +680,6 @@ while
 	select
 		at.serial % 100000 -- (5 digits)
 	,	at.parent_serial % 100000 -- (5 digits)
-	,	mixed =
-			(	select
-					case when count(distinct at2.part) = 1 then 0 else 1 end
-				from
-					dbo.audit_trail at2
-				where
-					at2.type = 'S'
-					and at2.shipper = 'S'
-					and at2.parent_serial = at.parent_serial
-			)
 	from
 		dbo.audit_trail at
 		left join dbo.package_materials pm
@@ -719,7 +699,6 @@ while
 		declare
 			@serial int
 		,	@palletSerial int
-		,	@palletMixed int
 
 		fetch
 			Objects
@@ -729,40 +708,42 @@ while
 
 		if	@@FETCH_STATUS != 0 break
 
-		-- Line 29 - Units
+		-- Line 23 - Units
 		insert
 			#ASNFlatFile
 		(	LineData
 		)
 		select
-			'29'
+			'23'
 				-- 001-002: LineNo
 			+	convert(char(12), @quantity)
-				-- 003-014: 2SN102 - # of Units Shipped
+				-- 003-014: SN102 - # of Units Shipped
 			+	'EA'
-				-- 015-016: 2SN103 - UOM
+				-- 015-016: SN103 - UOM
 
-		-- Line 30-31 - Box / Pallet Serial
+		-- Line 27-28 - Box / Pallet Serial
 		insert
 			#ASNFlatFile
 		(	LineData
 		)
 		select
-			'30'
+			'24'
 				-- 001-002: LineNo
 			+	'MC'
 				-- 003-004: MAN01 - Marks & Number Type (Master Carton)
-			+	convert(char(48), '1J' + @supplierCode + replace(convert(char(8), @TranDT, 10), '-', '') + convert(char(5), @serial))
+			+	convert(char(48), @supplierCode + replace(convert(char(8), @TranDT, 10), '-', '') + convert(char(5), @serial))
 				-- 005-052: MAN02 - Marks & Number (Box Serial)
 			+	convert(char(2), case when @palletSerial is not null then 'W' else '' end)
 				-- 053-054: MAN04 - Marks & Number (Qualifier)
 		union all
 		select
-			'31'
+			'25'
 				-- 001-002: LineNo
-			+	coalesce(convert(char(48), case when @palletMixed = 0 then '2J' else '5J' end + replace(convert(char(8), @TranDT, 10), '-', '') + convert(char(5), @palletSerial)), space(48))
-				-- 003-050: MAN05 - Marks & Number (Pallet Serial)
+			+	coalesce(convert(char(48), @palletSerial), space(48))
+				-- 003-050: MAN04 - Marks & Number (Pallet Serial)
 	end
+
+	set	@lineNo += 1
 
 	close
 		Objects
