@@ -657,6 +657,7 @@ from
 		and fr.ShipToCode = c.ShipToCode
 		and coalesce(fr.AuxShipToCode, '') = c.AuxShipToCode
 		and coalesce(fr.ShipFromCode, '') = c.ShipFromCode
+		and coalesce(fr.CustomerPart, '') = c.CustomerPart
 		and coalesce(fr.CustomerPO, '') = c.CustomerPO
 		and coalesce(fr.CustomerModelYear, '') = c.CustomerModelYear
 	left join EDI5050.ShipScheduleAccums fa
@@ -664,6 +665,7 @@ from
 		and fa.ShipToCode = c.ShipToCode
 		and coalesce(fa.AuxShipToCode, '') = c.AuxShipToCode
 		and coalesce(fa.ShipFromCode, '') = c.ShipFromCode
+		and coalesce(fa.CustomerPart, '') = c.CustomerPart
 		and coalesce(fa.CustomerPO, '') = c.CustomerPO
 		and coalesce(fa.CustomerModelYear, '') = c.CustomerModelYear
 	left join EDI5050.ShipScheduleAuthAccums faa
@@ -671,6 +673,7 @@ from
 		and faa.ShipToCode = c.ShipToCode
 		and coalesce(faa.AuxShipToCode, '') = c.AuxShipToCode
 		and coalesce(faa.ShipFromCode, '') = c.ShipFromCode
+		and coalesce(faa.CustomerPart, '') = c.CustomerPart
 		and coalesce(faa.CustomerPO, '') = c.CustomerPO
 		and coalesce(faa.CustomerModelYear, '') = c.CustomerModelYear
 	join EDI5050.BlanketOrders bo
@@ -744,6 +747,7 @@ from
 		and fr.ShipToCode = c.ShipToCode
 		and coalesce(fr.AuxShipToCode, '') = c.AuxShipToCode
 		and coalesce(fr.ShipFromCode, '') = c.ShipFromCode
+		and coalesce(fr.CustomerPart, '') = c.CustomerPart
 		and coalesce(fr.CustomerPO, '') = c.CustomerPO
 		and coalesce(fr.CustomerModelYear, '') = c.CustomerModelYear
 	left join EDI5050.PlanningAccums fa
@@ -751,6 +755,7 @@ from
 		and fa.ShipToCode = c.ShipToCode
 		and coalesce(fa.AuxShipToCode, '') = c.AuxShipToCode
 		and coalesce(fa.ShipFromCode, '') = c.ShipFromCode
+		and coalesce(fa.CustomerPart, '') = c.CustomerPart
 		and coalesce(fa.CustomerPO, '') = c.CustomerPO
 		and coalesce(fa.CustomerModelYear, '') = c.CustomerModelYear
 	left join EDI5050.PlanningAuthAccums faa
@@ -758,6 +763,7 @@ from
 		and faa.ShipToCode = c.ShipToCode
 		and coalesce(faa.AuxShipToCode, '') = c.AuxShipToCode
 		and coalesce(faa.ShipFromCode, '') = c.ShipFromCode
+		and coalesce(faa.CustomerPart, '') = c.CustomerPart
 		and coalesce(faa.CustomerPO, '') = c.CustomerPO
 		and coalesce(faa.CustomerModelYear, '') = c.CustomerModelYear
 	join EDI5050.BlanketOrders bo
