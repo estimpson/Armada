@@ -42,7 +42,7 @@ declare
 	@Error integer,
 	@RowCount integer
 
-set	@ProcName = user_name(objectproperty(@@procid, 'OwnerId')) + '.' + object_name(@@procid)  -- e.g. FXFI.usp_Test
+set	@ProcName = schema_name(objectproperty(@@procid, 'SchemaId')) + '.' + object_name(@@procid)  -- e.g. FXFI.usp_Test
 --- </Error Handling>
 
 begin try
