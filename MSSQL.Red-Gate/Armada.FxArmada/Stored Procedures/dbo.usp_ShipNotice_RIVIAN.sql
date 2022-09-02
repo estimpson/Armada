@@ -2,7 +2,8 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE procedure [dbo].[usp_ShipNotice_RIVIAN]
+
+create procedure [dbo].[usp_ShipNotice_RIVIAN]
 	@ShipperID int
 ,	@TranDT datetime = null out
 ,	@Result integer = null out
@@ -200,8 +201,10 @@ insert
 select
 	'05'
 		-- 001-002: LineNo
-	+	convert(char(4), s.ship_via)
-		-- 003-006: TD503 - Scac
+	+	convert(char(72), s.ship_via)
+		-- 003-074: TD503 - Scac
+	+	convert(char(2), 'H')
+		-- 075-076: TD504 = Transportation Type
 from
 	dbo.shipper s
 	left join dbo.carrier c
@@ -216,10 +219,8 @@ insert
 select
 	'06'
 		-- 001-002: LineNo
-	+	convert(char(2), 'H')
-		-- 003-004: TD504 - Transportation Type
 	+	convert(char(15), c.name)
-		-- 005-019: TD505
+		-- 003-017: TD505
 from
 	dbo.shipper s
 	left join dbo.carrier c
@@ -726,6 +727,7 @@ while
 		into
 			@serial
 		,	@palletSerial
+		,	@palletMixed
 
 		if	@@FETCH_STATUS != 0 break
 
