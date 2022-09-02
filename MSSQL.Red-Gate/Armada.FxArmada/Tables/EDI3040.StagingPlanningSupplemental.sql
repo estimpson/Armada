@@ -41,3 +41,5 @@ CREATE TABLE [EDI3040].[StagingPlanningSupplemental]
 [RowModifiedUser] [sys].[sysname] NOT NULL CONSTRAINT [DF__StagingPl__RowMo__4901A2BF] DEFAULT (suser_name())
 ) ON [PRIMARY]
 GO
+ALTER TABLE [EDI3040].[StagingPlanningSupplemental] ADD CONSTRAINT [PK__StagingP__FFEE745121F8079B] PRIMARY KEY CLUSTERED  ([RowID]) ON [PRIMARY]
+GO

@@ -18,3 +18,5 @@ CREATE TABLE [EDI3040].[StagingShipScheduleHeaders]
 [RowModifiedUser] [sys].[sysname] NOT NULL CONSTRAINT [DF__StagingSh__RowMo__5A2C2EC1] DEFAULT (user_name())
 ) ON [PRIMARY]
 GO
+ALTER TABLE [EDI3040].[StagingShipScheduleHeaders] ADD CONSTRAINT [PK__StagingS__FFEE745012568A81] PRIMARY KEY NONCLUSTERED  ([RowID]) ON [PRIMARY]
+GO
