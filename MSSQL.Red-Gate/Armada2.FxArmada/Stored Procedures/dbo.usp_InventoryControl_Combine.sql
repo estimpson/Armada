@@ -24,7 +24,7 @@ declare
 	@Error integer,
 	@RowCount integer
 
-set	@ProcName = user_name(objectproperty(@@procid, 'OwnerId')) + '.' + object_name(@@procid)  -- e.g. dbo.usp_Test
+set	@ProcName = schema_name(objectproperty(@@procid, 'SchemaId')) + '.' + object_name(@@procid)  -- e.g. dbo.usp_Test
 --- </Error Handling>
 
 --- <Tran Required=Yes AutoCreate=Yes TranDTParm=Yes>

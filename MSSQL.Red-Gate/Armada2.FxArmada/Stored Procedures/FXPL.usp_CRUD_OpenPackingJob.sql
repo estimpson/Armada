@@ -39,7 +39,7 @@ begin
 		,	@TocMsg varchar(max)
 		,	@cDebugMsg varchar(max)
 
-		set @DebugMsg = replicate(' -', (@Debug & 0x3E) / 2) + 'Start ' + user_name(objectproperty(@@procid, 'OwnerId')) + '.' + object_name(@@procid)
+		set @DebugMsg = replicate(' -', (@Debug & 0x3E) / 2) + 'Start ' + schema_name(objectproperty(@@procid, 'SchemaId')) + '.' + object_name(@@procid)
 	end
 	--- </TIC>
 
@@ -54,7 +54,7 @@ begin
 	,	InArguments
 	)
 	select
-		USP_Name = user_name(objectproperty(@@procid, 'OwnerId')) + '.' + object_name(@@procid)
+		USP_Name = schema_name(objectproperty(@@procid, 'SchemaId')) + '.' + object_name(@@procid)
 	,	BeginDT = getdate()
 	,	InArguments = convert
 			(	varchar(max)
@@ -94,7 +94,7 @@ begin
 	,	@Error integer
 	,	@RowCount integer
 
-	set	@ProcName = user_name(objectproperty(@@procid, 'OwnerId')) + '.' + object_name(@@procid)  -- e.g. FXPL.usp_Test
+	set	@ProcName = schema_name(objectproperty(@@procid, 'SchemaId')) + '.' + object_name(@@procid)  -- e.g. FXPL.usp_Test
 	--- </Error Handling>
 
 	/*	Record initial transaction count. */
@@ -271,7 +271,7 @@ begin
 			set @cDebugMsg = null
 			--- </TOC>
 		end
-			
+
 		/*	Return packing job. */
 		set @TocMsg = 'Return packing job'
 		begin
@@ -384,8 +384,9 @@ go
 
 declare
 	@User varchar(5) = 'EES'
-,	@PartCode varchar(25) = '10047'
-,	@PackagingCode varchar(25) = 'B-18X12X12'
+,	@PartCode varchar(25) = '10370'
+,	@PackagingCode varchar(25) = 'B-11.75X11X9'
+,	@StandardPack numeric(20,6) = 70000
 ,	@SpecialInstructions varchar(max) = null
 ,	@PieceWeightQuantity numeric(20,6) = 1
 ,	@PieceWeight numeric(20,6) = 0.0048
@@ -409,6 +410,7 @@ execute
 	@User = @User
 ,	@PartCode = @PartCode
 ,	@PackagingCode = @PackagingCode
+,	@StandardPack = @StandardPack
 ,	@SpecialInstructions = @SpecialInstructions
 ,	@PieceWeightQuantity = @PieceWeightQuantity
 ,	@PieceWeight = @PieceWeight

@@ -26,7 +26,7 @@ begin
 		,	@TocMsg varchar(max)
 		,	@cDebugMsg varchar(max)
 
-		set @DebugMsg = replicate(' -', (@Debug & 0x3E) / 2) + 'Start ' + user_name(objectproperty(@@procid, 'OwnerId')) + '.' + object_name(@@procid)
+		set @DebugMsg = replicate(' -', (@Debug & 0x3E) / 2) + 'Start ' + schema_name(objectproperty(@@procid, 'SchemaId')) + '.' + object_name(@@procid)
 	end
 	--- </TIC>
 
@@ -41,7 +41,7 @@ begin
 	,	InArguments
 	)
 	select
-		USP_Name = user_name(objectproperty(@@procid, 'OwnerId')) + '.' + object_name(@@procid)
+		USP_Name = schema_name(objectproperty(@@procid, 'SchemaId')) + '.' + object_name(@@procid)
 	,	BeginDT = getdate()
 	,	InArguments = convert
 			(	varchar(max)
@@ -69,7 +69,7 @@ begin
 	,	@Error integer
 	,	@RowCount integer
 
-	set	@ProcName = user_name(objectproperty(@@procid, 'OwnerId')) + '.' + object_name(@@procid)  -- e.g. FXPL.usp_Test
+	set	@ProcName = schema_name(objectproperty(@@procid, 'SchemaId')) + '.' + object_name(@@procid)  -- e.g. FXPL.usp_Test
 	--- </Error Handling>
 
 	/*	Record initial transaction count. */
@@ -107,11 +107,7 @@ begin
 							,	UnitWeight = pInv.unit_weight
 							,	WeightTolerance = 0.03
 							,	DefaultPackaging = defaultPack.code
-							,	RequiresFinalInspection =
-									convert
-										(	bit
-										,	1
-										)
+							,	RequiresFinalInspection = 1
 							,	DeflashMethod = 'MACHINE'
 							,	PackagingList = 
 								(	select
