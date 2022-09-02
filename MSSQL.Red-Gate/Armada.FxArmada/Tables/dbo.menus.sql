@@ -12,5 +12,5 @@ CREATE TABLE [dbo].[menus]
 GO
 ALTER TABLE [dbo].[menus] ADD CONSTRAINT [pk_menus] PRIMARY KEY CLUSTERED  ([menu_id]) ON [PRIMARY]
 GO
-ALTER TABLE [dbo].[menus] ADD CONSTRAINT [FK_menus_options] FOREIGN KEY ([option_id]) REFERENCES [dbo].[options] ([option_id]) ON DELETE CASCADE ON UPDATE CASCADE
+ALTER TABLE [dbo].[menus] ADD CONSTRAINT [FK_menus_options] FOREIGN KEY ([option_id]) REFERENCES [dbo].[options] ([option_id])
 GO

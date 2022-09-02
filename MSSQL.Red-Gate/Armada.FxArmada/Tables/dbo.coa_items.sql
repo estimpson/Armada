@@ -19,5 +19,5 @@ CREATE TABLE [dbo].[coa_items]
 GO
 ALTER TABLE [dbo].[coa_items] ADD CONSTRAINT [pk_coa_items] PRIMARY KEY CLUSTERED  ([fiscal_year], [coa], [account], [account_type]) ON [PRIMARY]
 GO
-ALTER TABLE [dbo].[coa_items] ADD CONSTRAINT [FK_coa_items_coa_headers] FOREIGN KEY ([fiscal_year], [coa]) REFERENCES [dbo].[coa_headers] ([fiscal_year], [coa]) ON DELETE CASCADE ON UPDATE CASCADE
+ALTER TABLE [dbo].[coa_items] ADD CONSTRAINT [FK_coa_items_coa_headers] FOREIGN KEY ([fiscal_year], [coa]) REFERENCES [dbo].[coa_headers] ([fiscal_year], [coa])
 GO

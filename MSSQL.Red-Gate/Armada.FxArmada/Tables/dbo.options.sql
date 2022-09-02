@@ -18,5 +18,5 @@ CREATE TABLE [dbo].[options]
 GO
 ALTER TABLE [dbo].[options] ADD CONSTRAINT [pk_options] PRIMARY KEY CLUSTERED  ([option_id]) ON [PRIMARY]
 GO
-ALTER TABLE [dbo].[options] ADD CONSTRAINT [FK_options_reports] FOREIGN KEY ([report_id]) REFERENCES [dbo].[reports] ([report_id]) ON DELETE CASCADE ON UPDATE CASCADE
+ALTER TABLE [dbo].[options] ADD CONSTRAINT [FK_options_reports] FOREIGN KEY ([report_id]) REFERENCES [dbo].[reports] ([report_id])
 GO

@@ -16,5 +16,5 @@ CREATE TABLE [dbo].[report_parameters]
 GO
 ALTER TABLE [dbo].[report_parameters] ADD CONSTRAINT [pk_report_parameters] PRIMARY KEY CLUSTERED  ([report_id], [report_parameter_name]) ON [PRIMARY]
 GO
-ALTER TABLE [dbo].[report_parameters] ADD CONSTRAINT [FK_report_parameters_reports] FOREIGN KEY ([report_id]) REFERENCES [dbo].[reports] ([report_id]) ON DELETE CASCADE ON UPDATE CASCADE
+ALTER TABLE [dbo].[report_parameters] ADD CONSTRAINT [FK_report_parameters_reports] FOREIGN KEY ([report_id]) REFERENCES [dbo].[reports] ([report_id])
 GO

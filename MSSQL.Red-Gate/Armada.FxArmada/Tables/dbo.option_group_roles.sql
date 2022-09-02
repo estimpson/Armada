@@ -8,7 +8,7 @@ CREATE TABLE [dbo].[option_group_roles]
 GO
 ALTER TABLE [dbo].[option_group_roles] ADD CONSTRAINT [pk_option_group_roles] PRIMARY KEY CLUSTERED  ([option_group_id], [role_id]) ON [PRIMARY]
 GO
-ALTER TABLE [dbo].[option_group_roles] ADD CONSTRAINT [FK_option_group_roles_option_groups] FOREIGN KEY ([option_group_id]) REFERENCES [dbo].[option_groups] ([option_group_id]) ON DELETE CASCADE ON UPDATE CASCADE
+ALTER TABLE [dbo].[option_group_roles] ADD CONSTRAINT [FK_option_group_roles_option_groups] FOREIGN KEY ([option_group_id]) REFERENCES [dbo].[option_groups] ([option_group_id])
 GO
-ALTER TABLE [dbo].[option_group_roles] ADD CONSTRAINT [FK_option_group_roles_roles] FOREIGN KEY ([role_id]) REFERENCES [dbo].[roles] ([role_id]) ON DELETE CASCADE ON UPDATE CASCADE
+ALTER TABLE [dbo].[option_group_roles] ADD CONSTRAINT [FK_option_group_roles_roles] FOREIGN KEY ([role_id]) REFERENCES [dbo].[roles] ([role_id])
 GO
