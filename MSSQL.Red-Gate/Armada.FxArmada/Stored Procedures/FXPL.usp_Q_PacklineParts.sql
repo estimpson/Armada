@@ -107,16 +107,7 @@ begin
 							,	UnitWeight = pInv.unit_weight
 							,	WeightTolerance = 0.03
 							,	DefaultPackaging = defaultPack.code
-							,	RequiresFinalInspection =
-									convert
-										(	bit
-										,	case
-												when binary_checksum(p.part) % 15 = 0 then
-													0
-												else
-													1
-											end
-										)
+							,	RequiresFinalInspection = 1
 							,	DeflashMethod = 'MACHINE'
 							,	PackagingList = 
 								(	select
